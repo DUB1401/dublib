@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools", "cython"]
+
+[project]
+name = "dublib"
+version = "1.0.0"
+description = "Коллекция модулей от DUB1401."
+authors = [
+	{name = "DUB1401", email="vlad.milosta@outlook.com"}
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/DUB1401/dublib/tree/main/docs"
+"Source Code" = "https://github.com/DUB1401/dublib"
+"Bug Tracker" = "https://github.com/DUB1401/dublib/issues"
+Changelog = "https://github.com/DUB1401/dublib/releases"
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "License :: OSI Approved :: The Unlicense (Unlicense)",
+    "Natural Language :: Russian",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.11",
+]
