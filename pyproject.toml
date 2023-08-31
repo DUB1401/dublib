@@ -12,13 +12,6 @@ readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
 dependencies = []
-
-[project.urls]
-Documentation = "https://github.com/DUB1401/dublib/tree/main/docs"
-"Source Code" = "https://github.com/DUB1401/dublib"
-"Bug Tracker" = "https://github.com/DUB1401/dublib/issues"
-Changelog = "https://github.com/DUB1401/dublib/releases"
-
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
@@ -28,3 +21,9 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.11",
 ]
+
+[project.urls]
+Documentation = "https://github.com/DUB1401/dublib/tree/main/docs"
+"Source Code" = "https://github.com/DUB1401/dublib"
+"Bug Tracker" = "https://github.com/DUB1401/dublib/issues"
+Changelog = "https://github.com/DUB1401/dublib/releases"
