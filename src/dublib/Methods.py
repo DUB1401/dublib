@@ -79,12 +79,20 @@ def RemoveHTML(TextHTML: str) -> str:
 		TextHTML – строка, имеющая HTML-разметку.
 	"""
 
+	# Если переданный объект является None.
+	if TextHTML == None:
+		TextHTML = str()
+
+	# Если переданный объект не является None и не является строкой.
+	elif type(TextHTML) != str:
+		TextHTML = str(TextHTML)
+
 	# Конвертирование спецсимволов HTML в Unicode.
 	TextHTML = html.unescape(TextHTML)
 	# Регулярное выражение фильтрации тегов HTML.
 	TagsHTML = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 	# Удаление найденных по регулярному выражению тегов.
-	CleanText = re.sub(TagsHTML, '', str(TextHTML))
+	CleanText = re.sub(TagsHTML, '', TextHTML)
 
 	return str(CleanText)
 
