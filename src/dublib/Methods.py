@@ -18,6 +18,17 @@ def CheckForCyrillicPresence(Text: str) -> bool:
 
 	return TextContainsCyrillicCharacters
 
+def CheckPythonMinimalVersion(Major: int, Minor: int):
+	"""
+	Проверяет, соответствует ли используемая версия Python минимальной требуемой.
+		Major – идентификатор MAJOR-версии Python;
+		Minor – идентификатор MINOR-версии Python
+	"""
+	
+	# Если версия Python старше минимальной требуемой, выбросить исключение.
+	if sys.version_info < (Major, Minor):
+		raise Exception("Python %s.%s or later is required" % PythonMinimalVersion)
+
 def Cls():
 	"""
 	Очищает консоль (кроссплатформенная функция).
