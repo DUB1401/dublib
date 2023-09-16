@@ -22,7 +22,7 @@ def CheckPythonMinimalVersion(Major: int, Minor: int):
 	"""
 	Проверяет, соответствует ли используемая версия Python минимальной требуемой.
 		Major – идентификатор MAJOR-версии Python;
-		Minor – идентификатор MINOR-версии Python
+		Minor – идентификатор MINOR-версии Python.
 	"""
 	
 	# Если версия Python старше минимальной требуемой, выбросить исключение.
@@ -46,7 +46,7 @@ def MakeRootDirectories(Directories: list[str]):
 	for Name in Directories:
 		
 		# Если папка не существует, то создать её.
-		if os.path.exists(Name):
+		if os.path.exists(Name) == False:
 			os.makedirs(Name)
 
 def MergeDictionaries(FirstDictionary: dict, SecondDictionary: dict) -> dict:
@@ -173,7 +173,7 @@ def RenameDictionaryKey(Dictionary: dict, OldKey: str, NewKey: str) -> dict:
 
 def Shutdown():
 	"""
-	Выключает питание устройства (кроссплатформенная функция).
+	Выключает устройство (кроссплатформенная функция).
 	"""
 
 	# Если устройство работает под управлением ОС семейства Linux.
@@ -187,7 +187,7 @@ def Shutdown():
 def WriteJSON(Path: str, Dictionary: dict):
 	"""
 	Сохраняет стилизованный JSON файл. Для отступов используются символы табуляции, новая строка проставляется после запятых, а после двоеточий добавляется пробел.
-		Path – путь к существующему или будущему файлу JSON;
+		Path – путь к файлу JSON;
 		Dictionary – словарь, записываемый в формат JSON.
 	"""
 
