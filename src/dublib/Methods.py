@@ -36,6 +36,19 @@ def Cls():
 
 	os.system("cls" if os.name == "nt" else "clear")
 
+def MakeRootDirectories(Directories: list[str]):
+	"""
+	Создаёт папки в текущей корневой директории скрипта.
+		Directories – список названий папок.
+	"""
+	
+	# Для каждого названия папки.
+	for Name in Directories:
+		
+		# Если папка не существует, то создать её.
+		if os.path.exists(Name):
+			os.makedirs(Name)
+
 def MergeDictionaries(FirstDictionary: dict, SecondDictionary: dict) -> dict:
 	"""
 	Объединяет словари без перезаписи значений уже существующих ключей.
