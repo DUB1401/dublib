@@ -485,8 +485,8 @@ class Terminalyzer:
 					if ArgumentsList[PositionIndex] in FlagsNames or ArgumentsList[PositionIndex] in KeysNames:
 						FreeArguments.append(None)		
 
-		# Если количество свободных аргументов превышает максимальное.
-		if len(FreeArguments) > len(ArgumentsDescription):
+		# Если количество свободных аргументов (игнорируя None) превышает максимальное.
+		if len([x for x in FreeArguments if x != None]) > len(ArgumentsDescription):
 			raise TooManyArguments(" ".join(self.__Argv))
 
 		# Для каждого незадействованного аргумента.
