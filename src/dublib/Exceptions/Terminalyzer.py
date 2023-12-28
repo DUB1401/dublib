@@ -4,9 +4,13 @@ class InvalidArgumentType(Exception):
 	"""
 
 	# Конструктор: вызывается при обработке исключения.
-	def __init__(self, Value: str, Type: str): 
+	def __init__(self, Value: str, Type: str):
+		"""
+		Исключение: неверный тип аргумента.
+		"""
+
 		# Добавление данных в сообщение об ошибке.
-		self.__Message = "\"" + Value + "\" isn't \"" + Type + "\""
+		self.__Message = "\"" + Value + "\" isn't \"" + Type + "\"."
 		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 			
@@ -20,9 +24,13 @@ class MutuallyExclusiveFlags(Exception):
 	"""
 
 	# Конструктор: вызывается при обработке исключения.
-	def __init__(self, Command: str): 
+	def __init__(self, Command: str):
+		"""
+		Исключение: активированы взаимоисключающие флаги.
+		"""
+
 		# Добавление данных в сообщение об ошибке.
-		self.__Message = "\"" + Command + "\""
+		self.__Message = "\"" + Command + "\"."
 		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 			
@@ -36,9 +44,13 @@ class MutuallyExclusiveKeys(Exception):
 	"""
 
 	# Конструктор: вызывается при обработке исключения.
-	def __init__(self, Command: str): 
+	def __init__(self, Command: str):
+		"""
+		Исключение: активированы взаимоисключающие ключи.
+		"""
+
 		# Добавление данных в сообщение об ошибке.
-		self.__Message = "\"" + Command + "\""
+		self.__Message = "\"" + Command + "\"."
 		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 		
@@ -54,8 +66,12 @@ class MutuallyExclusivePositions(Exception):
 
 	# Конструктор: вызывается при обработке исключения.
 	def __init__(self, Command: str): 
+		"""
+		Исключение: активированы разные позиции на одном слое.
+		"""
+
 		# Добавление данных в сообщение об ошибке.
-		self.__Message = "\"" + Command + "\""
+		self.__Message = "\"" + Command + "\"."
 		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 		
@@ -70,9 +86,13 @@ class NotEnoughArguments(Exception):
 	"""
 
 	# Конструктор: вызывается при обработке исключения.
-	def __init__(self, Command: str): 
+	def __init__(self, Command: str):
+		"""
+		Исключение: недостаточно аргументов.
+		"""
+
 		# Добавление данных в сообщение об ошибке.
-		self.__Message = "\"" + Command + "\""
+		self.__Message = "\"" + Command + "\"."
 		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 
@@ -87,8 +107,12 @@ class TooManyArguments(Exception):
 
 	# Конструктор: вызывается при обработке исключения.
 	def __init__(self, Command: str):
+		"""
+		Исключение: слишком много аргументов.
+		"""
+
 		# Добавление данных в сообщение об ошибке.
-		self.__Message = "\"" + Command + "\""
+		self.__Message = "\"" + Command + "\"."
 		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 			
@@ -102,9 +126,13 @@ class UnknownCommand(Exception):
 	"""
 
 	# Конструктор: вызывается при обработке исключения.
-	def __init__(self, Command: str): 
+	def __init__(self, Command: str):
+		"""
+		Исключение: неизвестная комманда.
+		"""
+		
 		# Добавление данных в сообщение об ошибке.
-		self.__Message = "\"" + Command + "\""
+		self.__Message = "\"" + Command + "\"."
 		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 		

@@ -3,7 +3,7 @@ requires = ["setuptools", "cython"]
 
 [project]
 name = "dublib"
-version = "1.0.0"
+version = "0.1.0"
 description = "Коллекция модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email="vlad.milosta@outlook.com"}
@@ -11,16 +11,15 @@ authors = [
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["fake_useragent", "requests"]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Environment :: Console",
-    "License :: OSI Approved :: The Unlicense (Unlicense)",
-    "Natural Language :: Russian",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
+	"Development Status :: 4 - Beta",
+	"License :: OSI Approved :: The Unlicense (Unlicense)",
+	"Natural Language :: Russian",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python",
 	"Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12"
 ]
 

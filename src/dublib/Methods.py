@@ -27,7 +27,7 @@ def CheckPythonMinimalVersion(Major: int, Minor: int):
 	
 	# Если версия Python старше минимальной требуемой, выбросить исключение.
 	if sys.version_info < (Major, Minor):
-		raise Exception("Python %s.%s or later is required" % PythonMinimalVersion)
+		raise Exception(f"Python {Major}.{Minor} or newer is required.")
 
 def Cls():
 	"""

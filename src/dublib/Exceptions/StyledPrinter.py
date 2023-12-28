@@ -5,8 +5,12 @@ class DuplicatedStyles(Exception):
 
 	# Конструктор: вызывается при обработке исключения.
 	def __init__(self):
+		"""
+		Исключение: использованы оба способа указания стилей.
+		"""
+		
 		# Добавление данных в сообщение об ошибке.
-		self.__Message = "use only StyledGroup() or arguments styles"
+		self.__Message = "Use only StyledGroup() or arguments styles."
 		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message)
 			

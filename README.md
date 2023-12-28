@@ -6,5 +6,6 @@
 * [Methods](docs/Methods.md)
 * [Terminalyzer](docs/Terminalyzer.md)
 * [StyledPrinter](docs/StyledPrinter.md)
+* [WebRequestor](docs/WebRequestor.md)
 
 _Copyright © DUB1401. 2023._
