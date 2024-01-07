@@ -4,6 +4,7 @@ from dublib.Exceptions.WebRequestor import *
 import importlib
 import requests
 import logging
+import random
 import httpx
 import enum
 
@@ -19,6 +20,16 @@ class Browsers(enum.Enum):
 	Chrome = "Google Chrome"
 	#Firefox = "Mozilla Firefox"
 	#Edge = "Microsoft Edge"
+
+class Protocols(enum.Enum):
+	"""
+	Перечисление типов протоколов.
+	"""
+	
+	FTP = "ftp"
+	HTTP = "http"
+	HTTPS = "https"
+	SOCKS = "socks"
 
 class HttpxConfig:
 	"""
@@ -306,6 +317,40 @@ class WebRequestor:
 
 		# Если конфигурация не задана, выбросить исключение.
 		if self.__Config == None: raise ConfigRequired()
+		
+	def __GetProxy(self) -> dict | None:
+		"""
+		Возвращает объект прокси для запроса.
+		"""
+		
+		# Объект прокси.
+		Proxy = None
+		
+		# Если задан хотя бы один прокси..
+		if len(self.__Proxies) > 0:
+			# Случайный выбор прокси.
+			Proxy = random.choice(self.__Proxies)
+			# Данные авторизации.
+			Auth = ""
+			# Если указаны логин и пароль, составить авторизационные данные.
+			if Proxy["login"] != None and Proxy["password"] != None: Auth = Proxy["login"] + ":" + Proxy["password"] + "@"
+					
+			# Если задана конфигурация requests.		
+			if type(self.__Config) == RequestsConfig:
+				# Создание объекта прокси.
+				Proxy = {
+					Proxy["protocol"]: Proxy["protocol"].replace("https", "http") + "://" + Auth + Proxy["host"] + ":" + Proxy["port"]
+				}
+				print(Proxy)
+			
+			# Если задана конфигурация httpx.		
+			if type(self.__Config) == HttpxConfig:
+				# Создание объекта прокси.
+				Proxy = {
+					Proxy["protocol"] + "://": Proxy["protocol"].replace("https", "http") + "://" + Auth + Proxy["host"] + ":" + Proxy["port"]
+				}
+			
+		return Proxy
 	
 	def __InitializeChrome(self):
 		"""
@@ -401,7 +446,7 @@ class WebRequestor:
 			Headers = self.__Config.headers
 
 		# Ответ.
-		Response = self.__Session.get(URL, params = Params, headers = Headers, cookies = Cookies, allow_redirects = self.__Config.redirecting)
+		Response = self.__Session.get(URL, params = Params, headers = Headers, cookies = Cookies, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting)
 		
 		return Response
 	
@@ -426,7 +471,7 @@ class WebRequestor:
 			Headers = self.__Config.headers
 		
 		# Ответ.
-		Response = self.__Session.post(URL, params = Params, headers = Headers, cookies = Cookies, data = Data, json = JSON, allow_redirects = self.__Config.redirecting)
+		Response = self.__Session.post(URL, params = Params, headers = Headers, cookies = Cookies, data = Data, json = JSON, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting)
 		
 		return Response
 	
@@ -476,6 +521,8 @@ class WebRequestor:
 		self.__Browser = None
 		# Состояние: вести ли логи.
 		self.__Logging = Logging
+		# Список прокси.
+		self.__Proxies = list()
 		
 	#==========================================================================================#
 	# >>>>> ОБЩИЕ МЕТОДЫ <<<<< #
@@ -513,9 +560,28 @@ class WebRequestor:
 			# Обнуление клиента.
 			self.__Client = None
 			
+	def addProxy(self, Protocol: Protocols, Host: str, Port: int | str, Login: str | None = None, Password: str | None = None):
+		"""
+		Добавляет прокси для использования в запросах. Не работает с Selenium.
+			Protocol – протокол прокси-соединения;
+			Host – IP или адрес хоста;
+			Port – порт сервера;
+			Login – логин для авторизации;
+			Password – пароль для авторизации.
+		"""
+		
+		# Добавление прокси.
+		self.__Proxies.append({
+			"protocol": Protocol.value,
+			"host": Host,
+			"port": str(Port),
+			"login": Login,
+			"password": Password
+		})
+			
 	def initialize(self, Config: HttpxConfig | RequestsConfig | SeleniumConfig = RequestsConfig()):
 		"""
-		Задаёт конфигурацию и инициализирует модуль запросов.
+		Задаёт конфигурацию и инициализирует модуль запросов. Вызывать после всех настроек.
 			Config – конфигурация.
 		"""
 
@@ -551,7 +617,7 @@ class WebRequestor:
 			# Сохранение конфигурации.
 			self.__Config = Config
 			# Инициализация клиента.
-			self.__Client = httpx.Client(http2 = Config.http2)
+			self.__Client = httpx.Client(http2 = Config.http2, proxies = self.__GetProxy())
 	
 	#==========================================================================================#
 	# >>>>> SELENIUM <<<<< #

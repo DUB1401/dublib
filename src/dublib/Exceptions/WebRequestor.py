@@ -10,7 +10,7 @@ class ConfigRequired(Exception):
 		"""
 
 		# Добавление данных в сообщение об ошибке.
-		self.__Message = "Selenium or requests config required."
+		self.__Message = "Any requests library config required."
 		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message)
 			
