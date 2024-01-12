@@ -5,192 +5,218 @@ import sys
 import os
 import re
 
-def CheckForCyrillicPresence(Text: str) -> bool:
+def CheckForCyrillicPresence(text: str) -> bool:
 	"""
 	Проверяет, имеются ли кирилические символы в строке.
-		Text – проверяемая строка.
+		text – проверяемая строка.
+	Типы возвращаемых значений:
+		bool – результат проверки.
 	"""
 
 	# Русский алфавит в нижнем регистре.
 	Alphabet = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
 	# Состояние: содержит ли строка кирилические символы.
-	TextContainsCyrillicCharacters = not Alphabet.isdisjoint(Text.lower())
+	IsTextContainsCyrillicCharacters = not Alphabet.isdisjoint(text.lower())
 
-	return TextContainsCyrillicCharacters
+	return IsTextContainsCyrillicCharacters
 
-def CheckPythonMinimalVersion(Major: int, Minor: int):
+def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = True) -> bool:
 	"""
 	Проверяет, соответствует ли используемая версия Python минимальной требуемой.
-		Major – идентификатор MAJOR-версии Python;
-		Minor – идентификатор MINOR-версии Python.
+		major – идентификатор Major-версии Python;
+		minor – идентификатор Minor-версии Python;
+		raise_exception – указывает, как поступать при несоответствии версии: выбрасывать исключение или возвращать значение.
+	Типы возвращаемых значений:
+		bool – результат проверки.
 	"""
 	
-	# Если версия Python старше минимальной требуемой, выбросить исключение.
-	if sys.version_info < (Major, Minor):
-		raise Exception(f"Python {Major}.{Minor} or newer is required.")
+	# Если версия Python старше минимальной требуемой.
+	if sys.version_info < (Major, Minor): 
+		
+		# Если указано выбросить исключение.
+		if raise_exception == True:
+			# Выброс исключения.
+			raise RuntimeError(f"Python {Major}.{Minor} or newer is required.")
+
+		else: 
+			# Переключение статуса проверки.
+			IsVersionCorrect = False
+
+	return IsVersionCorrect
 
 def Cls():
 	"""
-	Очищает консоль (кроссплатформенная функция).
+	Очищает консоль.
 	"""
 
 	os.system("cls" if os.name == "nt" else "clear")
 
-def MakeRootDirectories(Directories: list[str]):
+def MakeRootDirectories(directories: list[str]):
 	"""
-	Создаёт папки в текущей корневой директории скрипта.
-		Directories – список названий папок.
+	Создаёт каталоги в текущей корневой директории скрипта.
+		directories – список названий каталогов.
 	"""
 	
-	# Для каждого названия папки.
-	for Name in Directories:
-		
-		# Если папка не существует, то создать её.
-		if os.path.exists(Name) == False:
-			os.makedirs(Name)
+	# Для каждого названия каталога.
+	for Name in directories:
+		# Если каталог не существует, то создать его.
+		if os.path.exists(Name) == False: os.makedirs(Name)
 
-def MergeDictionaries(FirstDictionary: dict, SecondDictionary: dict) -> dict:
+def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwrite: bool = False) -> dict:
 	"""
-	Объединяет словари без перезаписи значений уже существующих ключей.
-		FirstDictionary – словарь, в который идёт копирование.
-		SecondDictionary – словарь, из котрого идёт копирование.
+	Объединяет словари.
+		base_dictionary – словарь, в который идёт копирование;
+		mergeable_dictionary – словарь, из котрого идёт копирование;
+		overwrite – указывает, нужно ли перезаписывать значения конфликтующих ключей базового словаря.
+	Типы возвращаемых значений:
+		dict – объединённый словарь.
 	"""
 
-	# Для каждого ключа, если таковой отсутствует в первом словаре, то скопировать его.
-	for Key in SecondDictionary.keys():
-		if Key not in FirstDictionary.keys():
-			FirstDictionary[Key] = SecondDictionary[Key]
+	# Для каждого ключа.
+	for Key in mergeable_dictionary.keys():
 
-	return FirstDictionary
+		# Если перезапись отключена и ключ отсутствует в базовом словаре.
+		if overwrite == False and Key not in base_dictionary.keys():
+			# Копирование в базовый словарь ключа и его значения из объединяемого.
+			base_dictionary[Key] = mergeable_dictionary[Key]
 
-def ReadJSON(Path: str) -> dict:
+		# Если перезапись включена.
+		elif overwrite == True:
+			# Копирование в базовый словарь ключа и его значения из объединяемого.
+			base_dictionary[Key] = mergeable_dictionary[Key]
+
+	return base_dictionary
+
+def ReadJSON(path: str) -> dict:
 	"""
-	Считывает JSON файл в словарь.
-		Path – путь к файлу JSON.
+	Читает файл JSON и конвертирует его в словарь.
+		path – путь к файлу.
+	Типы возвращаемых значений:
+		dict – словарное представление файла JSON.
 	"""
 
 	# Словарь для преобразования.
 	JSON = dict()
-
 	# Открытие и чтение файла JSON.
-	with open(Path, encoding = "utf-8") as FileRead:
-		JSON = json.load(FileRead)
+	with open(path, encoding = "utf-8") as FileRead: JSON = json.load(FileRead)
 
 	return JSON
 
-def RemoveFolderContent(Path: str):
+def RemoveFolderContent(path: str):
 	"""
-	Удаляет все папки и файлы внутри директории.
-		Path – путь к директории.
+	Удаляет всё содержимое каталога.
+		path – путь к директории.
 	"""
 
 	# Список содержимого в папке.
-	FolderContent = os.listdir(Path)
+	FolderContent = os.listdir(path)
 
 	# Для каждого элемента.
 	for Item in FolderContent:
 
-		# Если элемент является папкой.
-		if os.path.isdir(Path + "/" + Item):
-			shutil.rmtree(Path + "/" + Item)
+		# Если элемент является каталогом.
+		if os.path.isdir(path + "/" + Item):
+			# Удаление каталога.
+			shutil.rmtree(path + "/" + Item)
 
 		else:
-			os.remove(Path + "/" + Item)
+			# Удаление файла.
+			os.remove(path + "/" + Item)
 
-def RemoveHTML(TextHTML: str) -> str:
+def RemoveHTML(HTML: str) -> str:
 	"""
 	Удаляет теги HTML из строки, а также преобразует спецсимволы HTML в Unicode.
-		TextHTML – строка, имеющая HTML-разметку.
+		HTML – строка, имеющая HTML-разметку.
+	Типы возвращаемых значений:
+		str – строка после обработки.
 	"""
 
-	# Если переданный объект является None.
-	if TextHTML == None:
-		TextHTML = str()
-
-	# Если переданный объект не является None и не является строкой.
-	elif type(TextHTML) != str:
-		TextHTML = str(TextHTML)
-
+	# Приведение объекта к строковому типу.
+	HTML = str(HTML)
 	# Конвертирование спецсимволов HTML в Unicode.
-	TextHTML = html.unescape(TextHTML)
+	HTML = html.unescape(HTML)
 	# Регулярное выражение фильтрации тегов HTML.
 	TagsHTML = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 	# Удаление найденных по регулярному выражению тегов.
-	CleanText = re.sub(TagsHTML, '', TextHTML)
+	CleanText = str(re.sub(TagsHTML, '', HTML))
 
-	return str(CleanText)
+	return CleanText
 
-def RemoveRecurringSubstrings(String: str, Substring: str) -> str:
+def RemoveRecurringSubstrings(string: str, substring: str) -> str:
 	"""
 	Удаляет из строки подряд идущие повторяющиеся подстроки.
-		String – строка, из которой удаляются повторы;
+		string – строка, из которой удаляются повторы;
 		Substring – удаляемая подстрока.
+	Типы возвращаемых значений:
+		str – строка после обработки.
 	"""
 
 	# Пока в строке находятся повторы указанного символа, удалять их.
-	while Substring + Substring in String:
-		String = String.replace(Substring + Substring, Substring)
+	while substring + substring in string: string = string.replace(substring + substring, substring)
 
-	return String
+	return string
 
-def RemoveRegexSubstring(String: str, Regex: str) -> str:
+def RemoveRegexSubstring(string: str, regex: str) -> str:
 	"""
 	Удаляет из строки все вхождения подстрок, совпадающие с регулярным выражением.
-		String – обрабатываемая строка;
-		Regex – регулярное выражение для поиска подстрок.
+		string – обрабатываемая строка;
+		regex – регулярное выражение для поиска подстрок.
+	Типы возвращаемых значений:
+		str – строка после обработки.
 	"""
 
 	# Поиск всех совпадений.
-	RegexSubstrings = re.findall(Regex, String)
-
+	RegexSubstrings = re.findall(regex, string)
 	# Удаление каждой подстроки.
-	for RegexSubstring in RegexSubstrings:
-		String = String.replace(RegexSubstring, "")
+	for RegexSubstring in RegexSubstrings: string = string.replace(RegexSubstring, "")
 
-	return String
+	return string
 
-def RenameDictionaryKey(Dictionary: dict, OldKey: str, NewKey: str) -> dict:
+def ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: any) -> dict:
 	"""
-	Переименовывает ключ в словаре, сохраняя исходный порядок.
-		Dictionary – обрабатываемый словарь;
-		OldKey – старое название ключа;
-		NewKey – новое название ключа.
+	Заменяет ключ в словаре, сохраняя исходный порядок элементов.
+		dictionary – обрабатываемый словарь;
+		old_key – старое название ключа;
+		new_key – новое название ключа.
+	Типы возвращаемых значений:
+		dict – словарь с заменённым ключом.
 	"""
-
+	
 	# Результат выполнения.
 	Result = dict()
+	# Если ключ не найден, выбросить исключение.
+	if old_key not in dictionary.keys(): raise KeyError(str(old_key))
 
-	# Перебор элементов словаря по списку ключей.
-	for Key in Dictionary.keys():
+	# Для каждого ключа.
+	for Key in dictionary.keys():
 
-		# Если нашли нужный ключ, то переместить значение по новому ключу в результат, иначе просто копировать.
-		if Key == OldKey:
-			Result[NewKey] = Dictionary[OldKey]
+		# Если текущий ключ совпадает с искомым.
+		if Key == old_key:
+			# Замена ключа новым.
+			Result[new_key] = dictionary[old_key]
+
 		else:
-			Result[Key] = Dictionary[Key]
+			# Копирование старой пары ключ-значение.
+			Result[Key] = dictionary[Key]
 
 	return Result
 
 def Shutdown():
 	"""
-	Выключает устройство (кроссплатформенная функция).
+	Выключает устройство.
 	"""
 
 	# Если устройство работает под управлением ОС семейства Linux.
-	if sys.platform in ["linux", "linux2"]:
-		os.system("sudo shutdown now")
-
+	if sys.platform in ["linux", "linux2"]: os.system("sudo shutdown now")
 	# Если устройство работает под управлением ОС семейства Windows.
-	elif sys.platform == "win32":
-		os.system("shutdown /s")
+	if sys.platform == "win32": os.system("shutdown /s")
 
-def WriteJSON(Path: str, Dictionary: dict):
+def WriteJSON(path: str, dictionary: dict):
 	"""
-	Сохраняет стилизованный JSON файл. Для отступов используются символы табуляции, новая строка проставляется после запятых, а после двоеточий добавляется пробел.
-		Path – путь к файлу JSON;
-		Dictionary – словарь, записываемый в формат JSON.
+	Записывает стандартизированный JSON файл. Для отступов используются символы табуляции.
+		path – путь к файлу;
+		dictionary – словарь, конвертируемый в формат JSON.
 	"""
 
 	# Запись словаря в JSON файл.
-	with open(Path, "w", encoding = "utf-8") as FileWrite:
-		json.dump(Dictionary, FileWrite, ensure_ascii = False, indent = '\t', separators = (",", ": "))
+	with open(path, "w", encoding = "utf-8") as FileWrite: json.dump(dictionary, FileWrite, ensure_ascii = False, indent = '\t', separators = (",", ": "))
