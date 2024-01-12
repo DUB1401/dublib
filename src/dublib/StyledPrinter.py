@@ -4,12 +4,12 @@ import enum
 
 class Styles:
 	"""
-	Содержит два контейнера: для декораций и стилей.
+	Содержит перечисления декораций и стилей.
 	"""
 
-	class Color(enum.Enum):
+	class Colors(enum.Enum):
 		"""
-		Контейнер цветов.
+		Перечисление цветов.
 		"""
 
 		Black = "0"
@@ -21,9 +21,9 @@ class Styles:
 		Cyan = "6"
 		White = "7"
 
-	class Decoration(enum.Enum):
+	class Decorations(enum.Enum):
 		"""
-		Контейнер декораций.
+		Перечисление декораций.
 		"""
 
 		Bold = "1"
@@ -39,117 +39,97 @@ class Styles:
 
 class StylesGroup:
 	"""
-	Предоставляет возможность комбинировать стили для их однократной инициализации и повторного использования.
-	При интерпретации в str() предоставляет строковый маркер стилей.
+	Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использования.
 	"""
 
-	def __init__(self, Decorations: list[Styles.Decoration] = list(), TextColor: Styles.Color | None = None, BackgroundColor: Styles.Color | None = None):
+	def __init__(self, decorations: list[Styles.Decoration] = list(), text_color: Styles.Color | None = None, background_color: Styles.Color | None = None):
 		"""
-		Конструктор: строит маркер стилей.
-			Decorations – список декораций;
-			TextColor – цвет текста;
-			BackgroundColor – цвет фона.
+		Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использования.
+			decorations – список декораций;
+			text_color – цвет текста;
+			background_color – цвет фона.
 		"""
 
-		# Маркер стилей строки.
-		self.StyleMarkers = "\033["
+		#---> Генерация динамических свойств.
+		#==========================================================================================#
+		# Строка маркеров стилей.
+		self.__StylesMarkers = "\033["
 
-		# Добавить каждую декорацию.
-		for Decoration in Decorations:
-			self.StyleMarkers += Decoration + ";"
-
-		# Если передан цвет для текста, то создать соответствующий литерал.
-		if TextColor != None:
-			self.StyleMarkers += "3" + TextColor.value + ";"
-
-		# Если передан цвет для фона, то создать соответствующий литерал.
-		if BackgroundColor != None:
-			self.StyleMarkers += "4" + BackgroundColor.value + ";"
-
-		# Постановка завершающего символа маркировки и добавление строки.
-		self.StyleMarkers = self.StyleMarkers.rstrip(';') + "m"
+		# Добавить каждый маркер стиля к общей строке.
+		for Decoration in decorations: self.__StylesMarkers += Decoration + ";"
+		# Если передан цвет текста, создать соответствующий маркер.
+		if TextColor != None: self.__StylesMarkers += "3" + TextColor.value + ";"
+		# Если передан цвет фона, создать соответствующий маркер.
+		if BackgroundColor != None: self.__StylesMarkers += "4" + BackgroundColor.value + ";"
+		# Постановка завершающего символа маркировки.
+		self.__StylesMarkers = self.__StylesMarkers.rstrip(';') + "m"
 
 	def __str__(self):
-		return self.StyleMarkers
+		return self.__StylesMarkers
 
-def StyledPrinter(Text: str, Styles: StylesGroup | None = None, Decorations: list[Styles.Decoration] = list(), TextColor: Styles.Color | None = None, BackgroundColor: Styles.Color | None = None, Autoreset: bool = True, Newline: bool = True):
+def StyledPrinter(text: str, styles: StylesGroup | None = None, decorations: list[Styles.Decoration] = list(), text_color: Styles.Color | None = None, background_color: Styles.Color | None = None, Autoreset: bool = True, end: bool = True):
 	"""
-	Выводит в терминал цветной и стилизованный текст с возможностью отключения автоматического сброса стилей к стандартным и перехода на новую строку.
-		Text – обрабатываемая строка;
-		Styles – контейнер стилей;
-		Decorations – список декораций;
-		TextColor – цвет текста;
-		BackgroundColor – цвет фона;
-		Autoreset – сбрасывать ли стили к стандартным после завершения вывода;
-		Newline – переходить ли на новую строку после завершения вывода.
-
-		Примечание: не используйте одновременно группу стилей и отдельные стили, так как это приводит к ошибке переопределения.
+	Выводит в терминал стилизованный текст.
+		text – стилизуемый текст;
+		styles – контейнер стилей;
+		decorations – список декораций;
+		text_color – цвет текста;
+		background_color – цвет фона;
+		autoreset – указывает, необходимо ли сбросить стили после вывода;
+		end – переходить ли на новую строку после завершения вывода.
+	Примечание: не используйте одновременно группу стилей и отдельные стили, так как это приводит к ошибке переопределения.
 	"""
 		
 	# Указатель новой строки.
-	End = "\n" if Newline == True else ""
-
+	End = "\n" if end == True else ""
 	# Генерация форматированного текста.
-	Text = TextStyler(Text, Styles, Decorations, TextColor, BackgroundColor, Autoreset)
-
-	# Если указано, добавить модификатор сброса стилей после вывода.
-	if Autoreset == True:
-		Text += "\033[0m"
-
+	text = TextStyler(text, styles, decorations, text_color, background_color, autoreset)
+	# Если указано, добавить маркер сброса стилей.
+	if autoreset == True: text += "\033[0m"
 	# Вывод в консоль: стилизованный текст.
-	print(Text, end = End)
+	print(text, end = End)
 
-def TextStyler(Text: str, Styles: StylesGroup | None = None, Decorations: list[Styles.Decoration] = list(), TextColor: Styles.Color | None = None, BackgroundColor: Styles.Color | None = None, Autoreset: bool = True) -> str:
+def TextStyler(text: str, styles: StylesGroup | None = None, decorations: list[Styles.Decoration] = list(), text_color: Styles.Color | None = None, background_color: Styles.Color | None = None, autoreset: bool = True) -> str:
 	"""
-	Возвращает стилизованный текст.
-		Text – обрабатываемая строка;
-		Styles – контейнер стилей;
-		Decorations – список декораций;
-		TextColor – цвет текста;
-		BackgroundColor – цвет фона;
-		Autoreset – сбрасывать ли стили к стандартным после завершения вывода.
-
-		Примечание: не используйте одновременно группу стилей и отдельные стили, так как это приводит к ошибке переопределения.
+	Стилизует текст.
+		text – стилизуемый текст;
+		styles – контейнер стилей;
+		decorations – список декораций;
+		text_color – цвет текста;
+		background_color – цвет фона;
+		autoreset – указывает, необходимо ли сбросить стили в конце текста.
+	Примечание: не используйте одновременно группу стилей и отдельные стили, так как это приводит к ошибке переопределения.
+	Типы возвращаемых значений:
+		str – текст после стилизации.
 	"""
 		
 	# Маркер стилей строки.
 	StyleMarkers = None
 
 	# Если не указана группа стилей.
-	if Styles == None:
+	if styles == None:
 		# Инициализация маркера стилей строки.
 		StyleMarkers = "\033["
 
 		# Добавить каждую декорацию.
-		for Decoration in Decorations:
-			StyleMarkers += Decoration + ";"
-
-		# Если передан цвет для текста, то создать соответствующий литерал.
-		if TextColor != None:
-			StyleMarkers += "3" + TextColor.value + ";"
-
-		# Если передан цвет для фона, то создать соответствующий литерал.
-		if BackgroundColor != None:
-			StyleMarkers += "4" + BackgroundColor.value + ";"
-
-		# Постановка завершающего символа маркировки и добавление строки.
+		for Decoration in decorations: StyleMarkers += Decoration + ";"
+		# Если передан цвет текста, создать соответствующий маркер.
+		if text_color != None: StyleMarkers += "3" + text_color.value + ";"
+		# Если передан цвет фона, создать соответствующий маркер.
+		if background_color != None: StyleMarkers += "4" + background_color.value + ";"
+		# Постановка завершающего символа маркировки.
 		StyleMarkers = StyleMarkers.rstrip(';') + "m"
 
-	# Если указана и группа стилей, и стили по отдельности.
-	elif Styles != None and Decorations != list() or TextColor != None or BackgroundColor != None:
-		raise DuplicatedStyles()
+	# Если указана и группа стилей, и стили по отдельности, выбросить исключение.
+	elif styles != None and decorations != list() or text_color != None or background_color != None: raise DuplicatedStyles()
 
-	# Если указана группа стилей.
 	else:
 		# Запись маркера стилей строки.
-		StyleMarkers = str(Styles)
+		StyleMarkers = str(styles)
 
 	# Добавление стилей к строке.
-	Text = StyleMarkers + Text
+	text = StyleMarkers + text
+	# Если указано, добавить маркер сброса стилей.
+	if autoreset == True: text += "\033[0m"
 
-	# Если указано, добавить модификатор сброса стилей после вывода.
-	if Autoreset == True:
-		Text += "\033[0m"
-
-	return Text
-
+	return text
