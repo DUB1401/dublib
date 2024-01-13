@@ -6,6 +6,10 @@
 * _**ключ**_ – выполняет роль переменной, значение которой указывается через пробел. Если значение содержит пробельные символы или амперсант, его необходимо заключить в кавычки `"`. По умолчанию: _**--key [VALUE]**_.
 * _**аргумент**_ – выполняет роль ни к чему не привязанного параметра. Если значение содержит пробельные символы или амперсант, его необходимо заключить в кавычки `"`. По умолчанию: _**[ARGUMENT]**_.
 
+Параметр может являться важным. В таком случае обработчик будет требовать его обязательного наличия.
+
+Отдельно следует упоминуть слои – контейнеры разнородных параметров, позволяющие взаимоисключать друг друга. Например, при установке на один слой важного ключа и важного флага, обработчик будет понимать, что если ключ уже найден, то флаг требовать не нужно.
+
 ## Классы
 * `ArgumentType` – перечисление типов аргументов:
 	* **All** – любое значение;
@@ -28,31 +32,31 @@ CommandsList = list()
 # Создание объекта описания команды с названием method.
 COM_method = Command("method")
 # Установка указателей флага и ключа. Они используются для идентификации соответствующих параметров. По умолчанию: "-" и "--" соответственно.
-COM_method.setFlagIndicator("-")
-COM_method.setKeyIndicator("--")
-# Добавление к описанию команды необязательной позиции флага.
+COM_method.set_flags_indicator("-")
+COM_method.set_keys_indicator("--")
+# Добавление к описанию команды позиции флага.
 # Описание: method -s?
-COM_method.addFlagPosition(["s"])
-# Добавление к описанию команды обязательной позиции взаимоисключающих флагов.
+COM_method.add_flag_position(["s"])
+# Добавление к описанию команды важной позиции взаимоисключающих флагов.
 # Описание: method -s? -dir|-file
-COM_method.addFlagPosition(["dir", "file"], Important = True)
-# Добавление к описанию команды обязательной позиции взаимоисключающих ключей с любым типом.
+COM_method.add_flag_position(["dir", "file"], important = True)
+# Добавление к описанию команды важной позиции взаимоисключающих ключей с любым типом.
 # Описание: method -s? -dir|-file --path|--filename [VALUE]
-COM_method.addKeyPosition(["path", "filename"], ArgumentType.All, Important = True)
-# Добавление к описанию команды обязательного аргумента с типом Number.
+COM_method.add_key_position(["path", "filename"], ArgumentType.All, important = True)
+# Добавление к описанию команды важного аргумента с типом Number.
 # Описание: method -s? -dir|-file --path|--filename [VALUE] [ARGUMENT]
-COM_method.addArgument(ArgumentType.Number, Important = True)
+COM_method.add_argument(ArgumentType.Number, important = True)
 
 # Если необходимо сделать разные типы параметров взаимоисклюдчаемыми, их необходимо добавить на один слой. Стоит помнить, что даже один важный параметр в слое делает весь слой важным, то есть один из параметров слоя обязательно должен присутствовать.
-Com_another_method.addFlagPosition(["flag"], Important = True, LayoutIndex = 1)
-Com_another_method.addKeyPosition(["key"], ArgumentType.ValidPath, LayoutIndex = 1)
+Com_another_method.add_flag_position(["flag"], important = True, layout_index = 1)
+Com_another_method.add_key_position(["key"], ArgumentType.ValidPath, layout_index = 1)
 
 # Добавление описания команды в список.
 CommandsList.append(COM_method)
 # Инициализация обработчика консольных аргументов.
 CAC = Terminalyzer()
 # Получение информации о проверке команд. Возвращает либо объект типа CommandData, либо None при отсутствии названия команды в списке описаний.
-CommandDataStruct = CAC.checkCommands(CommandsList)
+CommandDataStruct = CAC.check_commands(CommandsList)
 
 # Если не удалось определить команду.
 if CommandDataStruct == None:
@@ -62,18 +66,18 @@ if CommandDataStruct == None:
 else:
 
 	# Обработка команды: method.
-	if "method" == CommandDataStruct.Name:
+	if "method" == CommandDataStruct.name:
 
 		# Если активирован флаг "f".
-		if "f" in CommandDataStruct.Flags:
+		if "f" in CommandDataStruct.flags:
 			# Выполнение неких действий.
 			pass
 
 		# Если активирован ключ "path".
-		if "path" in CommandDataStruct.Keys:
+		if "path" in CommandDataStruct.keys:
 			# Осуществление доступа к значению ключа.
-			CommandDataStruct.Values["path"]
+			CommandDataStruct.values["path"]
 
 		# Осуществление доступа к списку аргументов (в порядке их добавления к параметрам команды).
-		CommandDataStruct.Arguments[0]
+		CommandDataStruct.arguments[0]
 ```

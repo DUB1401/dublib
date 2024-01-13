@@ -4,8 +4,23 @@
 # Поставляемые компоненты
 Библиотека включает следующие модули:
 * [Methods](docs/Methods.md)
-* [Terminalyzer](docs/Terminalyzer.md)
+* [Polyglot](docs/Polyglot.md)
 * [StyledPrinter](docs/StyledPrinter.md)
+* [Terminalyzer](docs/Terminalyzer.md)
 * [WebRequestor](docs/WebRequestor.md)
 
-_Copyright © DUB1401. 2023._
+# Установка
+Библиотека поддерживает установку из двух типов репозиториев:
+* **PyPI** – стабильные выпуски (с возможностью выбора конкретной версии);
+* **GitHub** – канал разработки со всеми последними изменениями и исправлениями.
+```
+# Установка из PyPi.
+pip install dublib
+
+# Установка из GitHub.
+pip install git+https://github.com/DUB1401/dublib
+```
+> [!NOTE]  
+> Для установки библиотеки из репозитория GitHub в вашей системе должна присутствовать система контроля версий Git.
+
+_Copyright © DUB1401. 2023-2024._

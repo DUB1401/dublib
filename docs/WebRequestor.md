@@ -13,9 +13,10 @@
 from Source.WebRequestor import WebRequestor
 
 # Запросчик HTML кода веб-страниц (с включеным ведением логов).
-Requestor = WebRequestor(Logging = True)
+Requestor = WebRequestor(logging = True)
 
-# Создание конфигурации для выбора одной из библиотек: requests или Selenium.
+# Создание конфигурации для выбора одной из библиотек: httpx, requests или Selenium.
+Config = HttpxConfig()
 Config = RequestsConfig()
 Config = SeleniumConfig(Browsers.Chrome)
 

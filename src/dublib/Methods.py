@@ -5,18 +5,9 @@ import sys
 import os
 import re
 
-def CheckForCyrillicPresence(text: str) -> bool:
-	"""
-	Проверяет, имеются ли кирилические символы в строке.
-		text – проверяемая строка.
-	"""
-
-	# Русский алфавит в нижнем регистре.
-	Alphabet = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
-	# Состояние: содержит ли строка кирилические символы.
-	IsTextContainsCyrillicCharacters = not Alphabet.isdisjoint(text.lower())
-
-	return IsTextContainsCyrillicCharacters
+#==========================================================================================#
+# >>>>> ФУНКЦИИ РАБОТЫ С СИСТЕМОЙ <<<<< #
+#==========================================================================================#
 
 def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = True) -> bool:
 	"""
@@ -58,6 +49,54 @@ def MakeRootDirectories(directories: list[str]):
 		# Если каталог не существует, то создать его.
 		if os.path.exists(Name) == False: os.makedirs(Name)
 
+def RemoveFolderContent(path: str):
+	"""
+	Удаляет всё содержимое каталога.
+		path – путь к каталогу.
+	"""
+
+	# Список содержимого в папке.
+	FolderContent = os.listdir(path)
+
+	# Для каждого элемента.
+	for Item in FolderContent:
+
+		# Если элемент является каталогом.
+		if os.path.isdir(path + "/" + Item):
+			# Удаление каталога.
+			shutil.rmtree(path + "/" + Item)
+
+		else:
+			# Удаление файла.
+			os.remove(path + "/" + Item)
+
+def Shutdown():
+	"""
+	Выключает устройство.
+	"""
+
+	# Если устройство работает под управлением ОС семейства Linux.
+	if sys.platform in ["linux", "linux2"]: os.system("sudo shutdown now")
+	# Если устройство работает под управлением ОС семейства Windows.
+	if sys.platform == "win32": os.system("shutdown /s")
+
+#==========================================================================================#
+# >>>>> ФУНКЦИИ ОБРАБОТКИ ТИПОВ ДАННЫХ <<<<< #
+#==========================================================================================#
+
+def CheckForCyrillicPresence(text: str) -> bool:
+	"""
+	Проверяет, имеются ли кирилические символы в строке.
+		text – проверяемая строка.
+	"""
+
+	# Русский алфавит в нижнем регистре.
+	Alphabet = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
+	# Состояние: содержит ли строка кирилические символы.
+	IsTextContainsCyrillicCharacters = not Alphabet.isdisjoint(text.lower())
+
+	return IsTextContainsCyrillicCharacters
+
 def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwrite: bool = False) -> dict:
 	"""
 	Объединяет словари.
@@ -80,57 +119,6 @@ def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwri
 			base_dictionary[Key] = mergeable_dictionary[Key]
 
 	return base_dictionary
-
-def ReadJSON(path: str) -> dict:
-	"""
-	Читает файл JSON и конвертирует его в словарь.
-		path – путь к файлу.
-	"""
-
-	# Словарь для преобразования.
-	JSON = dict()
-	# Открытие и чтение файла JSON.
-	with open(path, encoding = "utf-8") as FileRead: JSON = json.load(FileRead)
-
-	return JSON
-
-def RemoveFolderContent(path: str):
-	"""
-	Удаляет всё содержимое каталога.
-		path – путь к директории.
-	"""
-
-	# Список содержимого в папке.
-	FolderContent = os.listdir(path)
-
-	# Для каждого элемента.
-	for Item in FolderContent:
-
-		# Если элемент является каталогом.
-		if os.path.isdir(path + "/" + Item):
-			# Удаление каталога.
-			shutil.rmtree(path + "/" + Item)
-
-		else:
-			# Удаление файла.
-			os.remove(path + "/" + Item)
-
-def RemoveHTML(html: str) -> str:
-	"""
-	Удаляет теги HTML из строки, а также преобразует спецсимволы HTML в Unicode.
-		html – строка, имеющая HTML-разметку.
-	"""
-
-	# Приведение объекта к строковому типу.
-	html = str(html)
-	# Конвертирование спецсимволов HTML в Unicode.
-	html = html.unescape(html)
-	# Регулярное выражение фильтрации тегов HTML.
-	TagsHTML = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
-	# Удаление найденных по регулярному выражению тегов.
-	CleanText = str(re.sub(TagsHTML, '', html))
-
-	return CleanText
 
 def RemoveRecurringSubstrings(string: str, substring: str) -> str:
 	"""
@@ -185,15 +173,22 @@ def ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: any) -> dict:
 
 	return Result
 
-def Shutdown():
+#==========================================================================================#
+# >>>>> ФУНКЦИИ РАБОТЫ С JSON <<<<< #
+#==========================================================================================#
+
+def ReadJSON(path: str) -> dict:
 	"""
-	Выключает устройство.
+	Читает файл JSON и конвертирует его в словарь.
+		path – путь к файлу.
 	"""
 
-	# Если устройство работает под управлением ОС семейства Linux.
-	if sys.platform in ["linux", "linux2"]: os.system("sudo shutdown now")
-	# Если устройство работает под управлением ОС семейства Windows.
-	if sys.platform == "win32": os.system("shutdown /s")
+	# Словарь для преобразования.
+	JSON = dict()
+	# Открытие и чтение файла JSON.
+	with open(path, encoding = "utf-8") as FileRead: JSON = json.load(FileRead)
+
+	return JSON
 
 def WriteJSON(path: str, dictionary: dict):
 	"""

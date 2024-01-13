@@ -442,23 +442,23 @@ class CommandData:
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
 		# Значение аргумента.
-		self.Arguments = arguments
+		self.arguments = arguments
 		# Словарь значений ключей.
-		self.Values = values
+		self.values = values
 		# Список активированных флагов.
-		self.Flags = flags
+		self.flags = flags
 		# Список активированных ключей.
-		self.Keys = keys
+		self.keys = keys
 		# Название команды.
-		self.Name = name
+		self.name = name
 
 	def __str__(self):
 		return str({
-			"name": self.Name, 
-			"flags": self.Flags, 
-			"keys": self.Keys, 
-			"values": self.Values, 
-			"arguments": self.Arguments
+			"name": self.name, 
+			"flags": self.flags, 
+			"keys": self.keys, 
+			"values": self.values, 
+			"arguments": self.arguments
 		})
 
 #==========================================================================================#
