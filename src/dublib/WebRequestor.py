@@ -37,7 +37,7 @@ class HttpxConfig:
 	"""
 	
 	#==========================================================================================#
-	# >>>>> СВОЙСТВА <<<<< #
+	# >>>>> СВОЙСТВА ТОЛЬКО ДЛЯ ЧТЕНИЯ <<<<< #
 	#==========================================================================================#
 	
 	@property
@@ -56,10 +56,10 @@ class HttpxConfig:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, AutoUserAgent: bool = True):
+	def __init__(self, auto_user_agent: bool = True):
 		"""
 		Конфигурация библиотеки httpx.
-			AutoUserAgent – переключает автоматическую генерацию заголовка User-Agent.
+			auto_user_agent – переключает автоматическую генерацию заголовка User-Agent.
 		"""
 		
 		#---> Генерация динамических свойств.
@@ -74,47 +74,47 @@ class HttpxConfig:
 		# Если указано, сгенерировать заголовок User-Agent.
 		if AutoUserAgent == True: self.__Headers = {"User-Agent": UserAgentGenerator().chrome}
 		
-	def addHeader(self, Key: str, Value: int | str):
+	def add_header(self, key: str, value: int | str):
 		"""
 		Добавляет пользовательский заголовок запроса.
-			Key – ключ заголовка;
-			Value – значение заголовка.
+			key – ключ заголовка;
+			value – значение заголовка.
 		"""
 
 		# Запись заголовка.
-		self.__Headers[Key] = Value
+		self.__Headers[key] = value
 		
-	def enableHTTP2(self, Value: bool):
+	def enable_http2(self, status: bool):
 		"""
 		Переключает использование протокола HTTP2.0.
-			Value – статус использования протокола.
+			status – статус использования протокола.
 		"""
 		
-		self.__HTTP2 = Value
+		self.__HTTP2 = status
 		
-	def enableRedirecting(self, Value: bool):
+	def enable_redirecting(self, status: bool):
 		"""
 		Переключает автоматическое перенаправление HTTP.
-			Value – статус перенаправления.
+			status – статус перенаправления.
 		"""
 		
-		self.__Redirecting = Value
+		self.__Redirecting = status
 		
-	def setReferer(self, Referer: str):
+	def set_referer(self, referer: str):
 		"""
 		Задаёт пользовательское значение заголовка Referer.
-			Referer – новое значение заголовка.
+			referer – новое значение заголовка.
 		"""
 
-		self.__Headers["Referer"] = Referer
+		self.__Headers["Referer"] = referer
 		
-	def setUserAgent(self, UserAgent: str):
+	def set_user_agent(self, user_agent: str):
 		"""
 		Задаёт пользовательское значение заголовка User-Agent.
-			UserAgent – новое значение заголовка.
+			user_agent – новое значение заголовка.
 		"""
 
-		self.__Headers["User-Agent"] = UserAgent
+		self.__Headers["User-Agent"] = user_agent
 
 class RequestsConfig:
 	"""
@@ -122,7 +122,7 @@ class RequestsConfig:
 	"""
 	
 	#==========================================================================================#
-	# >>>>> СВОЙСТВА <<<<< #
+	# >>>>> СВОЙСТВА ТОЛЬКО ДЛЯ ЧТЕНИЯ <<<<< #
 	#==========================================================================================#
 	
 	@property
@@ -137,10 +137,10 @@ class RequestsConfig:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, AutoUserAgent: bool = True):
+	def __init__(self, auto_user_agent: bool = True):
 		"""
 		Конфигурация библиотеки requests.
-			AutoUserAgent – переключает автоматическую генерацию заголовка User-Agent.
+			auto_user_agent – переключает автоматическую генерацию заголовка User-Agent.
 		"""
 		
 		#---> Генерация динамических свойств.
@@ -151,41 +151,41 @@ class RequestsConfig:
 		self.__Redirecting = True
 		
 		# Если указано, сгенерировать заголовок User-Agent.
-		if AutoUserAgent == True: self.__Headers = {"User-Agent": UserAgentGenerator().chrome}
+		if auto_user_agent == True: self.__Headers = {"User-Agent": UserAgentGenerator().chrome}
 		
-	def addHeader(self, Key: str, Value: int | str):
+	def add_header(self, key: str, value: int | str):
 		"""
 		Добавляет пользовательский заголовок запроса.
-			Key – ключ заголовка;
-			Value – значение заголовка.
+			key – ключ заголовка;
+			value – значение заголовка.
 		"""
 
 		# Запись заголовка.
-		self.__Headers[Key] = Value
+		self.__Headers[key] = Value
 		
-	def enableRedirecting(self, Value: bool):
+	def enable_redirecting(self, status: bool):
 		"""
 		Переключает автоматическое перенаправление HTTP.
-			Value – статус перенаправления.
+			status – статус перенаправления.
 		"""
 		
-		self.__Redirecting = Value
+		self.__Redirecting = status
 		
-	def setReferer(self, Referer: str):
+	def set_referer(self, referer: str):
 		"""
 		Задаёт пользовательское значение заголовка Referer.
-			Referer – новое значение заголовка.
+			referer – новое значение заголовка.
 		"""
 
-		self.__Headers["Referer"] = Referer
+		self.__Headers["Referer"] = referer
 		
-	def setUserAgent(self, UserAgent: str):
+	def set_user_agent(self, user_agent: str):
 		"""
 		Задаёт пользовательское значение заголовка User-Agent.
-			UserAgent – новое значение заголовка.
+			user_agent – новое значение заголовка.
 		"""
 
-		self.__Headers["User-Agent"] = UserAgent
+		self.__Headers["User-Agent"] = user_agent
 	
 class SeleniumConfig:
 	"""
@@ -194,95 +194,85 @@ class SeleniumConfig:
 	
 	def __init__(
 			self,
-			BrowserType: Browsers = Browsers.Chrome,
-			Headless: bool = False,
-			PageLoadTimeout: int = 75,
-			ScriptTimeout: int = 75,
-			WindowWidth: int = 1920,
+			browser_type: Browsers = Browsers.Chrome,
+			headless: bool = False,
+			page_load_timeout: int = 75,
+			script_timeout: int = 75,
+			window_width: int = 1920,
 			WindowHeight: int = 1080
 		):
 		"""
 		Конфигурация библиотеки Selenium.
+			browser_type – наименование используемого браузера;
+			headless – переключатель безоконного режима;
+			page_load_timeout – тайм-аут загрузки страницы;
+			script_timeout – тайм-аут выполнения JavaScript;
+			window_width – ширина окна;
+			window_height – высота окна.
 		"""
 		
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
 		# Тип используемого браузера.
-		self.BrowserType = BrowserType
+		self.BrowserType = browser_type
 		# Состояние: активен ли безрабочный режим.
-		self.Headless = Headless
+		self.Headless = headless
 		# Тайм-аут загрузки страницы.
-		self.PageLoadTimeout = PageLoadTimeout
+		self.PageLoadTimeout = page_load_timeout
 		# Тайм-аут выполнения JavaScript.
-		self.ScriptTimeout = ScriptTimeout
+		self.ScriptTimeout = script_timeout
 		# Ширина окна.
-		self.WindowWidth = WindowWidth
+		self.WindowWidth = window_width
 		# Высота окна.
-		self.WindowHeight = WindowHeight
+		self.WindowHeight = window_height
 		
-	def setBrowserType(self, BrowserType: Browsers):
+	def set_browser_type(self, browser_type: Browsers):
 		"""
 		Задаёт используемый браузер.
 			BrowserType – браузер.
 		"""
 
-		self.BrowserType = BrowserType
+		self.BrowserType = browser_type
 		
-	def setHeadless(self, Headless: bool):
+	def set_headless(self, status: bool):
 		"""
 		Переключает отображение окна браузера.
-			Headless – состояние отображение окна браузера.
+			status – состояние отображение окна браузера.
 		"""
 
-		self.Headless = Headless
+		self.Headless = status
 		
-	def setPageLoadTimeout(self, PageLoadTimeout: int):
+	def set_page_load_timeout(self, page_load_timeout: int):
 		"""
 		Задаёт тайм-аут загрузки страницы.
-			PageLoadTimeout – тайм-аут загрузки страницы в секундах.
+			page_load_timeout – тайм-аут загрузки страницы в секундах.
 		"""
 
-		self.PageLoadTimeout = PageLoadTimeout
+		self.PageLoadTimeout = page_load_timeout
 		
-	def setScriptTimeout(self, ScriptTimeout: int):
+	def set_script_timeout(self, script_timeout: int):
 		"""
 		Задаёт тайм-аут выполнения JavaScript.
-			PageLoadTimeout – тайм-аут выполнения JavaScript в секундах.
+			script_timeout – тайм-аут выполнения JavaScript в секундах.
 		"""
 
-		self.ScriptTimeout = ScriptTimeout
+		self.ScriptTimeout = script_timeout
 		
-	def setWindowSize(self, Width: int, Height: int):
+	def set_window_size(self, width: int, height: int):
 		"""
 		Задаёт размер окна браузера.
-			Width – ширина окна в пикселях;
-			Height – высота окна в пикселях.
+			width – ширина окна в пикселях;
+			height – высота окна в пикселях.
 		"""
 
-		self.WindowWidth = Width
-		self.WindowHeight = Height
+		self.WindowWidth = width
+		self.WindowHeight = height
 		
 class WebResponse:
 	"""
 	Эмуляция структуры ответа библиотеки requests.
 	"""
 
-	#==========================================================================================#
-	# >>>>> СТАТИЧЕСКИЕ СВОЙСТВА <<<<< #
-	#==========================================================================================#
-
-	# Статус ответа.
-	status_code = None
-	# Бинарное представление ответа.
-	content = None
-	# Текстовое представление ответа.
-	text = None
-
-	#==========================================================================================#
-	# >>>>> МЕТОДЫ <<<<< #
-	#==========================================================================================#
-	
-	# Конструктор.
 	def __init__(self):
 		"""
 		Эмуляция структуры ответа библиотеки requests.
@@ -291,11 +281,11 @@ class WebResponse:
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
 		# Статус ответа.
-		status_code = None
+		self.status_code = None
 		# Бинарное представление ответа.
-		content = None
+		self.content = None
 		# Текстовое представление ответа.
-		text = None
+		self.text = None
 		
 #==========================================================================================#
 # >>>>> ОСНОВНОЙ КЛАСС <<<<< #
@@ -375,109 +365,99 @@ class WebRequestor:
 		# Установка максимального времени загрузки страницы и выполнения скрипта.
 		self.__Browser.set_page_load_timeout(self.__Config.PageLoadTimeout)
 		self.__Browser.set_script_timeout(self.__Config.ScriptTimeout)
+
+	def __ProcessHeaders(self, headers: dict | None) -> dict | None:
+		"""
+		Обрабатывает заголовки перед выполнением запроса.
+		"""
+
+		# Если переданы заголовки.
+		if headers != None:
+			# Объединение словарей заголовков из конфигурации и аргументов.
+			headers = self.__Config.headers | headers
+			
+		else:
+			# Установка словаря заголовков из конфигурации.
+			headers = self.__Config.headers
+
+		return headers
 		
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ ЗАПРОСОВ <<<<< #
 	#==========================================================================================#
 
-	def __httpx_GET(self, URL: str, Params: dict | None = None, Headers: dict | None = None, Cookies: dict | None = None) -> httpx.Response:
+	def __httpx_GET(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> httpx.Response:
 		"""
 		Отправляет GET запрос через библиотеку httpx.
-			URL – адрес запроса;
-			Params – словарь параметров запроса;
-			Headers – словарь заголовков;
-			Cookies – словарь куков.
+			url – адрес запроса;
+			params – словарь параметров запроса;
+			headers – словарь заголовков;
+			cookies – словарь куков.
 		"""
-		
-		# Если переданы заголовки.
-		if Headers != None:
-			# Объединение словарей заголовков из конфигурации и аргументов.
-			Headers = self.__Config.headers | Headers
-			
-		else:
-			# Установка словаря заголовков из конфигурации.
-			Headers = self.__Config.headers
-		
+
+		# Обработка заголовков.
+		headers = self.__ProcessHeaders(headers)
 		# Ответ.
-		Response = self.__Client.get(URL, params = Params, headers = Headers, cookies = Cookies, follow_redirects = self.__Config.redirecting)
+		Response = self.__Client.get(url, params = params, headers = headers, cookies = cookies, follow_redirects = self.__Config.redirecting)
 		
 		return Response
 	
-	def __httpx_POST(self, URL: str, Params: dict | None = None, Headers: dict | None = None, Cookies: dict | None = None, Data: any = None, JSON: dict | None = None) -> httpx.Response:
+	def __httpx_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None) -> httpx.Response:
 		"""
 		Отправляет POST запрос через библиотеку httpx.
-			URL – адрес запроса;
-			Params – словарь параметров запроса;
-			Headers – словарь заголовков;
-			Data – данные запроса;
-			Cookies – словарь куков.
+			url – адрес запроса;
+			params – словарь параметров запроса;
+			headers – словарь заголовков;
+			cookies – словарь куков;
+			data – данные запроса;
+			json – сериализованное тело запроса.
 		"""
 		
-		# Если переданы заголовки.
-		if Headers != None:
-			# Объединение словарей заголовков из конфигурации и аргументов.
-			Headers = self.__Config.headers | Headers
-			
-		else:
-			# Установка словаря заголовков из конфигурации.
-			Headers = self.__Config.headers
-		
+		# Обработка заголовков.
+		headers = self.__ProcessHeaders(headers)
 		# Ответ.
-		Response = self.__Client.post(URL, params = Params, headers = Headers, cookies = Cookies, data = Data, json = JSON, follow_redirects = self.__Config.redirecting)
+		Response = self.__Client.post(url, params = params, headers = headers, cookies = cookies, data = data, json = json, follow_redirects = self.__Config.redirecting)
 		
 		return Response
 		
-	def __requests_GET(self, URL: str, Params: dict | None = None, Headers: dict | None = None, Cookies: dict | None = None) -> requests.Response:
+	def __requests_GET(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> requests.Response:
 		"""
 		Отправляет GET запрос через библиотеку requests.
-			URL – адрес запроса;
-			Params – словарь параметров запроса;
-			Headers – словарь заголовков;
-			Cookies – словарь куков.
+			url – адрес запроса;
+			params – словарь параметров запроса;
+			headers – словарь заголовков;
+			cookies – словарь куков.
 		"""
 		
-		# Если переданы заголовки.
-		if Headers != None:
-			# Объединение словарей заголовков из конфигурации и аргументов.
-			Headers = self.__Config.headers | Headers
-			
-		else:
-			# Установка словаря заголовков из конфигурации.
-			Headers = self.__Config.headers
-
+		# Обработка заголовков.
+		headers = self.__ProcessHeaders(headers)
 		# Ответ.
-		Response = self.__Session.get(URL, params = Params, headers = Headers, cookies = Cookies, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting)
+		Response = self.__Session.get(url, params = params, headers = headers, cookies = cookies, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting)
 		
 		return Response
 	
-	def __requests_POST(self, URL: str, Params: dict | None = None, Headers: dict | None = None, Cookies: dict | None = None, Data: any = None, JSON: dict | None = None) -> requests.Response:
+	def __requests_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None) -> requests.Response:
 		"""
 		Отправляет POST запрос через библиотеку requests.
-			URL – адрес запроса;
-			Params – словарь параметров запроса;
-			Headers – словарь заголовков;
-			Cookies – словарь куков;
-			Data – данные запроса;
-			JSON – тело запроса.
+			url – адрес запроса;
+			params – словарь параметров запроса;
+			headers – словарь заголовков;
+			cookies – словарь куков;
+			data – данные запроса;
+			json – сериализованное тело запроса.
 		"""
 		
-		# Если переданы заголовки.
-		if Headers != None:
-			# Объединение словарей заголовков из конфигурации и аргументов.
-			Headers = self.__Config.headers | Headers
-			
-		else:
-			# Установка словаря заголовков из конфигурации.
-			Headers = self.__Config.headers
-		
+		# Обработка заголовков.
+		headers = self.__ProcessHeaders(headers)
 		# Ответ.
-		Response = self.__Session.post(URL, params = Params, headers = Headers, cookies = Cookies, data = Data, json = JSON, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting)
+		Response = self.__Session.post(url, params = params, headers = headers, cookies = cookies, data = data, json = json, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting)
 		
 		return Response
 	
-	def __selenium_LOAD(self, URL: str) -> WebResponse:
+	def __selenium_LOAD(self, url: str) -> WebResponse:
 		"""
-		Запрашивает страницу при помощи библиотеки Selenium.
+		Загружает страницу при помощи библиотеки Selenium.
+			URL – адрес страницы.
 		"""
 
 		# Ответ.
@@ -485,7 +465,7 @@ class WebRequestor:
 		
 		try:
 			# Запрос страницы.
-			self.__Browser.get(URL)
+			self.__Browser.get(url)
 			
 		except self.TimeoutException.TimeoutException:
 			# Установка свойств ответа.
@@ -503,10 +483,10 @@ class WebRequestor:
 		
 		return Response
 			
-	def __init__(self, Logging: bool = False):
+	def __init__(self, logging: bool = False):
 		"""
 		Запросчик HTML кода веб-страниц.
-			Logging – переключает ведение логов при помощи стандартного модуля logging.
+			logging – переключает ведение логов при помощи стандартного модуля.
 		"""
 
 		#---> Генерация динамических свойств.
@@ -520,7 +500,7 @@ class WebRequestor:
 		# Экземпляр веб-браузера Selenium.
 		self.__Browser = None
 		# Состояние: вести ли логи.
-		self.__Logging = Logging
+		self.__Logging = logging
 		# Список прокси.
 		self.__Proxies = list()
 		
@@ -560,35 +540,35 @@ class WebRequestor:
 			# Обнуление клиента.
 			self.__Client = None
 			
-	def addProxy(self, Protocol: Protocols, Host: str, Port: int | str, Login: str | None = None, Password: str | None = None):
+	def add_proxy(self, protocol: Protocols, host: str, port: int | str, login: str | None = None, password: str | None = None):
 		"""
 		Добавляет прокси для использования в запросах. Не работает с Selenium.
-			Protocol – протокол прокси-соединения;
-			Host – IP или адрес хоста;
-			Port – порт сервера;
-			Login – логин для авторизации;
-			Password – пароль для авторизации.
+			protocol – протокол прокси-соединения;
+			host – IP или адрес хоста;
+			port – порт сервера;
+			login – логин для авторизации;
+			password – пароль для авторизации.
 		"""
 		
 		# Добавление прокси.
 		self.__Proxies.append({
-			"protocol": Protocol.value,
-			"host": Host,
-			"port": str(Port),
-			"login": Login,
-			"password": Password
+			"protocol": protocol.value,
+			"host": host,
+			"port": str(port),
+			"login": login,
+			"password": password
 		})
 			
-	def initialize(self, Config: HttpxConfig | RequestsConfig | SeleniumConfig = RequestsConfig()):
+	def initialize(self, config: HttpxConfig | RequestsConfig | SeleniumConfig = RequestsConfig()):
 		"""
 		Задаёт конфигурацию и инициализирует модуль запросов. Вызывать после всех настроек.
-			Config – конфигурация.
+			config – конфигурация.
 		"""
 
 		# Если задана конфигурация Selenium.
-		if type(Config) == SeleniumConfig:
+		if type(config) == SeleniumConfig:
 			# Сохранение конфигурации.
-			self.__Config = Config
+			self.__Config = config
 			
 			try:
 				# Динамический импорт пакетов.
@@ -601,35 +581,36 @@ class WebRequestor:
 				raise SeleniumRequired()
 			
 			# Инициализация выбранного браузера.
-			match Config.BrowserType:
+			match config.BrowserType:
 				
 				case Browsers.Chrome: self.__InitializeChrome()
 					
 		# Если задана конфигурация requests.		
-		if type(Config) == RequestsConfig:
+		if type(config) == RequestsConfig:
 			# Сохранение конфигурации.
-			self.__Config = Config
+			self.__Config = config
 			# Инициализация сессии.
 			self.__Session = requests.Session()
 			
 		# Если задана конфигурация httpx.		
-		if type(Config) == HttpxConfig:
+		if type(config) == HttpxConfig:
 			# Сохранение конфигурации.
-			self.__Config = Config
+			self.__Config = config
 			# Инициализация клиента.
-			self.__Client = httpx.Client(http2 = Config.http2, proxies = self.__GetProxy())
+			self.__Client = httpx.Client(http2 = config.http2, proxies = self.__GetProxy())
 	
 	#==========================================================================================#
 	# >>>>> SELENIUM <<<<< #
 	#==========================================================================================#
 
-	def executeJavaScript(self, Script: str, Async: bool = False, TriesCount: int = 3) -> WebResponse:
+	def execute_script(self, script: str, use_async: bool = False, tries: int = 3) -> WebResponse:
 		"""
-		Выполняет JavaScript на текущей странице браузера.
-			Script – исполняемый код;
-			Async – указывает, необходимо ли выполнить скрипт асинхронно;
-			TriesCount – количество попыток повтора при неудачном выполнении.
-		Требуется инициализация библиотеки Selenium!
+		Выполняет JavaScript на текущей странице браузера. Требуется инициализация библиотеки Selenium!
+			script – исполняемый код;
+			use_async – указывает, необходимо ли выполнить скрипт асинхронно;
+			tries – количество попыток повтора при неудачном выполнении.
+		Примечание:
+			Требуется инициализация библиотеки Selenium!
 		"""
 
 		# Ответ.
@@ -649,7 +630,7 @@ class WebRequestor:
 				
 				try:
 					# Выполнение скрипта и запись результата.
-					Result = self.__Browser.execute_async_script(Script) if Async == True else self.__Browser.execute_script(Script)
+					Result = self.__Browser.execute_async_script(script) if use_async == True else self.__Browser.execute_script(script)
 				
 				except self.TimeoutException.TimeoutException:
 					# Установка свойств ответа.
@@ -662,7 +643,7 @@ class WebRequestor:
 					Response.status_code = 400
 					
 					# Если достигнуто максимальное количество повторов, остановить повторные запросы.
-					if CurrentTry == TriesCount:
+					if CurrentTry == tries:
 						break
 			
 				else:
@@ -679,11 +660,12 @@ class WebRequestor:
 				
 		return Response
 	
-	def getBrowserHandler(self) -> any:
+	def get_browser_handler(self) -> any:
 		"""
 		Возвращает дескриптор экземпляра браузера.
 			URL – адрес страницы;
 			TriesCount – количество попыток повтора при неудачном выполнении.
+		Примечание:
 			Требуется инициализация библиотеки Selenium!
 		"""
 
@@ -692,11 +674,13 @@ class WebRequestor:
 		
 		return self.__Browser
 	
-	def load(self, URL: str, TriesCount: int = 3) -> WebResponse:
+	def load(self, url: str, tries: int = 3) -> WebResponse:
 		"""
 		Загружает HTML код страницы через Selenium.
-			URL – адрес запроса;
-			TriesCount – количество попыток повтора при неудачном выполнении.
+			url – адрес запроса;
+			tries – количество попыток повтора при неудачном выполнении.
+		Примечание:
+			Требуется инициализация библиотеки Selenium!
 		"""
 
 		# Ответ.
@@ -707,13 +691,13 @@ class WebRequestor:
 		self.__CheckConfig()
 		
 		# Пока не превышено количество попыток.
-		while Try < TriesCount and Response.status_code != 200:
+		while Try < tries and Response.status_code != 200:
 			# Инкремент повтора.
 			Try += 1
 			
 			try:
 				# Выполнение запроса.
-				Response = self.__selenium_LOAD(URL)
+				Response = self.__selenium_LOAD(url)
 				
 			except Exception as ExceptionData:
 				# Запись в лог ошибки: не удалось выполнить запрос.
@@ -725,14 +709,14 @@ class WebRequestor:
 	# >>>>> ЗАПРОСЫ <<<<< #
 	#==========================================================================================#	
 	
-	def get(self, URL: str, Params: dict | None = None, Headers: dict | None = None, Cookies: dict | None = None, TriesCount: int = 3) -> requests.Response | httpx.Response:
+	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, tries: int = 3) -> requests.Response | httpx.Response:
 		"""
 		Отправляет GET запрос.
-			URL – адрес запроса;
-			Params – словарь параметров запроса;
-			Headers – словарь заголовков;
-			Cookies – словарь куков;
-			TriesCount – количество попыток повтора при неудачном выполнении.
+			url – адрес запроса;
+			params – словарь параметров запроса;
+			headers – словарь заголовков;
+			cookies – словарь куков;
+			tries – количество попыток повтора при неудачном выполнении.
 		"""
 
 		# Ответ.
@@ -746,7 +730,7 @@ class WebRequestor:
 		LibName = None
 		
 		# Пока не превышено количество попыток.
-		while Try < TriesCount and Response.status_code != 200:
+		while Try < tries and Response.status_code != 200:
 			# Инкремент повтора.
 			Try += 1
 			
@@ -757,14 +741,14 @@ class WebRequestor:
 					# Установка имени библиотеки.
 					LibName = "REQUESTS"
 					# Выполнение запроса.
-					Response = self.__requests_GET(URL, Params, Headers, Cookies)
+					Response = self.__requests_GET(url, params, headers, cookies)
 					
 				# Если установлена конфигурация библиотеки httpx.
 				if type(self.__Config) == HttpxConfig:
 					# Установка имени библиотеки.
 					LibName = "HTTPX"
 					# Выполнение запроса.
-					Response = self.__httpx_GET(URL, Params, Headers, Cookies)
+					Response = self.__httpx_GET(url, params, headers, cookies)
 				
 			except Exception as ExceptionData:
 				# Запись в лог ошибки: не удалось выполнить запрос.
@@ -772,15 +756,16 @@ class WebRequestor:
 		
 		return Response
 	
-	def post(self, URL: str, Params: dict | None = None, Headers: dict | None = None, Cookies: dict | None = None, Data: any = None, JSON: dict | None = None, TriesCount: int = 3) -> requests.Response | httpx.Response:
+	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, tries: int = 3) -> requests.Response | httpx.Response:
 		"""
 		Отправляет POST запрос.
-			URL – адрес запроса;
-			Params – словарь параметров запроса;
-			Headers – словарь заголовков;
-			Cookies – словарь куков;
-			JSON – тело запроса;
-			TriesCount – количество попыток повтора при неудачном выполнении.
+			url – адрес запроса;
+			params – словарь параметров запроса;
+			headers – словарь заголовков;
+			cookies – словарь куков;
+			data – отправляемые данные;
+			json – сериализованное тело запроса;
+			tries – количество попыток повтора при неудачном выполнении.
 		"""
 
 		# Ответ.
@@ -793,7 +778,7 @@ class WebRequestor:
 		LibName = None
 		
 		# Пока не превышено количество попыток.
-		while Try < TriesCount and Response.status_code != 200:
+		while Try < tries and Response.status_code != 200:
 			# Инкремент повтора.
 			Try += 1
 			
@@ -804,14 +789,14 @@ class WebRequestor:
 					# Установка имени библиотеки.
 					LibName = "REQUESTS"
 					# Выполнение запроса.
-					Response = self.__requests_POST(URL, Params, Headers, Cookies, Data, JSON)
+					Response = self.__requests_POST(url, params, headers, cookies, data, json)
 					
 				# Если установлена конфигурация библиотеки httpx.
 				if type(self.__Config) == HttpxConfig:
 					# Установка имени библиотеки.
 					LibName = "HTTPX"
 					# Выполнение запроса.
-					Response = self.__httpx_POST(URL, Params, Headers, Cookies, Data, JSON)
+					Response = self.__httpx_POST(url, params, headers, cookies, data, json)
 				
 			except Exception as ExceptionData:
 				# Запись в лог ошибки: не удалось выполнить запрос.

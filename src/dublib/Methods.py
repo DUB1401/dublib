@@ -9,8 +9,6 @@ def CheckForCyrillicPresence(text: str) -> bool:
 	"""
 	Проверяет, имеются ли кирилические символы в строке.
 		text – проверяемая строка.
-	Типы возвращаемых значений:
-		bool – результат проверки.
 	"""
 
 	# Русский алфавит в нижнем регистре.
@@ -26,8 +24,6 @@ def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = Tr
 		major – идентификатор Major-версии Python;
 		minor – идентификатор Minor-версии Python;
 		raise_exception – указывает, как поступать при несоответствии версии: выбрасывать исключение или возвращать значение.
-	Типы возвращаемых значений:
-		bool – результат проверки.
 	"""
 	
 	# Если версия Python старше минимальной требуемой.
@@ -68,8 +64,6 @@ def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwri
 		base_dictionary – словарь, в который идёт копирование;
 		mergeable_dictionary – словарь, из котрого идёт копирование;
 		overwrite – указывает, нужно ли перезаписывать значения конфликтующих ключей базового словаря.
-	Типы возвращаемых значений:
-		dict – объединённый словарь.
 	"""
 
 	# Для каждого ключа.
@@ -91,8 +85,6 @@ def ReadJSON(path: str) -> dict:
 	"""
 	Читает файл JSON и конвертирует его в словарь.
 		path – путь к файлу.
-	Типы возвращаемых значений:
-		dict – словарное представление файла JSON.
 	"""
 
 	# Словарь для преобразования.
@@ -123,22 +115,20 @@ def RemoveFolderContent(path: str):
 			# Удаление файла.
 			os.remove(path + "/" + Item)
 
-def RemoveHTML(HTML: str) -> str:
+def RemoveHTML(html: str) -> str:
 	"""
 	Удаляет теги HTML из строки, а также преобразует спецсимволы HTML в Unicode.
-		HTML – строка, имеющая HTML-разметку.
-	Типы возвращаемых значений:
-		str – строка после обработки.
+		html – строка, имеющая HTML-разметку.
 	"""
 
 	# Приведение объекта к строковому типу.
-	HTML = str(HTML)
+	html = str(html)
 	# Конвертирование спецсимволов HTML в Unicode.
-	HTML = html.unescape(HTML)
+	html = html.unescape(html)
 	# Регулярное выражение фильтрации тегов HTML.
 	TagsHTML = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 	# Удаление найденных по регулярному выражению тегов.
-	CleanText = str(re.sub(TagsHTML, '', HTML))
+	CleanText = str(re.sub(TagsHTML, '', html))
 
 	return CleanText
 
@@ -147,8 +137,6 @@ def RemoveRecurringSubstrings(string: str, substring: str) -> str:
 	Удаляет из строки подряд идущие повторяющиеся подстроки.
 		string – строка, из которой удаляются повторы;
 		Substring – удаляемая подстрока.
-	Типы возвращаемых значений:
-		str – строка после обработки.
 	"""
 
 	# Пока в строке находятся повторы указанного символа, удалять их.
@@ -161,8 +149,6 @@ def RemoveRegexSubstring(string: str, regex: str) -> str:
 	Удаляет из строки все вхождения подстрок, совпадающие с регулярным выражением.
 		string – обрабатываемая строка;
 		regex – регулярное выражение для поиска подстрок.
-	Типы возвращаемых значений:
-		str – строка после обработки.
 	"""
 
 	# Поиск всех совпадений.
@@ -178,8 +164,6 @@ def ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: any) -> dict:
 		dictionary – обрабатываемый словарь;
 		old_key – старое название ключа;
 		new_key – новое название ключа.
-	Типы возвращаемых значений:
-		dict – словарь с заменённым ключом.
 	"""
 	
 	# Результат выполнения.
