@@ -39,6 +39,14 @@ class Command:
 		return self.__Arguments
 	
 	@property
+	def description(self) -> str:
+		"""
+		Описание команды.
+		"""
+
+		return self.__Description
+
+	@property
 	def flags_indicator(self) -> str:
 		"""
 		Индикатор флагов.
@@ -209,7 +217,7 @@ class Command:
 			# Если аргумент лежит на важном слое, сделать его важным.
 			if self.__Arguments[ArgumentIndex]["layout-index"] == layout_index: self.__Arguments[ArgumentIndex]["important"] = True
 	
-	def __init__(self, name: str):
+	def __init__(self, name: str, description: str | None = None):
 		"""
 		Контейнер описания команды.
 			name – название команды.
@@ -235,6 +243,8 @@ class Command:
 		self.__MinArgc = 0
 		# Словарь, предоставляющий список слоёв и количество параметров на них.
 		self.__Layouts = dict()
+		# Описание команды.
+		self.__Description = description
 
 	def add_argument(self, type: ArgumentsTypes = ArgumentsTypes.All, important: bool = False, layout_index: int | None = None):
 		"""
@@ -395,6 +405,14 @@ class Command:
 		
 		return LayoutKeys
 	
+	def set_description(self, description: str):
+		"""
+		Задаёт описание команды.
+			description – описание команды.
+		"""
+
+		self.__Description = description
+
 	def set_flags_indicator(self, indicator: str):
 		"""
 		Задаёт индикатор флагов.
@@ -461,6 +479,167 @@ class CommandData:
 			"values": self.values, 
 			"arguments": self.arguments
 		})
+
+class Config:
+	"""
+	JSON-конфигурация команд.
+	"""
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА ТОЛЬКО ДЛЯ ЧТЕНИЯ <<<<< #
+	#==========================================================================================#
+
+	@property
+	def arguments_types(self) -> dict:
+		"""
+		Словарь строковых и классовых представлений типов аргументов.
+		"""
+
+		return {
+			"all": ArgumentsTypes.All,
+			"number": ArgumentsTypes.Number,
+			"validpath": ArgumentsTypes.ValidPath,
+			"text": ArgumentsTypes.Text,
+			"url": ArgumentsTypes.URL,
+		}
+
+	#==========================================================================================#
+	# >>>>> МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __ProcessTypes(self, types: list[str] | str) -> list[str] | str:
+		"""
+		Конвертирует текстовое представление типов в классовое.
+			types – список названий типов или конкретное название.
+		"""
+
+		# Типы аргументов.
+		Types = list()
+
+		# Если передан список типов.
+		if type(types) == list:
+			# Запись всех типов.
+			Types = types
+
+		else:
+			# Дополнение списка типом.
+			Types.append(types)
+
+		# Для каждого типа.
+		for Index in range(0, len(Types)):
+			# Замещение строкового типа аргумента классовым.
+			Types[Index] = self.arguments_types[Types[Index]]
+
+		# Если передан один тип, вернуть строку, а не список.
+		if len(Types) == 1: Types = Types[0]
+
+		return Types
+
+	def __init__(self, path: str | None = None):
+		"""
+		JSON-конфигурация команд.
+		"""
+
+		#---> Генерация динамических свойств.
+		#==========================================================================================#
+		# Конфигурация.
+		self.__Config = None
+
+		# Если указан путь к файлу, прочитать его.
+		if path != None: self.read(path)
+
+	def build_commands(self) -> list[Command]:
+		"""
+		Строит список описаний команд из конфигурации.
+		"""
+
+		# Список описательных структур команд.
+		CommandsList = list()
+
+		# Для каждой команды.
+		for CommandName in self.__Config["commands"].keys():
+			# Буфер обрабатываемой команды.
+			Bufer = self.__Config["commands"][CommandName]
+			# Структура команды.
+			CommandDescription = Command(CommandName)
+
+			# Если указано описание команды, игнорировать его.
+			if "description" in Bufer.keys(): CommandDescription.set_description(Bufer["description"])
+
+			# Если указан индикатор флагов, записать его.
+			if "flags-indicator" in Bufer.keys(): CommandDescription.set_flags_indicator(Bufer["flags-indicator"])
+
+			# Если указан индикатор ключей, записать его.
+			if "keys-indicator" in Bufer.keys(): CommandDescription.set_keys_indicator(Bufer["keys-indicator"])
+
+			# Если для команды указаны позиции флагов.
+			if "flags" in Bufer.keys():
+				
+				# Для каждого флага.
+				for FlagPosition in Bufer["flags"]:
+					# Состояние: является ли позиция важной.
+					IsImportant = False
+					# Индекс слоя.
+					LayoutIndex = None
+					# Если определено состояние важности, записать его.
+					if "important" in FlagPosition.keys(): IsImportant = FlagPosition["important"]
+					# Если определён индекс слоя, записать его.
+					if "layout_index" in FlagPosition.keys(): LayoutIndex = FlagPosition["layout_index"]
+					# Формирование позиции флага.
+					CommandDescription.add_flag_position(FlagPosition["names"], IsImportant, LayoutIndex)
+			
+			# Если для команды указаны позиции ключей.
+			if "keys" in Bufer.keys():
+				
+				# Для каждого ключа.
+				for KeyPosition in Bufer["keys"]:
+					# Типы значений.
+					Types = ArgumentsTypes.All
+					# Состояние: является ли позиция важной.
+					IsImportant = False
+					# Индекс слоя.
+					LayoutIndex = None
+					# Если указаны специфические типы, преобразовать их строковые представления в классовые.
+					if "types" in KeyPosition.keys(): Types = self.__ProcessTypes(KeyPosition["types"])
+					# Если определено состояние важности, записать его.
+					if "important" in KeyPosition.keys(): IsImportant = KeyPosition["important"]
+					# Если определён индекс слоя, записать его.
+					if "layout_index" in KeyPosition.keys(): LayoutIndex = KeyPosition["layout_index"]
+					# Формирование позиции ключа.
+					CommandDescription.add_key_position(KeyPosition["names"], Types, IsImportant, LayoutIndex)
+
+			# Если для команды указаны аргументы.
+			if "arguments" in Bufer.keys():
+				
+				# Для каждого аргумента.
+				for Argument in Bufer["arguments"]:
+					# Типы значений.
+					Types = ArgumentsTypes.All
+					# Состояние: является ли позиция важной.
+					IsImportant = False
+					# Индекс слоя.
+					LayoutIndex = None
+					# Если указаны специфические типы, преобразовать их строковые представления в классовые.
+					if "type" in Argument.keys(): Types = self.__ProcessTypes(Argument["type"])
+					# Если определено состояние важности, записать его.
+					if "important" in Argument.keys(): IsImportant = Argument["important"]
+					# Если определён индекс слоя, записать его.
+					if "layout_index" in Argument.keys(): LayoutIndex = Argument["layout_index"]
+					# Формирование аргумента.
+					CommandDescription.add_argument(Types, IsImportant, LayoutIndex)
+
+			# Запись команды в список.
+			CommandsList.append(CommandDescription)
+
+		return CommandsList
+
+	def read(self, path: str):
+		"""
+		Читает конфигурацию из JSON файла.
+			path – путь к файлу.
+		"""
+
+		self.__Config = ReadJSON(path)
 
 #==========================================================================================#
 # >>>>> ОСНОВНОЙ КЛАСС <<<<< #
@@ -581,6 +760,36 @@ class Terminalyzer:
 				if bool(urlparse(value).scheme) == False: raise InvalidArgumentsTypes(value, "URL")
 
 		return True
+
+	def __CheckCommand(self, command: Command) -> CommandData | None:
+		"""
+		Выполняет проверку соответствия конкретной команде.
+			command – описательная структура команды.
+		"""
+
+		# Если название команды соответствует.
+		if self.__CheckName(command) == True:
+
+			# Если данные команды не кэшированы.
+			if self.__CommandData == None:
+				# Заполнение статусов позиций параметров.
+				self.__PositionsStatuses = [False] * (len(self.__Argv) - 1)
+				# Заполнение статусов слоёв параметров.
+				self.__LayoutsStatuses = [None] * (len(self.__Argv) - 1)
+				# Проверка соответствия количества параметров.
+				self.__CheckArgc(command)
+				# Получение названия команды.
+				Name = command.name
+				# Проверка активированных флагов.
+				Flags = self.__CheckFlags(command)
+				# Проверка активированных ключей.
+				Keys = self.__CheckKeys(command)
+				# Получение аргументов.
+				Arguments = self.__CheckArguments(command)
+				# Данные проверки команды.
+				self.__CommandData = CommandData(Name, Flags, list(Keys.keys()), Keys, Arguments)
+
+		return self.__CommandData
 
 	def __CheckFlags(self, command: Command) -> list[str]:
 		"""
@@ -707,10 +916,44 @@ class Terminalyzer:
 
 		return IsDetermined
 
-	def __init__(self, use_sys: bool = True):
+	def __CreateBaseHelp(self, commands: list[Command]) -> str | None:
+		# Буфер базовой помощи.
+		BaseHelp = ""
+		# Модификатор выравнивания.
+		Modificator = 0
+
+		# Если используется автовыравнивание.
+		if self.__Ljust == 0:
+			# Список названий команд.
+			CommandsNames = list()
+			# Для каждой команды записать имя.
+			for CurrentCommand in commands: CommandsNames.append(CurrentCommand.name)
+			# Вычисление длиннейшей строки.
+			Modificator = len(max(CommandsNames, key = len))
+
+		# Если задано конкретное значение выравнивания.
+		elif self.__Ljust != None:
+			# Установка конкретного значения.
+			Modificator = self.__Ljust
+
+		# Для каждой команды.
+		for CurrentCommand in commands:
+			# Добавление имени.
+			BaseHelp += CurrentCommand.name.ljust(Modificator)
+			# Добавление описания.
+			if CurrentCommand.description != None: BaseHelp += " " + CurrentCommand.description
+			# Завершение строки.
+			BaseHelp += "\n"
+
+		# Обнуление пустой помощи.
+		if BaseHelp == "": BaseHelp = None
+
+		return BaseHelp
+
+	def __init__(self, source: list[str] = sys.argv[1:]):
 		"""
 		Обработчик консольных аргументов.
-			use_sys – указывает, что обрабатываемую команду необходимо взять из аргументов запуска скрипта.
+			source – список из названия команды и её параметров
 		"""
 
 		#---> Генерация динамических свойств.
@@ -719,58 +962,63 @@ class Terminalyzer:
 		self.__PositionsStatuses = list()
 		# Список задействованных слоёв.
 		self.__LayoutsStatuses = list()
-		# Переданные параметры.
-		self.__Argv = sys.argv[1:] if use_sys == True else None
 		# Кэшированные данные команды.
 		self.__CommandData = None
-		# Состояние: включена ли обработка помощи.
-		self.help_enabled = False
+		# Состояние: используется ли помощь.
+		self.__EnableHelp = False
+		# Метод вывода данных помощи.
+		self.__OutMethod = None
+		# Переданные параметры.
+		self.__Argv = source
+		# Модификатор выравнивания базовой помощи.
+		self.__Ljust = None
 
-	def check_command(self, command: Command) -> CommandData | None:
-		"""
-		Выполняет проверку соответствия конкретной команде.
-			command – описательная структура команды.
-		"""
-
-		# Если название команды соответствует.
-		if self.__CheckName(command) == True:
-
-			# Если данные команды не кэшированы.
-			if self.__CommandData == None:
-				# Заполнение статусов позиций параметров.
-				self.__PositionsStatuses = [False] * (len(self.__Argv) - 1)
-				# Заполнение статусов слоёв параметров.
-				self.__LayoutsStatuses = [None] * (len(self.__Argv) - 1)
-				# Проверка соответствия количества параметров.
-				self.__CheckArgc(command)
-				# Получение названия команды.
-				Name = command.name
-				# Проверка активированных флагов.
-				Flags = self.__CheckFlags(command)
-				# Проверка активированных ключей.
-				Keys = self.__CheckKeys(command)
-				# Получение аргументов.
-				Arguments = self.__CheckArguments(command)
-				# Данные проверки команды.
-				self.__CommandData = CommandData(Name, Flags, list(Keys.keys()), Keys, Arguments)
-
-		return self.__CommandData
-
-	def check_commands(self, commands: list[Command]) -> CommandData | None:
+	def check_commands(self, commands: list[Command] | Command | Config) -> CommandData | None:
 		"""
 		Выполняет проверку соответствия списку команд.
 			commands – список описательных структур команд.
 		"""
 
+		# Если тип обрабатываемого значения – описание команды.
+		if type(commands) == Command:
+			# Преобразование команды в список.
+			commands = [commands]
+
+		# Если тип обрабатываемого значения – описание команды.
+		elif type(commands) == Config:
+			# Преобразование конфигурации в список команд.
+			commands = commands.build_commands()
+
 		# Проверка каждой команды из списка.
-		for CurrentCommand in commands: self.check_command(CurrentCommand)
+		for CurrentCommand in commands: self.__CheckCommand(CurrentCommand)
+
+		# Если включена обработка помощи 
+		if self.__EnableHelp == True and self.__CommandData.name == "help":
+			# Буфер вывода.
+			Out = None
+			# Если нет аргументов, создать базовую помощь.
+			if len(self.__CommandData.arguments) == 0: Out = self.__CreateBaseHelp(commands)
+			# Отправка помощи в вывод.
+			self.__OutMethod(Out)
 
 		return self.__CommandData
 
-	def enable_help(self):
+	def enable_help(self, out_method: any = print, ljust: int | None = 0):
+		"""
+		Включает обработку дополнительной команды вывода помощи.
+			out_method – указывает функцию, в которую будет перенаправлен вывод помощи;
+			ljust – задаёт длину названия команд для выравнивания методом добавления пробелов (0 включает автоматическое выравнивание по самой длинной команде).
+		"""
+
+		# Установка параметров.
+		self.__EnableHelp = True
+		self.__OutMethod = out_method
+		self.__Ljust = ljust
+
+	def set_source(self, source: list[str]):
 		"""
 		Задаёт обрабатываемый источник. Первым элементом списка обязательно должно являться название команды.
 			source – список из названия команды и её параметров
 		"""
 
-		self.__Argv = argv
+		self.__Argv = source

@@ -1,5 +1,5 @@
 # Terminalyzer
-**Terminalyzer** – это модуль для обработки консольных параметров с автоматической проверкой типов аргументов и их количества.
+**Terminalyzer** – это модуль для обработки консольных параметров с автоматической проверкой типов аргументов и их количества. Поддерживает генерацию помощи и хранение определений команд в файле JSON.
 
 Он выделят три типа параметров:
 * _**флаг**_ – выполняет роль переключателя. По умолчанию: _**-flag**_.
@@ -11,9 +11,9 @@
 Отдельно следует упоминуть слои – контейнеры разнородных параметров, позволяющие взаимоисключать друг друга. Например, при установке на один слой важного ключа и важного флага, обработчик будет понимать, что если ключ уже найден, то флаг требовать не нужно.
 
 ## Классы
-* `ArgumentType` – перечисление типов аргументов:
+* `ArgumentsTypes` – перечисление типов аргументов:
 	* **All** – любое значение;
-	* **Number** – целое отрицательное или положительное число;
+	* **Number** – целое отрицательное или положительное число, а также ноль;
 	* **ValidPath** – существующий путь к файлу или папке;
 	* **Text** – только буквенные символы.
 	* **URL** – ссылка на WEB-ресурс (при этом проверяется только её формат, а не доступность ресурса).
@@ -29,34 +29,34 @@ from dublib.Terminalyzer import *
 # Список описаний обрабатываемых команд.
 CommandsList = list()
 
-# Создание объекта описания команды с названием method.
-COM_method = Command("method")
+# Создание объекта команды с названием method и неким описанием.
+COM_method = Command("method", description = "Some method.")
 # Установка указателей флага и ключа. Они используются для идентификации соответствующих параметров. По умолчанию: "-" и "--" соответственно.
 COM_method.set_flags_indicator("-")
 COM_method.set_keys_indicator("--")
 # Добавление к описанию команды позиции флага.
-# Описание: method -s?
 COM_method.add_flag_position(["s"])
 # Добавление к описанию команды важной позиции взаимоисключающих флагов.
-# Описание: method -s? -dir|-file
 COM_method.add_flag_position(["dir", "file"], important = True)
 # Добавление к описанию команды важной позиции взаимоисключающих ключей с любым типом.
-# Описание: method -s? -dir|-file --path|--filename [VALUE]
-COM_method.add_key_position(["path", "filename"], ArgumentType.All, important = True)
+COM_method.add_key_position(["path", "filename"], ArgumentsTypes.All, important = True)
 # Добавление к описанию команды важного аргумента с типом Number.
-# Описание: method -s? -dir|-file --path|--filename [VALUE] [ARGUMENT]
-COM_method.add_argument(ArgumentType.Number, important = True)
+COM_method.add_argument(ArgumentsTypes.Number, important = True)
 
 # Если необходимо сделать разные типы параметров взаимоисклюдчаемыми, их необходимо добавить на один слой. Стоит помнить, что даже один важный параметр в слое делает весь слой важным, то есть один из параметров слоя обязательно должен присутствовать.
-Com_another_method.add_flag_position(["flag"], important = True, layout_index = 1)
-Com_another_method.add_key_position(["key"], ArgumentType.ValidPath, layout_index = 1)
+COM_another_method.add_flag_position(["flag"], important = True, layout_index = 1)
+COM_another_method.add_key_position(["key"], ArgumentsTypes.ValidPath, layout_index = 1)
 
 # Добавление описания команды в список.
 CommandsList.append(COM_method)
 # Инициализация обработчика консольных аргументов.
 CAC = Terminalyzer()
-# Получение информации о проверке команд. Возвращает либо объект типа CommandData, либо None при отсутствии названия команды в списке описаний.
-CommandDataStruct = CAC.check_commands(CommandsList)
+# Включение стандартной обработки помощи.
+CAC.enable_help()
+# Чтение файла конфигурации в качестве альтернативного метода настройки обработчика.
+ConfigCLI = Config("CLI.json")
+# Получение информации о проверке команд (из списка или из конфигурации). Возвращает либо объект типа CommandData, либо None при отсутствии названия команды в списке описаний.
+CommandDataStruct = CAC.check_commands(CommandsList | Config)
 
 # Если не удалось определить команду.
 if CommandDataStruct == None:
@@ -80,4 +80,49 @@ else:
 
 		# Осуществление доступа к списку аргументов (в порядке их добавления к параметрам команды).
 		CommandDataStruct.arguments[0]
+```
+
+## Файл конфигурации
+Ниже представлен пример полностью сформированного файла конфигурации, описывающего одну команду с обязательными флагом и ключом на одном слое, а также необязательным аргументом.
+
+Значение ключа `description` используется для построения помощи и может отсутствовать.
+
+Такие ключи, как `important` и `layout-index`, не являются обязательными. По умолчанию они принимают следующие значения, соответственно: _false_, _null_.
+
+```JSON
+{
+	"commands": {
+		"method": {
+			"description": "Some method.",
+			"flags": [
+				{
+					"names": [
+						"flag_name"
+					],
+					"important": true,
+					"layout-index": 1
+				}
+			],
+			"keys": [
+				{
+					"names": [
+						"key_name"
+					],
+					"types": [
+						"all"
+					],
+					"important": true,
+					"layout-index": 1
+				}
+			],
+			"arguments": [
+				{
+					"type": "all",
+					"important": false,
+					"layout-index": null
+				}
+			]
+		}
+	}
+}
 ```
