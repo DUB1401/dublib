@@ -1,4 +1,5 @@
 from dublib.Exceptions.Terminalyzer import *
+from dublib.Methods import ReadJSON
 from urllib.parse import urlparse
 
 import enum
@@ -9,16 +10,16 @@ import os
 # >>>>> ВСПОМОГАТЕЛЬНЫЕ ТИПЫ ДАННЫХ <<<<< #
 #==========================================================================================#
 
-class ArgumentType(enum.Enum):
+class ArgumentsTypes(enum.Enum):
 	"""
 	Перечисление типов аргументов.
 	"""
 
-	All = "@all"
-	Number = "@number"
-	ValidPath = "@validpath"
-	Text = "@text"
-	URL = "@url"
+	All = "all"
+	Number = "number"
+	ValidPath = "validpath"
+	Text = "text"
+	URL = "url"
 	
 class Command:
 	"""
@@ -235,7 +236,7 @@ class Command:
 		# Словарь, предоставляющий список слоёв и количество параметров на них.
 		self.__Layouts = dict()
 
-	def add_argument(self, type: ArgumentType = ArgumentType.All, important: bool = False, layout_index: int | None = None):
+	def add_argument(self, type: ArgumentsTypes = ArgumentsTypes.All, important: bool = False, layout_index: int | None = None):
 		"""
 		Добавляет аргумент к команде.
 			type – тип аргумента;
@@ -283,7 +284,7 @@ class Command:
 		self.__CalculateMaxParameters()
 		self.__CalculateMinParameters()
 
-	def add_key_position(self, keys: list[str], types: list[ArgumentType] | ArgumentType, important: bool = False, layout_index: int | None = None):
+	def add_key_position(self, keys: list[str], types: list[ArgumentsTypes] | ArgumentsTypes, important: bool = False, layout_index: int | None = None):
 		"""
 		Добавляет позицию ключа к команде.
 			keys – список названий ключей;
@@ -293,7 +294,7 @@ class Command:
 		"""
 		
 		# Если для всех значений установлен один тип аргумента.
-		if type(types) == ArgumentType:
+		if type(types) == ArgumentsTypes:
 			# Буфер заполнения.
 			Bufer = list()
 			# На каждый ключ продублировать тип значения.
@@ -477,9 +478,9 @@ class Terminalyzer:
 		"""
 
 		# Если аргументов слишком много, выбросить исключение.
-		if len(self.__Argv) - 1 > CommandDescription.getMaxArgc(): raise TooManyArguments(" ".join(self.__Argv))
+		if len(self.__Argv) - 1 > command.max_parameters: raise TooManyArguments(" ".join(self.__Argv))
 		# Если аргументов слишком мало, выбросить исключение.
-		if len(self.__Argv) - 1 < CommandDescription.getMinArgc(): raise NotEnoughArguments(" ".join(self.__Argv))
+		if len(self.__Argv) - 1 < command.min_parameters: raise NotEnoughArguments(" ".join(self.__Argv))
 	
 	def __CheckArguments(self, command: Command) -> list[str | None]:
 		"""
@@ -490,7 +491,7 @@ class Terminalyzer:
 		# Значения аргументов.
 		Values = list()
 		# Список возможных аргументов.
-		ArgumentsDescription = CommandDescription.arguments
+		ArgumentsDescription = command.arguments
 		# Список параметров без команды.
 		ParametersList = self.__Argv[1:]
 		# Список незадействованных параметров.
@@ -516,8 +517,8 @@ class Terminalyzer:
 						
 				else:
 					# Списки названий флагов и ключей.
-					FlagsNames = CommandDescription.getLayoutFlags(self.__LayoutsStatuses[PositionIndex], True)
-					KeysNames = CommandDescription.getLayoutKeys(self.__LayoutsStatuses[PositionIndex], True)
+					FlagsNames = command.get_layout_flags(self.__LayoutsStatuses[PositionIndex], True)
+					KeysNames = command.get_layout_keys(self.__LayoutsStatuses[PositionIndex], True)
 					# Если параметр является флагом или ключём того же слоя, записать пустое значение.
 					if ParametersList[PositionIndex] in FlagsNames or ParametersList[PositionIndex] in KeysNames: FreeParameters.append(None)		
 
@@ -531,13 +532,13 @@ class Terminalyzer:
 			if FreeParameters[Index] != None:
 
 				# Если параметр соответствует типу.
-				if self.__CheckArgumentType(FreeParameters[Index], ArgumentsDescription[Index]["type"]) == True:
+				if self.__CheckArgumentsTypes(FreeParameters[Index], ArgumentsDescription[Index]["type"]) == True:
 					# Сохранение параметра в качестве аргумента.
 					Values.append(FreeParameters[Index])
 
 				else:
 					# Выброс исключения.
-					raise InvalidArgumentType(FreeParameters[Index], CommandDescription.getArguments()["type"])
+					raise InvalidArgumentsTypes(FreeParameters[Index], command.arguments["type"])
 				
 			else:
 				# Сохранение пустого значения аргумента.
@@ -545,7 +546,7 @@ class Terminalyzer:
 
 		return Values
 	
-	def __CheckArgumentType(self, value: str, type_name: ArgumentType = ArgumentType.All) -> bool:
+	def __CheckArgumentsTypes(self, value: str, type_name: ArgumentsTypes = ArgumentsTypes.All) -> bool:
 		"""
 		Проверяет значение аргумента.
 			value – значение аргумента;
@@ -553,31 +554,31 @@ class Terminalyzer:
 		"""
 		
 		# Если требуется проверить специфический тип аргумента.
-		if type_name != ArgumentType.All:
+		if type_name != ArgumentsTypes.All:
 			
 			# Если аргумент должен являться числом.
-			if type_name == ArgumentType.Number:
+			if type_name == ArgumentsTypes.Number:
 
 				# Если вся строка, без учёта отрицательного знака, не является числом, выбросить исключение.
-				if value.lstrip('-').isdigit() == False: raise InvalidArgumentType(value, "Number")
+				if value.lstrip('-').isdigit() == False: raise InvalidArgumentsTypes(value, "Number")
 				
 			# Если аргумент должен являться валидным путём к файлу или директории.
-			if type_name == ArgumentType.ValidPath:
+			if type_name == ArgumentsTypes.ValidPath:
 
 				# Если строка не является валидным путём к файлу или директории, выбросить исключение.
-				if os.path.exists(value) == False: raise InvalidArgumentType(value, "ValidPath")
+				if os.path.exists(value) == False: raise InvalidArgumentsTypes(value, "ValidPath")
 
 			# Если аргумент должен являться набором букв.
-			if type_name == ArgumentType.Text:
+			if type_name == ArgumentsTypes.Text:
 
 				# Если строка содержит небуквенные символы, выбросить исключение.
-				if value.isalpha() == False: raise InvalidArgumentType(value, "Text")
+				if value.isalpha() == False: raise InvalidArgumentsTypes(value, "Text")
 
 			# Если аргумент должен являться URL.
-			if type_name == ArgumentType.URL:
+			if type_name == ArgumentsTypes.URL:
 
 				# Если строка не является URL, выбросить исключение.
-				if bool(urlparse(value).scheme) == False: raise InvalidArgumentType(value, "URL")
+				if bool(urlparse(value).scheme) == False: raise InvalidArgumentsTypes(value, "URL")
 
 		return True
 
@@ -670,7 +671,7 @@ class Terminalyzer:
 						# Блокировка позиции.
 						IsPositionActivated = True
 						# Проверка типа значения ключа.
-						self.__CheckArgumentType(Keys[KeyName], KeysPositions[PositionIndex]["types"][KeyIndex])
+						self.__CheckArgumentsTypes(Keys[KeyName], KeysPositions[PositionIndex]["types"][KeyIndex])
 						
 						# Если для ключа задан слой.
 						if KeysPositions[PositionIndex]["layout-index"] != None:
@@ -706,9 +707,10 @@ class Terminalyzer:
 
 		return IsDetermined
 
-	def __init__(self):
+	def __init__(self, use_sys: bool = True):
 		"""
 		Обработчик консольных аргументов.
+			use_sys – указывает, что обрабатываемую команду необходимо взять из аргументов запуска скрипта.
 		"""
 
 		#---> Генерация динамических свойств.
@@ -718,10 +720,12 @@ class Terminalyzer:
 		# Список задействованных слоёв.
 		self.__LayoutsStatuses = list()
 		# Переданные параметры.
-		self.__Argv = sys.argv[1:]
+		self.__Argv = sys.argv[1:] if use_sys == True else None
 		# Кэшированные данные команды.
 		self.__CommandData = None
-		
+		# Состояние: включена ли обработка помощи.
+		self.help_enabled = False
+
 	def check_command(self, command: Command) -> CommandData | None:
 		"""
 		Выполняет проверку соответствия конкретной команде.
@@ -740,7 +744,7 @@ class Terminalyzer:
 				# Проверка соответствия количества параметров.
 				self.__CheckArgc(command)
 				# Получение названия команды.
-				Name = command.getName()
+				Name = command.name
 				# Проверка активированных флагов.
 				Flags = self.__CheckFlags(command)
 				# Проверка активированных ключей.
@@ -755,10 +759,18 @@ class Terminalyzer:
 	def check_commands(self, commands: list[Command]) -> CommandData | None:
 		"""
 		Выполняет проверку соответствия списку команд.
-			commands – описательная структура команды.
+			commands – список описательных структур команд.
 		"""
 
-		# Проверить каждую команду из списка.
+		# Проверка каждой команды из списка.
 		for CurrentCommand in commands: self.check_command(CurrentCommand)
 
 		return self.__CommandData
+
+	def enable_help(self):
+		"""
+		Задаёт обрабатываемый источник. Первым элементом списка обязательно должно являться название команды.
+			source – список из названия команды и её параметров
+		"""
+
+		self.__Argv = argv

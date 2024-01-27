@@ -16,14 +16,17 @@ def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = Tr
 		minor – идентификатор Minor-версии Python;
 		raise_exception – указывает, как поступать при несоответствии версии: выбрасывать исключение или возвращать значение.
 	"""
+
+	# Состояние: корректна ли версия.
+	IsVersionCorrect = True
 	
 	# Если версия Python старше минимальной требуемой.
-	if sys.version_info < (Major, Minor): 
+	if sys.version_info < (major, minor): 
 		
 		# Если указано выбросить исключение.
 		if raise_exception == True:
 			# Выброс исключения.
-			raise RuntimeError(f"Python {Major}.{Minor} or newer is required.")
+			raise RuntimeError(f"Python {major}.{minor} or newer is required.")
 
 		else: 
 			# Переключение статуса проверки.

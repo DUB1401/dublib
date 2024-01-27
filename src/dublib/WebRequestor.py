@@ -72,7 +72,7 @@ class HttpxConfig:
 		self.__HTTP2 = True
 		
 		# Если указано, сгенерировать заголовок User-Agent.
-		if AutoUserAgent == True: self.__Headers = {"User-Agent": UserAgentGenerator().chrome}
+		if auto_user_agent == True: self.__Headers = {"User-Agent": UserAgentGenerator().chrome}
 		
 	def add_header(self, key: str, value: int | str):
 		"""
@@ -331,7 +331,6 @@ class WebRequestor:
 				Proxy = {
 					Proxy["protocol"]: Proxy["protocol"].replace("https", "http") + "://" + Auth + Proxy["host"] + ":" + Proxy["port"]
 				}
-				print(Proxy)
 			
 			# Если задана конфигурация httpx.		
 			if type(self.__Config) == HttpxConfig:

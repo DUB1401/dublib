@@ -42,7 +42,7 @@ class StylesGroup:
 	Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использования.
 	"""
 
-	def __init__(self, decorations: list[Styles.Decoration] = list(), text_color: Styles.Color | None = None, background_color: Styles.Color | None = None):
+	def __init__(self, decorations: list[Styles.Decorations] = list(), text_color: Styles.Colors | None = None, background_color: Styles.Colors | None = None):
 		"""
 		Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использования.
 			decorations – список декораций;
@@ -67,7 +67,7 @@ class StylesGroup:
 	def __str__(self):
 		return self.__StylesMarkers
 
-def StyledPrinter(text: str, styles: StylesGroup | None = None, decorations: list[Styles.Decoration] = list(), text_color: Styles.Color | None = None, background_color: Styles.Color | None = None, Autoreset: bool = True, end: bool = True):
+def StyledPrinter(text: str, styles: StylesGroup | None = None, decorations: list[Styles.Decorations] = list(), text_color: Styles.Colors | None = None, background_color: Styles.Colors | None = None, autoreset: bool = True, end: bool = True):
 	"""
 	Выводит в терминал стилизованный текст.
 		text – стилизуемый текст;
@@ -90,7 +90,7 @@ def StyledPrinter(text: str, styles: StylesGroup | None = None, decorations: lis
 	# Вывод в консоль: стилизованный текст.
 	print(text, end = End)
 
-def TextStyler(text: str, styles: StylesGroup | None = None, decorations: list[Styles.Decoration] = list(), text_color: Styles.Color | None = None, background_color: Styles.Color | None = None, autoreset: bool = True) -> str:
+def TextStyler(text: str, styles: StylesGroup | None = None, decorations: list[Styles.Decorations] = list(), text_color: Styles.Colors | None = None, background_color: Styles.Colors | None = None, autoreset: bool = True) -> str:
 	"""
 	Стилизует текст.
 		text – стилизуемый текст;
