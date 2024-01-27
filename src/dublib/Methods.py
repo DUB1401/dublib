@@ -135,20 +135,6 @@ def RemoveRecurringSubstrings(string: str, substring: str) -> str:
 
 	return string
 
-def RemoveRegexSubstring(string: str, regex: str) -> str:
-	"""
-	Удаляет из строки все вхождения подстрок, совпадающие с регулярным выражением.
-		string – обрабатываемая строка;
-		regex – регулярное выражение для поиска подстрок.
-	"""
-
-	# Поиск всех совпадений.
-	RegexSubstrings = re.findall(regex, string)
-	# Удаление каждой подстроки.
-	for RegexSubstring in RegexSubstrings: string = string.replace(RegexSubstring, "")
-
-	return string
-
 def ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: any) -> dict:
 	"""
 	Заменяет ключ в словаре, сохраняя исходный порядок элементов.
@@ -175,6 +161,21 @@ def ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: any) -> dict:
 			Result[Key] = dictionary[Key]
 
 	return Result
+
+def ReplaceRegexSubstring(origin: str, regex: str, substring: str) -> str:
+	"""
+	Заменяет все вхождения регулярного выражения в строке на подстроку.
+		origin – обрабатываемая строка;
+		regex – регулярное выражение для поиска подстрок;
+		substring – вставляемая подстрока.
+	"""
+
+	# Поиск всех совпадений.
+	RegexSubstrings = re.findall(regex, origin)
+	# Удаление каждой подстроки.
+	for RegexSubstring in RegexSubstrings: string = string.replace(RegexSubstring, substring)
+
+	return string
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С JSON <<<<< #
