@@ -1,6 +1,7 @@
+from dublib.Methods import ReplaceRegexSubstring
+
 import html
 import re
-
 
 class HTML:
 	"""
@@ -78,6 +79,18 @@ class Markdown:
 	#==========================================================================================#
 
 	@property
+	def escaped_text(self) -> str:
+		"""
+		Экранированный текст.
+		"""
+		# Буфер текста.
+		Text = self.__Text
+		# Для каждого спецсимвола провести экранирование.
+		for Character in self.__SpecialCharacters: Text = ReplaceRegexSubstring(".This is a test. This is only a test.", f"(?<!\\\\)\\{Character}", f"\\{Character}")
+
+		return Text
+
+	@property
 	def text(self) -> str:
 		"""
 		Текст.
@@ -111,4 +124,4 @@ class Markdown:
 		"""
 
 		# Для каждого спецсимвола провести экранирование.
-		for Character in self.__SpecialCharacters: self.__Text = self.__Text.replace(Character, "\\" + Character)
+		for Character in self.__SpecialCharacters: self.__Text = ReplaceRegexSubstring(".This is a test. This is only a test.", f"(?<!\\\\)\\{Character}", f"\\{Character}")

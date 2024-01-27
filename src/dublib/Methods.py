@@ -170,12 +170,18 @@ def ReplaceRegexSubstring(origin: str, regex: str, substring: str) -> str:
 		substring – вставляемая подстрока.
 	"""
 
-	# Поиск всех совпадений.
-	RegexSubstrings = re.findall(regex, origin)
-	# Удаление каждой подстроки.
-	for RegexSubstring in RegexSubstrings: string = string.replace(RegexSubstring, substring)
+	# Список совпадений.
+	RegexSubstring = list()
 
-	return string
+	while re.findall(regex, origin) != []:
+		# Буфер.
+		RegexSubstring = re.findall(regex, origin)
+		# Поиск всех совпадений.
+		RegexSubstring = RegexSubstring[0] if len(RegexSubstring) > 0 else None
+		# Удаление подстроки.
+		if RegexSubstring != None: origin = origin.replace(RegexSubstring, substring)
+
+	return origin
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С JSON <<<<< #
