@@ -708,7 +708,7 @@ class WebRequestor:
 	# >>>>> ЗАПРОСЫ <<<<< #
 	#==========================================================================================#	
 	
-	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, tries: int = 3) -> requests.Response | httpx.Response:
+	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, tries: int = 1) -> requests.Response | httpx.Response:
 		"""
 		Отправляет GET запрос.
 			url – адрес запроса;
@@ -755,7 +755,7 @@ class WebRequestor:
 		
 		return Response
 	
-	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, tries: int = 3) -> requests.Response | httpx.Response:
+	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, tries: int = 1) -> requests.Response | httpx.Response:
 		"""
 		Отправляет POST запрос.
 			url – адрес запроса;

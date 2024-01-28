@@ -13,14 +13,6 @@ class HTML:
 	#==========================================================================================#
 
 	@property
-	def text(self) -> str:
-		"""
-		Текст.
-		"""
-
-		return self.__Text
-
-	@property
 	def plain_text(self) -> str:
 		"""
 		Текст без тегов и спецсимволов HTML.
@@ -32,6 +24,14 @@ class HTML:
 		PlainText = str(re.sub(self.__AllTagsRegex, "", PlainText))
 
 		return PlainText
+
+	@property
+	def text(self) -> str:
+		"""
+		Текст.
+		"""
+
+		return self.__Text
 
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ <<<<< #
@@ -81,12 +81,12 @@ class Markdown:
 	@property
 	def escaped_text(self) -> str:
 		"""
-		Экранированный текст.
+		Текст с экранированными спецсимволами.
 		"""
 		# Буфер текста.
 		Text = self.__Text
 		# Для каждого спецсимвола провести экранирование.
-		for Character in self.__SpecialCharacters: Text = ReplaceRegexSubstring(".This is a test. This is only a test.", f"(?<!\\\\)\\{Character}", f"\\{Character}")
+		for Character in self.__SpecialCharacters: Text = ReplaceRegexSubstring(Text, f"(?<!\\\\)\\{Character}", f"\\{Character}")
 
 		return Text
 
@@ -124,4 +124,4 @@ class Markdown:
 		"""
 
 		# Для каждого спецсимвола провести экранирование.
-		for Character in self.__SpecialCharacters: self.__Text = ReplaceRegexSubstring(".This is a test. This is only a test.", f"(?<!\\\\)\\{Character}", f"\\{Character}")
+		for Character in self.__SpecialCharacters: self.__Text = ReplaceRegexSubstring(self.__Text, f"(?<!\\\\)\\{Character}", f"\\{Character}")

@@ -56,7 +56,7 @@ CAC.enable_help()
 # Чтение файла конфигурации в качестве альтернативного метода настройки обработчика.
 ConfigCLI = Config("CLI.json")
 # Получение информации о проверке команд (из списка или из конфигурации). Возвращает либо объект типа CommandData, либо None при отсутствии названия команды в списке описаний.
-CommandDataStruct = CAC.check_commands(CommandsList | Config)
+CommandDataStruct = CAC.check_commands(CommandsList | ConfigCLI)
 
 # Если не удалось определить команду.
 if CommandDataStruct == None:
