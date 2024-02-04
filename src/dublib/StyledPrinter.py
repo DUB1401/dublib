@@ -1,16 +1,12 @@
-from dublib.Exceptions.StyledPrinter import DuplicatedStyles
+from .Exceptions.StyledPrinter import DuplicatedStyles
 
 import enum
 
 class Styles:
-	"""
-	Содержит перечисления декораций и стилей.
-	"""
+	"""Содержит перечисления декораций и стилей."""
 
 	class Colors(enum.Enum):
-		"""
-		Перечисление цветов.
-		"""
+		"""Перечисление цветов."""
 
 		Black = "0"
 		Red = "1"
@@ -22,9 +18,7 @@ class Styles:
 		White = "7"
 
 	class Decorations(enum.Enum):
-		"""
-		Перечисление декораций.
-		"""
+		"""Перечисление декораций."""
 
 		Bold = "1"
 		Faded = "2"
@@ -38,9 +32,7 @@ class Styles:
 		Upperlined = "53"
 
 class StylesGroup:
-	"""
-	Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использования.
-	"""
+	"""Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использования."""
 
 	def __init__(self, decorations: list[Styles.Decorations] = list(), text_color: Styles.Colors | None = None, background_color: Styles.Colors | None = None):
 		"""

@@ -1,5 +1,6 @@
+from .Exceptions.WebRequestor import *
+
 from fake_useragent import UserAgent as UserAgentGenerator
-from dublib.Exceptions.WebRequestor import *
 
 import importlib
 import requests
@@ -13,18 +14,14 @@ import enum
 #==========================================================================================#
 
 class Browsers(enum.Enum):
-	"""
-	Перечисление типов поддерживаемых браузеров.
-	"""
+	"""Перечисление типов поддерживаемых браузеров."""
 
 	Chrome = "Google Chrome"
 	#Firefox = "Mozilla Firefox"
 	#Edge = "Microsoft Edge"
 
 class Protocols(enum.Enum):
-	"""
-	Перечисление типов протоколов.
-	"""
+	"""Перечисление типов протоколов."""
 	
 	FTP = "ftp"
 	HTTP = "http"
@@ -32,9 +29,7 @@ class Protocols(enum.Enum):
 	SOCKS = "socks"
 
 class HttpxConfig:
-	"""
-	Конфигурация библиотеки httpx.
-	"""
+	"""Конфигурация библиотеки httpx."""
 	
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА ТОЛЬКО ДЛЯ ЧТЕНИЯ <<<<< #
@@ -42,14 +37,20 @@ class HttpxConfig:
 	
 	@property
 	def headers(self) -> dict:
+		"""Заголовки запроса."""
+
 		return self.__Headers.copy()
 	
 	@property
 	def http2(self) -> bool:
+		"""Статус использования протокола HTTP2."""
+
 		return self.__HTTP2
 	
 	@property
 	def redirecting(self) -> bool:
+		"""Статус автоматического перенаправления."""
+
 		return self.__Redirecting
 	
 	#==========================================================================================#
@@ -117,9 +118,7 @@ class HttpxConfig:
 		self.__Headers["User-Agent"] = user_agent
 
 class RequestsConfig:
-	"""
-	Конфигурация библиотеки requests.
-	"""
+	"""Конфигурация библиотеки requests."""
 	
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА ТОЛЬКО ДЛЯ ЧТЕНИЯ <<<<< #
@@ -127,10 +126,14 @@ class RequestsConfig:
 	
 	@property
 	def headers(self) -> dict:
+		"""Заголовки запроса."""
+
 		return self.__Headers.copy()
 	
 	@property
 	def redirecting(self) -> bool:
+		"""Статус автоматического перенаправления."""
+
 		return self.__Redirecting
 	
 	#==========================================================================================#
@@ -188,9 +191,7 @@ class RequestsConfig:
 		self.__Headers["User-Agent"] = user_agent
 	
 class SeleniumConfig:
-	"""
-	Конфигурация библиотеки Selenium.
-	"""
+	"""Конфигурация библиотеки Selenium."""
 	
 	def __init__(
 			self,
@@ -269,14 +270,10 @@ class SeleniumConfig:
 		self.WindowHeight = height
 		
 class WebResponse:
-	"""
-	Эмуляция структуры ответа библиотеки requests.
-	"""
+	"""Эмуляция структуры ответа библиотеки requests."""
 
 	def __init__(self):
-		"""
-		Эмуляция структуры ответа библиотеки requests.
-		"""
+		"""Эмуляция структуры ответа библиотеки requests."""
 
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
@@ -292,26 +289,20 @@ class WebResponse:
 #==========================================================================================#
 
 class WebRequestor:
-	"""
-	Запросчик HTML кода веб-страниц.
-	"""
+	"""Запросчик HTML кода веб-страниц."""
 	
 	#==========================================================================================#
 	# >>>>> ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
 	def __CheckConfig(self):
-		"""
-		Выбрасывает исключение при отсутствии конфигурации.
-		"""
+		"""Выбрасывает исключение при отсутствии конфигурации."""
 
 		# Если конфигурация не задана, выбросить исключение.
 		if self.__Config == None: raise ConfigRequired()
 		
 	def __GetProxy(self) -> dict | None:
-		"""
-		Возвращает объект прокси для запроса.
-		"""
+		"""Возвращает объект прокси для запроса."""
 		
 		# Объект прокси.
 		Proxy = None
@@ -342,9 +333,7 @@ class WebRequestor:
 		return Proxy
 	
 	def __InitializeChrome(self):
-		"""
-		Инициализирует браузер Google Chrome.
-		"""
+		"""Инициализирует браузер Google Chrome."""
 
 		# Закрытие браузера.
 		self.close()
@@ -366,9 +355,7 @@ class WebRequestor:
 		self.__Browser.set_script_timeout(self.__Config.ScriptTimeout)
 
 	def __ProcessHeaders(self, headers: dict | None) -> dict | None:
-		"""
-		Обрабатывает заголовки перед выполнением запроса.
-		"""
+		"""Обрабатывает заголовки перед выполнением запроса."""
 
 		# Если переданы заголовки.
 		if headers != None:
@@ -508,9 +495,7 @@ class WebRequestor:
 	#==========================================================================================#
 		
 	def close(self):
-		"""
-		Закрывает запросчик.
-		"""
+		"""Закрывает запросчик."""
 
 		# Если задана конфигурация Selenium.
 		if type(self.__Config) == SeleniumConfig:
@@ -673,7 +658,7 @@ class WebRequestor:
 		
 		return self.__Browser
 	
-	def load(self, url: str, tries: int = 3) -> WebResponse:
+	def load(self, url: str, tries: int = 1) -> WebResponse:
 		"""
 		Загружает HTML код страницы через Selenium.
 			url – адрес запроса;

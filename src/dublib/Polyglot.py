@@ -1,12 +1,10 @@
-from dublib.Methods import ReplaceRegexSubstring
+from .Methods import ReplaceRegexSubstring
 
 import html
 import re
 
 class HTML:
-	"""
-	Объектная реализация обработчика HTML.
-	"""
+	"""Объектная реализация обработчика HTML."""
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА ТОЛЬКО ДЛЯ ЧТЕНИЯ <<<<< #
@@ -14,9 +12,7 @@ class HTML:
 
 	@property
 	def plain_text(self) -> str:
-		"""
-		Текст без тегов и спецсимволов HTML.
-		"""
+		"""Текст без тегов и спецсимволов HTML."""
 		
 		# Конвертирование спецсимволов HTML в Unicode.
 		PlainText = html.unescape(self.__Text)
@@ -27,9 +23,7 @@ class HTML:
 
 	@property
 	def text(self) -> str:
-		"""
-		Текст.
-		"""
+		"""Текст."""
 
 		return self.__Text
 
@@ -54,25 +48,19 @@ class HTML:
 		return self.__Text
 
 	def remove_tags(self):
-		"""
-		Удаляет все теги HTML из текста.
-		"""
+		"""Удаляет все теги HTML из текста."""
 
 		# Удаление найденных по регулярному выражению тегов.
 		self.__Text = str(re.sub(self.__AllTagsRegex, "", self.__Text))
 
 	def unescape(self):
-		"""
-		Преобразует спецсимволы HTML в Unicode.
-		"""
+		"""Преобразует спецсимволы HTML в Unicode."""
 
 		# Конвертирование спецсимволов HTML в Unicode.
 		self.__Text = html.unescape(self.__Text)
 
 class Markdown:
-	"""
-	Объектная реализация обработчика Markdown.
-	"""
+	"""Объектная реализация обработчика Markdown."""
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА ТОЛЬКО ДЛЯ ЧТЕНИЯ <<<<< #
@@ -80,9 +68,8 @@ class Markdown:
 
 	@property
 	def escaped_text(self) -> str:
-		"""
-		Текст с экранированными спецсимволами.
-		"""
+		"""Текст с экранированными спецсимволами."""
+
 		# Буфер текста.
 		Text = self.__Text
 		# Для каждого спецсимвола провести экранирование.
@@ -92,9 +79,7 @@ class Markdown:
 
 	@property
 	def text(self) -> str:
-		"""
-		Текст.
-		"""
+		"""Текст."""
 
 		return self.__Text
 
@@ -119,9 +104,7 @@ class Markdown:
 		return self.__Text
 
 	def escape(self):
-		"""
-		Экранирует спецсимволы.
-		"""
+		"""Экранирует спецсимволы."""
 
 		# Для каждого спецсимвола провести экранирование.
 		for Character in self.__SpecialCharacters: self.__Text = ReplaceRegexSubstring(self.__Text, f"(?<!\\\\)\\{Character}", f"\\{Character}")

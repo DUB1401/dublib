@@ -1,5 +1,6 @@
-from dublib.Exceptions.Terminalyzer import *
-from dublib.Methods import ReadJSON
+from .Exceptions.Terminalyzer import *
+from .Methods import ReadJSON
+
 from urllib.parse import urlparse
 
 import enum
@@ -11,9 +12,7 @@ import os
 #==========================================================================================#
 
 class ArgumentsTypes(enum.Enum):
-	"""
-	Перечисление типов аргументов.
-	"""
+	"""Перечисление типов аргументов."""
 
 	All = "all"
 	Number = "number"
@@ -22,9 +21,7 @@ class ArgumentsTypes(enum.Enum):
 	URL = "url"
 	
 class Command:
-	"""
-	Контейнер описания команды.
-	"""
+	"""Контейнер описания команды."""
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА ТОЛЬКО ДЛЯ ЧТЕНИЯ <<<<< #
@@ -32,73 +29,55 @@ class Command:
 
 	@property
 	def arguments(self) -> list:
-		"""
-		Список аргументов.
-		"""
+		"""Список аргументов."""
 
 		return self.__Arguments
 	
 	@property
 	def description(self) -> str:
-		"""
-		Описание команды.
-		"""
+		"""Описание команды."""
 
 		return self.__Description
 
 	@property
 	def flags_indicator(self) -> str:
-		"""
-		Индикатор флагов.
-		"""
+		"""Индикатор флагов."""
 
 		return self.__FlagIndicator
 
 	@property
 	def flags_positions(self) -> list:
-		"""
-		Список позиций флагов.
-		"""
+		"""Список позиций флагов."""
 
 		return self.__FlagsPositions
 	
 	@property
 	def keys_indicator(self) -> str:
-		"""
-		Индикатор ключей.
-		"""
+		"""Индикатор ключей."""
 
 		return self.__KeyIndicator
 	
 	@property
 	def keys_positions(self) -> list:
-		"""
-		Список позиций ключей.
-		"""
+		"""Список позиций ключей."""
 
 		return self.__KeysPositions
 	
 	@property
 	def max_parameters(self) -> int:
-		"""
-		Максимальное количество параметров.
-		"""
+		"""Максимальное количество параметров."""
 
 		return self.__MaxArgc
 
 	@property
 	def min_parameters(self) -> int:
-		"""
-		Минимальное количество параметров.
-		"""
+		"""Минимальное количество параметров."""
 
 		return self.__MinArgc
  
 	@property
 	def name(self) -> str:
-		"""
-		Название команды.
-		"""
+		"""Название команды."""
 
 		return self.__Name
 
@@ -107,9 +86,7 @@ class Command:
 	#==========================================================================================#
 
 	def __CalculateMaxParameters(self):
-		"""
-		Подсчитывает максимальное количество параметров.
-		"""
+		"""Подсчитывает максимальное количество параметров."""
 
 		# Обнуление максимального количества параметров.
 		self.__MaxArgc = 0
@@ -142,9 +119,7 @@ class Command:
 				self.__MaxArgc += 1
 
 	def __CalculateMinParameters(self):
-		"""
-		Подсчитывает минимальное количество параметров.
-		"""
+		"""Подсчитывает минимальное количество параметров."""
 
 		# Обнуление минимального количества параметров.
 		self.__MinArgc = 0
@@ -220,7 +195,8 @@ class Command:
 	def __init__(self, name: str, description: str | None = None):
 		"""
 		Контейнер описания команды.
-			name – название команды.
+			name – название команды;
+			description – описание команды.
 		"""
 
 		#---> Генерация динамических свойств.
@@ -444,9 +420,7 @@ class Command:
 			raise IdenticalIndicators()
 
 class CommandData:
-	"""
-	Контейнер хранения данных обработанной команды.
-	"""
+	"""Контейнер хранения данных обработанной команды."""
 
 	def __init__(self, name: str, flags: list[str] = list(), keys: list[str] = list(), values: dict[str, str] = dict(), arguments: list[str] = list()):
 		"""
@@ -481,9 +455,7 @@ class CommandData:
 		})
 
 class Config:
-	"""
-	JSON-конфигурация команд.
-	"""
+	"""JSON-конфигурация команд."""
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА ТОЛЬКО ДЛЯ ЧТЕНИЯ <<<<< #
@@ -491,9 +463,7 @@ class Config:
 
 	@property
 	def arguments_types(self) -> dict:
-		"""
-		Словарь строковых и классовых представлений типов аргументов.
-		"""
+		"""Словарь строковых и классовых представлений типов аргументов."""
 
 		return {
 			"all": ArgumentsTypes.All,
@@ -538,6 +508,7 @@ class Config:
 	def __init__(self, path: str | None = None):
 		"""
 		JSON-конфигурация команд.
+			path – путь к файлу конфигурации.
 		"""
 
 		#---> Генерация динамических свойств.
@@ -549,9 +520,7 @@ class Config:
 		if path != None: self.read(path)
 
 	def build_commands(self) -> list[Command]:
-		"""
-		Строит список описаний команд из конфигурации.
-		"""
+		"""Строит список описаний команд из конфигурации."""
 
 		# Список описательных структур команд.
 		CommandsList = list()
@@ -646,9 +615,7 @@ class Config:
 #==========================================================================================#
 
 class Terminalyzer:
-	"""
-	Обработчик консольных аргументов.
-	"""
+	"""Обработчик консольных аргументов."""
 
 	def __CheckArgc(self, command: Command):
 		"""

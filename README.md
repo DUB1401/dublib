@@ -3,11 +3,11 @@
 
 # Поставляемые компоненты
 Библиотека включает следующие модули:
-* [Methods](docs/Methods.md)
-* [Polyglot](docs/Polyglot.md)
-* [StyledPrinter](docs/StyledPrinter.md)
-* [Terminalyzer](docs/Terminalyzer.md)
-* [WebRequestor](docs/WebRequestor.md)
+* [Methods](https://github.com/DUB1401/dublib/blob/main/docs/Methods.md)
+* [Polyglot](https://github.com/DUB1401/dublib/blob/main/docs/Polyglot.md)
+* [StyledPrinter](https://github.com/DUB1401/dublib/blob/main/docs/StyledPrinter.md)
+* [Terminalyzer](https://github.com/DUB1401/dublib/blob/main/docs/Terminalyzer.md)
+* [WebRequestor](https://github.com/DUB1401/dublib/blob/main/docs/WebRequestor.md)
 
 # Установка
 Библиотека поддерживает установку из двух типов репозиториев:

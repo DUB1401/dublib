@@ -35,9 +35,7 @@ def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = Tr
 	return IsVersionCorrect
 
 def Cls():
-	"""
-	Очищает консоль.
-	"""
+	"""Очищает консоль."""
 
 	os.system("cls" if os.name == "nt" else "clear")
 
@@ -74,9 +72,7 @@ def RemoveFolderContent(path: str):
 			os.remove(path + "/" + Item)
 
 def Shutdown():
-	"""
-	Выключает устройство.
-	"""
+	"""Выключает устройство."""
 
 	# Если устройство работает под управлением ОС семейства Linux.
 	if sys.platform in ["linux", "linux2"]: os.system("sudo shutdown now")
