@@ -48,7 +48,7 @@ class StylesGroup:
 		self.__StylesMarkers = "\033["
 
 		# Добавить каждый маркер стиля к общей строке.
-		for Decoration in decorations: self.__StylesMarkers += Decoration + ";"
+		for Decoration in decorations: self.__StylesMarkers += Decoration.value + ";"
 		# Если передан цвет текста, создать соответствующий маркер.
 		if TextColor != None: self.__StylesMarkers += "3" + TextColor.value + ";"
 		# Если передан цвет фона, создать соответствующий маркер.
@@ -104,7 +104,7 @@ def TextStyler(text: str, styles: StylesGroup | None = None, decorations: list[S
 		StyleMarkers = "\033["
 
 		# Добавить каждую декорацию.
-		for Decoration in decorations: StyleMarkers += Decoration + ";"
+		for Decoration in decorations: StyleMarkers += Decoration.value + ";"
 		# Если передан цвет текста, создать соответствующий маркер.
 		if text_color != None: StyleMarkers += "3" + text_color.value + ";"
 		# Если передан цвет фона, создать соответствующий маркер.
