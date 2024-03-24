@@ -158,27 +158,6 @@ def ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: any) -> dict:
 
 	return Result
 
-def ReplaceRegexSubstring(origin: str, regex: str, substring: str) -> str:
-	"""
-	Заменяет все вхождения регулярного выражения в строке на подстроку.
-		origin – обрабатываемая строка;
-		regex – регулярное выражение для поиска подстрок;
-		substring – вставляемая подстрока.
-	"""
-
-	# Список совпадений.
-	RegexSubstring = list()
-
-	while re.findall(regex, origin) != []:
-		# Буфер.
-		RegexSubstring = re.findall(regex, origin)
-		# Поиск всех совпадений.
-		RegexSubstring = RegexSubstring[0] if len(RegexSubstring) > 0 else None
-		# Удаление подстроки.
-		if RegexSubstring != None: origin = origin.replace(RegexSubstring, substring)
-
-	return origin
-
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С JSON <<<<< #
 #==========================================================================================#
