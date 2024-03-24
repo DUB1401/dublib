@@ -8,16 +8,21 @@
 from dublib.Polyglot import HTML, Markdown
 
 # Получение сырого текста без следов HTML.
-HTML("Some <b>html</b>.").plain_text
+HTML("Lorem <b>ipsum</b>.").plain_text
+# >> Lorem ipsum.
+
+# Замена тегов.
+PolyHTML = HTML("Lorem <b>ipsum</b>.").replace_tag("b", "i")
+PolyHTML.text
+# >> Lorem <i>ipsum</i>.
 
 # Экранирование спецсимволов Markdown.
-MarkdownObject = Markdwon("Some Markdown.").escape()
-Text = MarkdownObject.text
+PolyMarkdown = Markdwon("Lorem ipsum.").escape()
+Text = PolyMarkdown.text
+# >> Lorem ipsum\.
 
 # Все обработчики поддерживают приведение к строковому типу.
-HTMLObject = HTML("Some <b>html</b>.")
-str(HTMLObject)
-
-MarkdownObject = Markdwon("Some Markdown.")
-str(MarkdownObject)
+PolyHTML = HTML("Lorem <b>ipsum</b>.")
+str(PolyHTML)
+# >> Lorem <b>ipsum</b>.
 ```
