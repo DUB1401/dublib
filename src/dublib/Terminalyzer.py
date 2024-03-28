@@ -684,7 +684,7 @@ class Terminalyzer:
 
 				else:
 					# Выброс исключения.
-					raise InvalidArgumentsTypes(FreeParameters[Index], command.arguments["type"])
+					raise InvalidArgumentType(FreeParameters[Index], command.arguments["type"])
 				
 			else:
 				# Сохранение пустого значения аргумента.
@@ -706,25 +706,25 @@ class Terminalyzer:
 			if type_name == ArgumentsTypes.Number:
 
 				# Если вся строка, без учёта отрицательного знака, не является числом, выбросить исключение.
-				if value.lstrip('-').isdigit() == False: raise InvalidArgumentsTypes(value, "Number")
+				if value.lstrip('-').isdigit() == False: raise InvalidArgumentType(value, "Number")
 				
 			# Если аргумент должен являться валидным путём к файлу или директории.
 			if type_name == ArgumentsTypes.ValidPath:
 
 				# Если строка не является валидным путём к файлу или директории, выбросить исключение.
-				if os.path.exists(value) == False: raise InvalidArgumentsTypes(value, "ValidPath")
+				if os.path.exists(value) == False: raise InvalidArgumentType(value, "ValidPath")
 
 			# Если аргумент должен являться набором букв.
 			if type_name == ArgumentsTypes.Text:
 
 				# Если строка содержит небуквенные символы, выбросить исключение.
-				if value.isalpha() == False: raise InvalidArgumentsTypes(value, "Text")
+				if value.isalpha() == False: raise InvalidArgumentType(value, "Text")
 
 			# Если аргумент должен являться URL.
 			if type_name == ArgumentsTypes.URL:
 
 				# Если строка не является URL, выбросить исключение.
-				if bool(urlparse(value).scheme) == False: raise InvalidArgumentsTypes(value, "URL")
+				if bool(urlparse(value).scheme) == False: raise InvalidArgumentType(value, "URL")
 
 		return True
 
