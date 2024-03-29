@@ -1,32 +1,34 @@
 # WebRequestor
-**WebRequestor** – это модуль для запроса HTML кода веб-страниц, поддерживающий библиотеки [requests](https://github.com/psf/requests) и [Selenium](https://github.com/SeleniumHQ/selenium).
-
-## Классы
-* `Browsers` – перечисление поддерживаемых браузеров:
-	* **Chrome** – Google Chrome.
-* `RequestsConfig` – конфигурация для использования библиотеки [requests](https://github.com/psf/requests).
-* `SeleniumConfig` – конфигурация для использования библиотеки [Selenium](https://github.com/SeleniumHQ/selenium).
-* `WebResponse` – имплементация requests-подобного ответа для Selenium.
+**WebRequestor** – это менеджер запросов, поддерживающий библиотеки [curl_cffi](https://github.com/yifeikong/curl_cffi), [httpx](https://github.com/encode/httpx) и [requests](https://github.com/psf/requests), а также ротацию прокси.
 
 ## Пример
 ```Python
-from Source.WebRequestor import WebRequestor
+from dublib.WebRequestor import Protocols, WebConfig, WebLibs, WebRequestor
 
-# Запросчик HTML кода веб-страниц (с включеным ведением логов).
-Requestor = WebRequestor(logging = True)
+# Инициализация менеджера запросов.
+Requestor = WebRequestor()
+# Создание конфигурации (по умолчанию используется requests).
+Config = WebConfig()
+# Выбор библиотеки.
+Config.select_lib(WebLibs.curl_cffi)
+# Генерация User-Agent для ПК.
+Config.generate_user_agent("pc")
+# Установка TLS отпечатка Google Chrome 120.
+Config.curl_cffi.select_fingerprint("chrome120")
+# Установка прокси.
+Requestor.add_proxy(
+	Protocols.HTTPS,
+	host = "1.2.3.4",
+	port = 8080,
+	login = "login",
+	password = "password"
+)
 
-# Создание конфигурации для выбора одной из библиотек: httpx, requests или Selenium.
-Config = HttpxConfig()
-Config = RequestsConfig()
-Config = SeleniumConfig(Browsers.Chrome)
-
-# Инициализация запросчика через выбранную библиотеку.
-Requestor.initialize(Config)
 # Запрос HTML кода веб-страницы.
 Response = Requestor.get("https://site.com/")
 
 # Если запрос успешен.
 if Response.status_code == 200:
-	# Вывод HTML кода.
+	# Вывод ответа.
 	print(Response.text)
 ```
