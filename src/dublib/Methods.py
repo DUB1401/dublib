@@ -96,6 +96,26 @@ def CheckForCyrillicPresence(text: str) -> bool:
 
 	return IsTextContainsCyrillicCharacters
 
+def IsNotAlpha(text: str) -> bool:
+	"""
+	Проверяет, состоит ли строка целиком из небуквенных символов.
+	"""
+
+	# Результат проверки.
+	Result = True
+
+	# Для каждого символа в строке.
+	for Character in text:
+
+		# Если символ является буквой.
+		if Character.isalpha():
+			# Изменение результата.
+			Result = False
+			# Прерывание цикла.
+			break
+
+	return Result
+
 def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwrite: bool = False) -> dict:
 	"""
 	Объединяет словари.
@@ -157,6 +177,21 @@ def ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: any) -> dict:
 			Result[Key] = dictionary[Key]
 
 	return Result
+
+def StripAlpha(text: str) -> str:
+	"""
+	Удаляет из строки начальные и конечные небуквенные символы.
+		text – обрабатываемая строка.
+	"""
+
+	try:
+		# Пока по краям строки есть небуквенные символы, удалять их по одному.
+		while not text[0].isalpha(): text.pop(0)
+		while not text[-1].isalpha(): text.pop()
+
+	except:
+		# Очистка строки.
+		text = ""
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С JSON <<<<< #
