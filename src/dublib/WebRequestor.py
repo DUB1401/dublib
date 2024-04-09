@@ -9,6 +9,7 @@ import logging
 import random
 import httpx
 import enum
+import json
 
 #==========================================================================================#
 # >>>>> ДОПОЛНИТЕЛЬНЫЕ КОНФИГУРАЦИИ БИБЛИОТЕК ЗАПРОСОВ <<<<< #
@@ -113,20 +114,111 @@ class WebLibs(enum.Enum):
 	httpx = "httpx"
 		
 class WebResponse:
-	"""Эмуляция структуры ответа библиотеки requests."""
+	"""Унифицированная объектная структура ответа библиотек запросов."""
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА ТОЛЬКО ДЛЯ ЧТЕНИЯ <<<<< #
+	#==========================================================================================#
+
+	@property
+	def content(self) -> bytes | None:
+		"""Бинарное представление ответа."""
+
+		return self.__content
+
+	@property
+	def json(self) -> dict | None:
+		"""Десериализованное в словарь из JSON представление ответа."""
+
+		return self.__json
+
+	@property
+	def status_code(self) -> int | None:
+		"""Код ответа."""
+
+		return self.__status_code
+
+	@property
+	def text(self) -> str | None:
+		"""Текстовое представление ответа."""
+
+		return self.__text
+
+	#==========================================================================================#
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __TryDeserialize(self, text: str) -> dict | None:
+		# Результат десериализации.
+		Result = None
+
+		try:
+			# Попытка десериализации.
+			Result = json.loads(text)
+
+		except: pass
+
+		return Result
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
 
 	def __init__(self):
-		"""Эмуляция структуры ответа библиотеки requests."""
+		"""Унифицированная объектная структура ответа библиотек запросов."""
 
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
 		# Статус ответа.
-		self.status_code = None
+		self.__status_code = None
 		# Бинарное представление ответа.
-		self.content = None
+		self.__content = None
+		# Десериализованное в словарь из JSON представление ответа.
+		self.__json = None
 		# Текстовое представление ответа.
-		self.text = None
-		
+		self.__text = None
+
+	def generate_by_text(self, text: str | None):
+		"""
+		Генерирует интерпретации ответа на основе текста.
+			text – текстовое представление ответа.
+		"""
+
+		# Если запрос успешен.
+		if response_text:
+			# Установка интерпретаций.
+			self.__status_code = 200
+			self.__text = text
+			self.__content = bytes(text)
+			self.__json = self.__TryDeserialize(text)
+
+	def parse_response(self, response: requests.Response | httpx.Response | curl_cffi_requests.Response):
+		"""
+		Парсит ответ библиотеки в унифицированный формат.
+			response – ответ библиотеки.
+		"""
+
+		# Установка кода ответа.
+		self.__status_code = response.status_code
+		self.__text = response.text
+		self.__content = response.content
+		self.__json = self.__TryDeserialize(response.text)
+
+	def set_data(self, status_code: int | None = None, text: str | None = None, content: bytes | None = None, json: dict | None = None):
+		"""
+		Присваивает значения интерпретациям ответа.
+			status_code – код ответа;
+			text – текстовое представление ответа;
+			content – бинарное представление ответа;
+			json – десериализованное в словарь из JSON представление ответа.
+		"""
+
+		# Проверка и установка типов значений.
+		if status_code: self.__status_code = status_code
+		if text: self.__text = text
+		if content: self.__content = content
+		if json: self.__json = json
+
 #==========================================================================================#
 # >>>>> ОСНОВНЫЕ КЛАССЫ <<<<< #
 #==========================================================================================#
@@ -358,7 +450,7 @@ class WebRequestor:
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 		# Выполнение запроса.
-		Response = self.__Session.get(url, params = params, headers = headers, cookies = cookies, proxies = self.__GetProxy())
+		Response.parse_response(self.__Session.get(url, params = params, headers = headers, cookies = cookies, proxies = self.__GetProxy()))
 
 		return Response
 
@@ -376,7 +468,7 @@ class WebRequestor:
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 		# Выполнение запроса.
-		Response = self.__Session.post(url, params = params, headers = headers, cookies = cookies, data = data, json = json, proxies = self.__GetProxy())
+		Response.parse_response(self.__Session.post(url, params = params, headers = headers, cookies = cookies, data = data, json = json, proxies = self.__GetProxy()))
 		
 		return Response
 	
@@ -396,7 +488,7 @@ class WebRequestor:
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 		# Выполнение запроса.
-		Response = self.__Session.get(url, params = params, headers = headers, cookies = cookies, follow_redirects = self.__Config.redirecting)
+		Response.parse_response(self.__Session.get(url, params = params, headers = headers, cookies = cookies, follow_redirects = self.__Config.redirecting))
 
 		return Response
 
@@ -414,7 +506,7 @@ class WebRequestor:
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 		# Выполнение запроса.
-		Response = self.__Session.post(url, params = params, headers = headers, cookies = cookies, data = data, json = json, follow_redirects = self.__Config.redirecting)
+		Response.parse_response(self.__Session.post(url, params = params, headers = headers, cookies = cookies, data = data, json = json, follow_redirects = self.__Config.redirecting))
 		
 		return Response
 	
@@ -438,13 +530,12 @@ class WebRequestor:
 		
 		try:
 			# Выполнение запроса.
-			Response = self.__Session.get(url, params = params, headers = headers, cookies = cookies, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting)
+			Response.parse_response(self.__Session.get(url, params = params, headers = headers, cookies = cookies, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting))
 
 		except requests.exceptions.ProxyError as ExceptionData:
 			# Установка значений ответа.
-			Response.status_code = 407
-			Response.text = str(ExceptionData)
-			Response.content = bytes(ExceptionData)
+			Response.generate_by_text(str(ExceptionData))
+			Response.set_data(status_code = 407)
 
 		return Response
 	
@@ -466,13 +557,12 @@ class WebRequestor:
 
 		try:
 			# Выполнение запроса.
-			Response = self.__Session.post(url, params = params, headers = headers, cookies = cookies, data = data, json = json, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting)
+			Response.parse_response(self.__Session.post(url, params = params, headers = headers, cookies = cookies, data = data, json = json, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting))
 		
 		except requests.exceptions.ProxyError as ExceptionData:
 			# Установка значений ответа.
-			Response.status_code = 407
-			Response.text = str(ExceptionData)
-			Response.content = bytes(ExceptionData)
+			Response.generate_by_text(str(ExceptionData))
+			Response.set_data(status_code = 407)
 
 		return Response
 		
@@ -530,7 +620,7 @@ class WebRequestor:
 	# >>>>> ЗАПРОСЫ <<<<< #
 	#==========================================================================================#	
 	
-	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, tries: int = 1) -> requests.Response | httpx.Response:
+	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, tries: int = 1) -> WebResponse:
 		"""
 		Отправляет GET запрос.
 			url – адрес запроса;
@@ -581,7 +671,7 @@ class WebRequestor:
 		
 		return Response
 	
-	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, tries: int = 1) -> requests.Response | httpx.Response:
+	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, tries: int = 1) -> WebResponse:
 		"""
 		Отправляет POST запрос.
 			url – адрес запроса;
