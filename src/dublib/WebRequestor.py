@@ -185,7 +185,7 @@ class WebResponse:
 		"""
 
 		# Если запрос успешен.
-		if response_text:
+		if text:
 			# Установка интерпретаций.
 			self.__status_code = 200
 			self.__text = text
