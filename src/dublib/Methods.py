@@ -96,6 +96,41 @@ def CheckForCyrillicPresence(text: str) -> bool:
 
 	return IsTextContainsCyrillicCharacters
 
+def ChunkList(value: list, length: int) -> list[list]:
+	"""
+	Разделяет список на фрагменты фиксированной длинны.
+		value – обрабатываемое значение;
+		length – длина фрагментов.
+	"""
+
+	# Список списков.
+	Result = list()
+	# Индекс обрезки.
+	CutIndex = 1
+	# Буфер обрезки.
+	Buffer = list()
+
+	# Для каждого элемента.
+	for Index in range(len(value)):
+
+		# Если индекс обрезки совпадает с длиной.
+		if CutIndex == length:
+			# Запись и обнуление буфера.
+			Result.append(Buffer)
+			Buffer = list()
+
+		else:
+			# Запись элемента в буфер.
+			Buffer.append(value[Index])
+
+		# Инкремент индекса обрезки.
+		CutIndex += 1
+
+	# Если в буфере что-то осталось, записать отдельной строкой.
+	if len(Buffer) > 0: Result.append(Buffer)
+
+	return Result
+
 def IsNotAlpha(text: str) -> bool:
 	"""
 	Проверяет, состоит ли строка целиком из небуквенных символов.
