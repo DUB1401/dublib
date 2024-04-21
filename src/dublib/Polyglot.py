@@ -98,7 +98,7 @@ class Markdown:
 		# Буфер текста.
 		Text = self.__Text
 		# Для каждого спецсимвола провести экранирование.
-		for Character in self.__SpecialCharacters: Text = re.sub(f"(?<!\\\\)\\{Character}", f"\\{Character}", self.__Text)
+		for Character in self.__SpecialCharacters: Text = re.sub(f"(?<!\\\\)\\{Character}", f"\\{Character}", Text)
 
 		return Text
 

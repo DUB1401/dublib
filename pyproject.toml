@@ -3,15 +3,21 @@ requires = ["setuptools", "cython"]
 
 [project]
 name = "dublib"
-version = "0.5.0"
+version = "0.5.1"
 description = "Коллекция модулей от DUB1401."
 authors = [
-	{name = "DUB1401", email="vlad.milosta@outlook.com"}
+	{name = "DUB1401", email = "vlad.milosta@outlook.com"}
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
-dependencies = ["curl_cffi>=0.6.0", "fake_useragent", "httpx", "httpx[http2]", "requests"]
+dependencies = [
+	"curl_cffi>=0.6.0",
+	"fake_useragent",
+	"httpx",
+	"httpx[http2]",
+	"requests",
+]
 classifiers = [
 	"Development Status :: 4 - Beta",
 	"License :: OSI Approved :: The Unlicense (Unlicense)",
