@@ -447,6 +447,8 @@ class WebRequestor:
 			cookies – словарь куков.
 		"""
 
+		# Эмуляция ответа.
+		Response = WebResponse()
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 		# Выполнение запроса.
@@ -464,7 +466,9 @@ class WebRequestor:
 			data – данные запроса;
 			json – сериализованное тело запроса.
 		"""
-		
+
+		# Эмуляция ответа.
+		Response = WebResponse()
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 		# Выполнение запроса.
@@ -485,6 +489,8 @@ class WebRequestor:
 			cookies – словарь куков.
 		"""
 
+		# Эмуляция ответа.
+		Response = WebResponse()
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 		# Выполнение запроса.
@@ -502,7 +508,9 @@ class WebRequestor:
 			data – данные запроса;
 			json – сериализованное тело запроса.
 		"""
-		
+
+		# Эмуляция ответа.
+		Response = WebResponse()
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 		# Выполнение запроса.
@@ -523,10 +531,10 @@ class WebRequestor:
 			cookies – словарь куков.
 		"""
 		
-		# Обработка заголовков.
-		headers = self.__MergeHeaders(headers)
 		# Эмуляция ответа.
 		Response = WebResponse()
+		# Обработка заголовков.
+		headers = self.__MergeHeaders(headers)
 		
 		try:
 			# Выполнение запроса.
@@ -550,10 +558,10 @@ class WebRequestor:
 			json – сериализованное тело запроса.
 		"""
 		
-		# Обработка заголовков.
-		headers = self.__MergeHeaders(headers)
 		# Эмуляция ответа.
 		Response = WebResponse()
+		# Обработка заголовков.
+		headers = self.__MergeHeaders(headers)
 
 		try:
 			# Выполнение запроса.
