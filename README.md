@@ -6,6 +6,7 @@
 * [Methods](https://github.com/DUB1401/dublib/blob/main/docs/Methods.md)
 * [Polyglot](https://github.com/DUB1401/dublib/blob/main/docs/Polyglot.md)
 * [StyledPrinter](https://github.com/DUB1401/dublib/blob/main/docs/StyledPrinter.md)
+* [TelebotUtils](https://github.com/DUB1401/dublib/blob/main/docs/Terminalyzer.md)
 * [Terminalyzer](https://github.com/DUB1401/dublib/blob/main/docs/Terminalyzer.md)
 * [WebRequestor](https://github.com/DUB1401/dublib/blob/main/docs/WebRequestor.md)
 
