@@ -1,7 +1,7 @@
 from .Methods import ReadJSON, WriteJSON
 from .Exceptions.TelebotUtils import *
 
-from telebot.types import Message, User
+from telebot.types import User
 
 import os
 
@@ -298,26 +298,26 @@ class UsersManager:
 		# Загрузка данных пользователей.
 		self.__LoadUsers()
 
-	def auth(self, message: Message) -> UserData:
+	def auth(self, user: User) -> UserData:
 		"""
 		Выполняет идентификацию и обновление данных существующего пользователя или создаёт локальный файл для нового.
-			message – структура описания сообщения.
+			user – структура описания пользователя Telegram.
 		"""
 		
 		# Текущий пользователь.
-		User = None
+		CurrentUser = None
 
 		# Если пользователь ещё не существует.
-		if message.from_user.id not in self.__Users.keys():
+		if user.id not in self.__Users.keys():
 			# Создание нового пользователя.
-			self.__Users[message.from_user.id] = UserData(self.__StorageDirectory, message.from_user.id, message.from_user)
+			self.__Users[user.id] = UserData(self.__StorageDirectory, user.id, user)
 
 		# Обновление данных пользователя.
-		self.__Users[message.from_user.id].update(message.from_user)
+		self.__Users[user.id].update(user)
 		# Установка текущего пользователя.
-		User = self.__Users[message.from_user.id]
+		CurrentUser = self.__Users[user.id]
 
-		return User
+		return CurrentUser
 
 	def get_user(self, user_id: int | str) -> UserData:
 		"""

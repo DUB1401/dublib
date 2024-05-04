@@ -15,7 +15,7 @@ Manager = UsersManager("Data/Users")
 @Bot.message_handler(commands = ["start"])
 def Start(Message: types.Message):
 	# Авторизация пользователя.
-	User = UsersManagerObject.auth(Message)
+	User = UsersManagerObject.auth(Message.from_user)
 
 	# Если пользователь имеет права администратора.
 	if User.has_permissions("admin"):
