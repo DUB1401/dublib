@@ -60,10 +60,10 @@ class UserData:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, dir: str, user_id: int, data: dict | None = None):
+	def __init__(self, storage_dir: str, user_id: int, data: dict | None = None):
 		"""
 		Объектное представление данных пользователя.
-			dir – путь к директории хранения данных;
+			storage_dir – путь к директории хранения данных;
 			user_id – ID пользователя;
 			data – словарь с описанием данных пользователя для инициализации (если не передан, данные будут загружены из файла).
 		"""
@@ -73,7 +73,7 @@ class UserData:
 		# ID пользователя.
 		self.__ID = user_id
 		# Директория хранилища.
-		self.__StorageDirectory = dir.replace("\\", "/").rstrip("/")
+		self.__StorageDirectory = storage_dir.replace("\\", "/").rstrip("/")
 		# Словарное представление данных пользователя.
 		self.__Data = {
 			"username": None,
@@ -129,6 +129,20 @@ class UserData:
 		# Сохранение данных.
 		self.__SaveData()
 
+	def create_property(self, key: str, value: any):
+		"""
+		Создаёт свойство пользователя и задаёт ему значение, если такового ещё не существует.
+			key – ключ свойства;
+			value – значение.
+		"""
+		
+		# Если свойства не существует.
+		if key not in self.__Data["data"].keys():
+			# Создание свойства.
+			self.__Data["data"][key] = value
+			# Сохранение данных.
+			self.__SaveData()
+
 	def get_property(self, key: str) -> any:
 		"""
 		Возвращает значение свойства пользователя.
@@ -182,19 +196,32 @@ class UserData:
 		# Сохранение данных.
 		self.__SaveData()
 
+	def remove_property(self, key: str):
+		"""
+		Удаляет свойство пользователя.
+			key – ключ свойства.
+		"""
+
+		# Если свойство существует.
+		if key in self.__Data["data"].keys():
+			# Удаление свойства.
+			del self.__Data["data"][key]
+			# Сохранение данных.
+			self.__SaveData()
+
 	def set_property(self, key: str, value: any):
 		"""
-		Обновляет значение свойства пользователя.
+		Обновляет значение существующего свойства пользователя.
 			key – ключ свойства;
 			value – значение.
 		"""
 		
-		# Если ключа данных не существует, создать его.
-		if "data" not in self.__Data.keys(): self.__Data["data"] = dict()
-		# Помещение данных.
-		self.__Data["data"][key] = value
-		# Сохранение данных.
-		self.__SaveData()
+		# Если свойство существует.
+		if key in self.__Data["data"].keys():
+			# Обновление данных.
+			self.__Data["data"][key] = value
+			# Сохранение данных.
+			self.__SaveData()
 
 	def update(self, user: User):
 		"""
