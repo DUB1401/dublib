@@ -129,15 +129,16 @@ class UserData:
 		# Сохранение данных.
 		self.__SaveData()
 
-	def create_property(self, key: str, value: any):
+	def create_property(self, key: str, value: any, force: bool = False):
 		"""
 		Создаёт свойство пользователя и задаёт ему значение, если такового ещё не существует.
 			key – ключ свойства;
-			value – значение.
+			value – значение;
+			force – переключатель: при активном состоянии будет перезаписано даже уже существующее свойство.
 		"""
 		
 		# Если свойства не существует.
-		if key not in self.__Data["data"].keys():
+		if key not in self.__Data["data"].keys() or force:
 			# Создание свойства.
 			self.__Data["data"][key] = value
 			# Сохранение данных.
