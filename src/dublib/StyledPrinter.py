@@ -2,8 +2,12 @@ from .Exceptions.StyledPrinter import DuplicatedStyles
 
 import enum
 
+#==========================================================================================#
+# >>>>> СТИЛИЗАЦИЯ ТЕКСТА <<<<< #
+#==========================================================================================#
+
 class Styles:
-	"""Содержит перечисления декораций и стилей."""
+	"""Перечисления декораций и стилей."""
 
 	class Colors(enum.Enum):
 		"""Перечисление цветов."""
@@ -32,11 +36,11 @@ class Styles:
 		Upperlined = "53"
 
 class StylesGroup:
-	"""Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использования."""
+	"""Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использованием."""
 
 	def __init__(self, decorations: list[Styles.Decorations] = list(), text_color: Styles.Colors | None = None, background_color: Styles.Colors | None = None):
 		"""
-		Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использования.
+		Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использованием.
 			decorations – список декораций;
 			text_color – цвет текста;
 			background_color – цвет фона.
@@ -50,9 +54,9 @@ class StylesGroup:
 		# Добавить каждый маркер стиля к общей строке.
 		for Decoration in decorations: self.__StylesMarkers += Decoration.value + ";"
 		# Если передан цвет текста, создать соответствующий маркер.
-		if TextColor != None: self.__StylesMarkers += "3" + TextColor.value + ";"
+		if text_color != None: self.__StylesMarkers += "3" + text_color.value + ";"
 		# Если передан цвет фона, создать соответствующий маркер.
-		if BackgroundColor != None: self.__StylesMarkers += "4" + BackgroundColor.value + ";"
+		if background_color != None: self.__StylesMarkers += "4" + background_color.value + ";"
 		# Постановка завершающего символа маркировки.
 		self.__StylesMarkers = self.__StylesMarkers.rstrip(';') + "m"
 
@@ -61,7 +65,7 @@ class StylesGroup:
 
 def StyledPrinter(text: str, styles: StylesGroup | None = None, decorations: list[Styles.Decorations] = list(), text_color: Styles.Colors | None = None, background_color: Styles.Colors | None = None, autoreset: bool = True, end: bool = True):
 	"""
-	Выводит в терминал стилизованный текст.
+	Выводит в терминал стилизованный с помощью ANSI-кодов текст.
 		text – стилизуемый текст;
 		styles – контейнер стилей;
 		decorations – список декораций;
@@ -84,7 +88,7 @@ def StyledPrinter(text: str, styles: StylesGroup | None = None, decorations: lis
 
 def TextStyler(text: str, styles: StylesGroup | None = None, decorations: list[Styles.Decorations] = list(), text_color: Styles.Colors | None = None, background_color: Styles.Colors | None = None, autoreset: bool = True) -> str:
 	"""
-	Стилизует текст.
+	Стилизует текст с помощью ANSI-кодов.
 		text – стилизуемый текст;
 		styles – контейнер стилей;
 		decorations – список декораций;
