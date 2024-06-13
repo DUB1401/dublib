@@ -678,7 +678,9 @@ class Terminalyzer:
 			if FreeParameters[Index] != None:
 
 				# Если параметр соответствует типу.
-				if self.__CheckArgumentsTypes(FreeParameters[Index], ArgumentsDescription[Index]["type"]) == True:
+				if self.__CheckArgumentsTypes(FreeParameters[Index], ArgumentsDescription[Index]["type"]):
+					# Если значение должно быть числом, провести преобразование.
+					if ArgumentsDescription[Index]["type"] == ArgumentsTypes.Number: FreeParameters[Index] = int(FreeParameters[Index])
 					# Сохранение параметра в качестве аргумента.
 					Values.append(FreeParameters[Index])
 
@@ -848,6 +850,8 @@ class Terminalyzer:
 						IsPositionActivated = True
 						# Проверка типа значения ключа.
 						self.__CheckArgumentsTypes(Keys[KeyName], KeysPositions[PositionIndex]["types"][KeyIndex])
+						# Если значение должно быть числом, провести преобразование.
+						if KeysPositions[PositionIndex]["types"][KeyIndex] == ArgumentsTypes.Number: Keys[KeyName] = int(Keys[KeyName])
 						
 						# Если для ключа задан слой.
 						if KeysPositions[PositionIndex]["layout-index"] != None:
