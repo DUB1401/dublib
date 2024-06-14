@@ -3,11 +3,13 @@
 
 Данный набор модулей распространяется по Rolling-модели. Это значит, что разработчик не заботится об обратной совместимости с прошлыми релизами, потому рекомендуется привязывать ваш проект строго к определённой версии библиотеки.
 
+Все компоненты поставляют лишь базовую документацию, необходимую для общего понимания принципов работы. Библиотека является самодокументируемой.
+
 # Поставляемые компоненты
 Библиотека включает следующие модули:
+* [CLI](https://github.com/DUB1401/dublib/blob/main/docs/CLI.md)
 * [Methods](https://github.com/DUB1401/dublib/blob/main/docs/Methods.md)
 * [Polyglot](https://github.com/DUB1401/dublib/blob/main/docs/Polyglot.md)
-* [StyledPrinter](https://github.com/DUB1401/dublib/blob/main/docs/StyledPrinter.md)
 * [TelebotUtils](https://github.com/DUB1401/dublib/blob/main/docs/Terminalyzer.md)
 * [Terminalyzer](https://github.com/DUB1401/dublib/blob/main/docs/Terminalyzer.md)
 * [WebRequestor](https://github.com/DUB1401/dublib/blob/main/docs/WebRequestor.md)

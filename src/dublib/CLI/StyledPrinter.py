@@ -1,4 +1,4 @@
-from .Exceptions.StyledPrinter import DuplicatedStyles
+from ..Exceptions.CLI import DuplicatedStyles
 
 import enum
 
