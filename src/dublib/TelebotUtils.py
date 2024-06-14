@@ -17,6 +17,12 @@ class UserData:
 	#==========================================================================================#
 
 	@property
+	def expected_type(self) -> int:
+		"""Тип ожидаемого значения."""
+
+		return self.__Data["expected_type"]
+
+	@property
 	def id(self) -> int:
 		"""ID пользователя."""
 
@@ -56,6 +62,19 @@ class UserData:
 		# Запись локального файла.
 		WriteJSON(self.__StorageDirectory + f"/{self.__ID}.json", self.__Data)
 
+	def __SetProperty(self, property_type: str, key: str, value: any):
+		"""
+		Задаёт свойство пользователя.
+			property_type – ключ раздела хранения свойства;
+			key – ключ свойства;
+			value – значение.
+		"""
+
+		# Обновление данных.
+		self.__Data[property_type][key] = value
+		# Сохранение данных.
+		self.__SaveData()
+
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
@@ -79,8 +98,10 @@ class UserData:
 			"username": None,
 			"language": None,
 			"is_premium": None,
+			"expected_type": None,
 			"permissions": [],
-			"data": {}
+			"data": {},
+			"temp": {}
 		}
 
 		# Если переданы данные в виде словаря.
@@ -129,6 +150,14 @@ class UserData:
 		# Сохранение данных.
 		self.__SaveData()
 
+	def clear_temp(self):
+		"""Очищает временные свойства пользователя."""
+
+		# Сброс временных свойств.
+		self.__Data["temp"] = dict()
+		# Сохранение данных.
+		self.__SaveData()
+
 	def create_property(self, key: str, value: any, force: bool = True):
 		"""
 		Создаёт свойство пользователя и задаёт ему значение, если такового ещё не существует.
@@ -137,12 +166,8 @@ class UserData:
 			force – указывает, необходимо ли перезаписывать значение уже существующего ключа.
 		"""
 		
-		# Если свойства не существует.
-		if key not in self.__Data["data"].keys() or force:
-			# Создание свойства.
-			self.__Data["data"][key] = value
-			# Сохранение данных.
-			self.__SaveData()
+		# Если свойства не существует или включён режим перезаписи, создать его.
+		if key not in self.__Data["data"].keys() or force: self.__SetProperty("data", key, value)
 
 	def get_property(self, key: str) -> any:
 		"""
@@ -210,6 +235,17 @@ class UserData:
 			# Сохранение данных.
 			self.__SaveData()
 
+	def set_expected_type(self, type_name: str):
+		"""
+		Задаёт ожидаемый от пользователя тип данных.
+			type_name – название типа.
+		"""
+
+		# Установка ожидаемого типа.
+		self.__Data["expected_type"] = type_name
+		# Сохранение данных.
+		self.__SaveData()
+
 	def set_property(self, key: str, value: any):
 		"""
 		Обновляет значение существующего свойства пользователя.
@@ -217,12 +253,18 @@ class UserData:
 			value – значение.
 		"""
 		
-		# Если свойство существует.
-		if key in self.__Data["data"].keys():
-			# Обновление данных.
-			self.__Data["data"][key] = value
-			# Сохранение данных.
-			self.__SaveData()
+		# Установка свойства пользователя.
+		self.__SetProperty("data", key, value)
+
+	def set_temp_property(self, key: str, value: any):
+		"""
+		Задаёт значение временного свойства пользователя.
+			key – ключ свойства;
+			value – значение.
+		"""
+		
+		# Установка временного свойства пользователя.
+		self.__SetProperty("temp", key, value)
 
 	def update(self, user: User):
 		"""
