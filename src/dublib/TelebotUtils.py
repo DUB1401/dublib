@@ -150,7 +150,7 @@ class UserData:
 		# Сохранение данных.
 		self.__SaveData()
 
-	def clear_temp(self):
+	def clear_temp_properties(self):
 		"""Очищает временные свойства пользователя."""
 
 		# Сброс временных свойств.
@@ -171,11 +171,15 @@ class UserData:
 
 	def get_property(self, key: str) -> any:
 		"""
-		Возвращает значение свойства пользователя.
+		Возвращает значение свойства пользователя, в том числе временного.
 			key – ключ свойства.
 		"""
 
-		return self.__Data["data"][key]
+		# Получение значения из свойств пользователя.
+		if key in self.__Data["data"].keys(): return self.__Data["data"][key]
+		if key in self.__Data["temp"].keys(): return self.__Data["temp"][key]
+
+		raise KeyError(key)
 
 	def has_permissions(self, permissions: list[str] | str) -> bool:
 		"""

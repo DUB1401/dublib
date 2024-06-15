@@ -24,11 +24,19 @@ Requestor.add_proxy(
 	password = "password"
 )
 
-# Запрос HTML кода веб-страницы.
+# Выполнение GET-запроса.
 Response = Requestor.get("https://site.com/")
 
 # Если запрос успешен.
 if Response.status_code == 200:
 	# Вывод ответа.
 	print(Response.text)
+
+# Выполнение POST-запроса.
+Response = Requestor.post("https://api.site.com/", data = "Lorem ipsum.")
+
+# Если запрос успешен.
+if Response.status_code == 200:
+	# Вывод ответа, спаршенного в словарь из JSON.
+	print(Response.json)
 ```
