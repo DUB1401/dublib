@@ -3,7 +3,6 @@ from .Exceptions.WebRequestor import *
 from curl_cffi import requests as curl_cffi_requests
 from fake_useragent import UserAgent
 
-import importlib
 import requests
 import logging
 import random

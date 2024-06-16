@@ -1,5 +1,5 @@
 from .Exceptions.Terminalyzer import *
-from .Methods import ReadJSON
+from .Methods.JSON import ReadJSON
 
 from urllib.parse import urlparse
 

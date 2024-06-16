@@ -1,4 +1,4 @@
-from .Methods import ReadJSON, WriteJSON
+from .Methods.JSON import ReadJSON, WriteJSON
 from .Exceptions.TelebotUtils import *
 
 from telebot.types import User
