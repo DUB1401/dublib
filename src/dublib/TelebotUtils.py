@@ -156,18 +156,7 @@ class UserData:
 		# Сброс временных свойств.
 		self.__Data["temp"] = dict()
 		# Сохранение данных.
-		self.__SaveData()
-
-	def create_property(self, key: str, value: any, force: bool = True):
-		"""
-		Создаёт свойство пользователя и задаёт ему значение, если такового ещё не существует.
-			key – ключ свойства;
-			value – значение;
-			force – указывает, необходимо ли перезаписывать значение уже существующего ключа.
-		"""
-		
-		# Если свойства не существует или включён режим перезаписи, создать его.
-		if key not in self.__Data["data"].keys() or force: self.__SetProperty("data", key, value)
+		self.__SaveData()		
 
 	def get_property(self, key: str) -> any:
 		"""
@@ -250,15 +239,18 @@ class UserData:
 		# Сохранение данных.
 		self.__SaveData()
 
-	def set_property(self, key: str, value: any):
+	def set_property(self, key: str, value: any, force: bool = True):
 		"""
-		Обновляет значение существующего свойства пользователя.
+		Задаёт значение свойства пользователя.
 			key – ключ свойства;
-			value – значение.
+			value – значение;
+			force – указывает, необходимо ли перезаписывать значение уже существующего ключа.
 		"""
 		
-		# Установка свойства пользователя.
-		self.__SetProperty("data", key, value)
+		# Если свойство не существует, создать его.
+		if key not in self.__Data["data"].keys(): self.__SetProperty("data", key, value)
+		# Если свойство уже существует и включён режим перезаписи, обновить его.
+		elif key in self.__Data["data"].keys() and force: self.__SetProperty("data", key, value)
 
 	def set_temp_property(self, key: str, value: any):
 		"""
