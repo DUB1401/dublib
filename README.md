@@ -7,11 +7,11 @@
 
 # Поставляемые компоненты
 Библиотека включает следующие модули:
-* [CLI](https://github.com/DUB1401/dublib/blob/main/docs/CLI.md)
+* [CLI](https://github.com/DUB1401/dublib/blob/main/docs/CLI/README.md)
+* [Engine](https://github.com/DUB1401/dublib/blob/main/docs/Engine.md)
 * [Methods](https://github.com/DUB1401/dublib/blob/main/docs/Methods.md)
 * [Polyglot](https://github.com/DUB1401/dublib/blob/main/docs/Polyglot.md)
 * [TelebotUtils](https://github.com/DUB1401/dublib/blob/main/docs/Terminalyzer.md)
-* [Terminalyzer](https://github.com/DUB1401/dublib/blob/main/docs/Terminalyzer.md)
 * [WebRequestor](https://github.com/DUB1401/dublib/blob/main/docs/WebRequestor.md)
 
 # Установка
