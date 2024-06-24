@@ -17,7 +17,7 @@ import os
 class ParametersTypes(enum.Enum):
 	"""Перечисление типов значений параметров."""
 
-	All = None
+	All = "All"
 	Bool = "Bool"
 	Date = "Date"
 	Number = "Number"
@@ -58,12 +58,12 @@ class Argument:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, type: ParametersTypes, important: bool, description: str | None):
+	def __init__(self, type: ParametersTypes, description: str | None, important: bool):
 		"""
 		Аргумент команды.
 			type – тип значения аргумента;
-			important – указывает, является ли аргумент обязательным;
-			description – описание аргумента.
+			description – описание аргумента;
+			important – указывает, является ли аргумент обязательным.
 		"""
 
 		#---> Генерация динамических свойств.
@@ -104,12 +104,12 @@ class Flag:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, name: str, important: bool, description: str | None):
+	def __init__(self, name: str, description: str | None, important: bool):
 		"""
 		Флаг команды.
 			name – название флага;
-			important – указывает, является ли флаг обязательным;
-			description – описание флага.
+			description – описание флага;
+			important – указывает, является ли флаг обязательным.
 		"""
 
 		#---> Генерация динамических свойств.
@@ -156,13 +156,13 @@ class Key:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, name: str, type: ParametersTypes, important: bool, description: str | None):
+	def __init__(self, name: str, type: ParametersTypes, description: str | None, important: bool):
 		"""
 		Ключ команды.
 			name – название ключа;
 			type – тип значения ключа;
-			important – указывает, является ли ключ обязательным;
-			description – описание ключа.
+			description – описание ключа;
+			important – указывает, является ли ключ обязательным.
 		"""
 
 		#---> Генерация динамических свойств.
@@ -187,10 +187,10 @@ class Position:
 	#==========================================================================================#
 
 	@property
-	def argument(self) -> Argument:
-		"""Аргумент."""
+	def arguments(self) -> list[Argument]:
+		"""Список аргументов."""
 
-		return self.__Argument
+		return self.__Arguments
 
 	@property
 	def description(self) -> str | None:
@@ -243,49 +243,49 @@ class Position:
 		# Состояние: является ли позиция обязательной.
 		self.__IsImportant = important
 		# Списки параметров.
-		self.__Argument = None
+		self.__Arguments = list()
 		self.__Flags = list()
 		self.__Keys = list()
 		
-	def add_argument(self, type: ParametersTypes = ParametersTypes.All, important: bool = False, description: str | None = None):
+	def add_argument(self, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
 		Добавляет аргумент на позицию.
 			type – тип значения аргумента;
-			important – указывает, является ли позиция обязательной;
-			description – описание позиции.
+			description – описание позиции;
+			important – указывает, является ли позиция обязательной.
 		"""
 
 		# Проверка обязательности позиции.
 		if important: self.__IsImportant = True
 		# Добавление аргумента.
-		self.__Argument = Argument(type, important, description)
+		self.__Arguments.append(Argument(type, description, important))
 
-	def add_flag(self, name: str, important: bool = False, description: str | None = None):
+	def add_flag(self, name: str, description: str | None = None, important: bool = False):
 		"""
 		Добавляет флаг на позицию.
 			name – название флага;
-			important – указывает, является ли флаг обязательным;
-			description – описание флага.
+			description – описание флага;
+			important – указывает, является ли флаг обязательным.
 		"""
 
 		# Проверка обязательности позиции.
 		if important: self.__IsImportant = True
 		# Добавление флага.
-		self.__Flags.append(Flag(name, important, description))
+		self.__Flags.append(Flag(name, description, important))
 
-	def add_key(self, name: str, type: ParametersTypes = ParametersTypes.All, important: bool = False, description: str | None = None):
+	def add_key(self, name: str, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
 		Добавляет ключ на позицию.
 			name – название ключа;
 			type – тип значения ключа;
-			important – указывает, является ли ключ обязательным;
-			description – описание ключа.
+			description – описание ключа;
+			important – указывает, является ли ключ обязательным.
 		"""
 
 		# Проверка обязательности позиции.
 		if important: self.__IsImportant = True
 		# Добавление ключа.
-		self.__Keys.append(Key(name, type, important, description))
+		self.__Keys.append(Key(name, type, description, important))
 
 class Command:
 	"""Описание команды."""
@@ -311,6 +311,24 @@ class Command:
 		"""Список флагов команды без позиций."""
 
 		return self.__Flags
+
+	@property
+	def has_important_argument(self) -> bool:
+		"""Состояние: имеет ли команда обязательный важный аргумент."""
+
+		return self.__HasImportantArgument
+
+	@property
+	def has_important_flag(self) -> bool:
+		"""Состояние: имеет ли команда обязательный важный аргумент."""
+
+		return self.__HasImportantFlag
+
+	@property
+	def has_important_key(self) -> bool:
+		"""Состояние: имеет ли команда обязательный важный аргумент."""
+
+		return self.__HasImportantKey
 
 	@property
 	def keys(self) -> list[Key]:
@@ -396,61 +414,82 @@ class Command:
 		self.__Arguments: list[Argument] = list()
 		self.__Flags: list[Flag] = list()
 		self.__Keys: list[Key] = list()
+		# Определения важности типов параметров.
+		self.__HasImportantArgument = False
+		self.__HasImportantFlag = False
+		self.__HasImportantKey = False
 
-	def add_argument(self, type: ParametersTypes = ParametersTypes.All, important: bool = False, description: str | None = None):
+	def add_argument(self, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
 		Добавляет аргумент команды.
 			type – тип значения аргумента;
-			important – указывает, является ли позиция обязательной;
-			description – описание позиции.
+			description – описание позиции;
+			important – указывает, является ли позиция обязательной.
 		"""
 
 		# Проверка обязательности позиции.
-		if important: self.__IsImportant = True
+		if important: self.__HasImportantArgument = True
 		# Добавление аргумента.
-		self.__Arguments.append(Argument(type, important, description))
+		self.__Arguments.append(Argument(type, description, important))
 
-	def add_flag(self, name: str, important: bool = False, description: str | None = None):
+	def add_flag(self, name: str, description: str | None = None, important: bool = False):
 		"""
 		Добавляет флаг команды.
 			name – название флага;
-			important – указывает, является ли флаг обязательным;
-			description – описание флага.
+			description – описание флага;
+			important – указывает, является ли флаг обязательным.
 		"""
 
 		# Проверка обязательности позиции.
-		if important: self.__IsImportant = True
+		if important: self.__HasImportantFlag = True
 		# Добавление флага.
-		self.__Flags.append(Flag(name, important, description))
+		self.__Flags.append(Flag(name, description, important))
 
-	def add_key(self, name: str, type: ParametersTypes = ParametersTypes.All, important: bool = False, description: str | None = None):
+	def add_key(self, name: str, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
 		Добавляет ключ команды.
 			name – название ключа;
 			type – тип значения ключа;
-			important – указывает, является ли ключ обязательным;
-			description – описание ключа.
+			description – описание ключа;
+			important – указывает, является ли ключ обязательным.
 		"""
 
 		# Проверка обязательности позиции.
-		if important: self.__IsImportant = True
+		if important: self.__HasImportantKey = True
 		# Добавление ключа.
-		self.__Keys.append(Key(name, type, important, description))
+		self.__Keys.append(Key(name, type, description, important))
 
-	def create_position(self, important: bool = False, name: str | None = None, description: str | None = None) -> Position:
+	def create_position(self, name: str | None = None, description: str | None = None, important: bool = False) -> Position:
 		"""
 		Создаёт позицию.
-			important – указывает, является ли позиция обязательной;
 			name – название позиции;
-			description – описание позиции.
+			description – описание позиции;
+			important – указывает, является ли позиция обязательной.
 		"""
 
 		# Создание позиции.
-		NewPosition = Position(name, description, important)
+		NewPosition = Position(important, name, description)
 		# Добавление позиции в команду.
 		self.__Positions.append(NewPosition)
 
 		return self.__Positions[-1]
+
+class HelpTranslation:
+	"""Модуль поддержки локализаций помощью."""
+
+	#==========================================================================================#
+	# >>>>> ВСПОМОГАТЕЛЬНЫЕ ТИПЫ ДАННЫХ <<<<< #
+	#==========================================================================================#
+
+	def __init__(self):
+		"""Настройки модуля помощи."""
+
+		#---> Генерация динамических свойств.
+		#==========================================================================================#
+		# Переводы строк.
+		self.help_command_description = "Prints a list of supported commands. For details, add the name of the command as an argument."
+		self.help_command_argument_description = "The name of command for which you want to see detailed help."
+		self.important_note = "Important parameters marked with * symbol."
 
 class ParsedCommandData:
 	"""Данные обработанной команды."""
@@ -570,6 +609,12 @@ class Terminalyzer:
 		return self.__FlagsIndicator
 
 	@property
+	def help_translation(self) -> HelpTranslation:
+		"""Настройки локализации помощи."""
+
+		return self.__HelpTranslationObject
+
+	@property
 	def keys_indicator(self) -> str:
 		"""Индикатор ключей."""
 
@@ -611,8 +656,6 @@ class Terminalyzer:
 				# Парсинг аргументов.
 				Arguments += self.__ParseArguments(Index, command)
 
-			print("Params: ", self.__ParametersLocks)
-			print("Positions:", self.__PositionsLocks)
 			# Проверка количества параметров.
 			self.__CheckParametersCount(command)
 			# Заполнение данных спаршенной команды.
@@ -634,7 +677,7 @@ class Terminalyzer:
 		Проверяет, соответствует ли название команды из описания текущему.
 			command – описание команды.
 		"""
-		print(self.__CommandName)
+		
 		# Состояние: определена ли команда.
 		IsDetermined = False
 		# Если имя команды определено, переключить статус проверки.
@@ -695,7 +738,7 @@ class Terminalyzer:
 		return value
 
 	#==========================================================================================#
-	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ПАРСИНГА ПАРАМЕТРОВ <<<<< #
+	# >>>>> МЕТОДЫ ПАРСИНГА ПАРАМЕТРОВ <<<<< #
 	#==========================================================================================#
 
 	def __ParseArguments(self, parameter_index: int, command: Command) -> dict[str, any]:
@@ -717,11 +760,11 @@ class Terminalyzer:
 				CurrentPosition = command.positions[PositionIndex]
 
 				# Если позиция имеет аргумент и не заблокирована.
-				if CurrentPosition.argument and not self.__PositionsLocks[PositionIndex]:
+				if CurrentPosition.arguments and not self.__PositionsLocks[PositionIndex]:
 					# Блокировка параметра.
 					self.__ParametersLocks[parameter_index] = True
 					# Добавление значения аргумента.
-					Arguments.append(self.__ConfirmParametrType(self.__Parameters[parameter_index], CurrentPosition.argument.type))
+					Arguments.append(self.__ConfirmParametrType(self.__Parameters[parameter_index], CurrentPosition.arguments[0].type))
 					# Переход к следующей итерации.
 					continue
 
@@ -860,8 +903,114 @@ class Terminalyzer:
 		return Keys
 
 	#==========================================================================================#
-	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ПОМОЩИ <<<<< #
+	# >>>>> МЕТОДЫ ГЕНЕРАЦИИ ПОМОЩИ <<<<< #
 	#==========================================================================================#
+
+	def __BuildArgumentDescription(self, argument: Argument, indent: str | None = None) -> str:
+		"""
+		Строит описание для аргумента.
+			argument – аргумент;
+			indent – отступ, добавляемый к каждой строке.
+		"""
+
+		# Литералы описания аргумента.
+		MSG_Indent = indent or "  "
+		MSG_Name = TextStyler("Argument", decorations = [Styles.Decorations.Bold])
+		MSG_Type = f" ({argument.type.value})"
+		MSG_Important = "*" if argument.is_important else ""
+		MSG_Description = f": {argument.description}" if argument.description else ""
+		# Описание аргумента.
+		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Important}{MSG_Type}{MSG_Description}"
+
+		return Description
+	
+	def __BuildFlagDescription(self, flag: Flag, indent: str | None = None) -> str:
+		"""
+		Строит описание для флага.
+			flag – флаг;
+			indent – отступ, добавляемый к каждой строке.
+		"""
+
+		# Литералы описания флага.
+		MSG_Indent = indent or "  "
+		MSG_Name = TextStyler(self.__FlagsIndicator + flag.name, decorations = [Styles.Decorations.Bold])
+		MSG_Important = "*" if flag.is_important else ""
+		MSG_Description = f": {flag.description}" if flag.description else ""
+		# Описание флага.
+		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Important}{MSG_Description}"
+
+		return Description
+	
+	def __BuildKeyDescription(self, key: Key, indent: str | None = None) -> str:
+		"""
+		Строит описание для ключа.
+			key – ключ;
+			indent – отступ, добавляемый к каждой строке.
+		"""
+
+		# Литералы описания ключа.
+		MSG_Name = TextStyler(self.__KeysIndicator + key.name, decorations = [Styles.Decorations.Bold])
+		MSG_Type = f" ({key.type.value})"
+		MSG_Important = "*" if key.is_important else ""
+		MSG_Description = f": {key.description}" if key.description else ""
+		# Описание ключа.
+		Description = f"\n{indent}    • {MSG_Name}{MSG_Important}{MSG_Type}{MSG_Description}"
+
+		return Description
+
+	def __BuildPositionDescription(self, position: Command | Position, index: int | None = None) -> str:
+		"""
+		Строит описание позиции или свободных параметров команды.
+			position – позиция или описание команды;
+			index – индекс обрабатываемой позиции.
+		"""
+
+		# Описание позиции.
+		Help = ""
+		# Отступ.
+		Indent = ""
+		# Состояние: обрабатывается ли позиция.
+		IsPosition = False
+
+		# Если описывается позиция.
+		if type(index) == int:
+			# Установка отступа.
+			Indent = "  "
+			# Переключение состояния.
+			IsPosition = True
+			# Название позиции.
+			PositionName = f"{Indent}{position.name}" if position.name else f"{Indent}POSITION_{index + 1}"
+			# Составление дополнительного описания позиции.
+			MSG_Important = "*" if position.is_important else""
+			MSG_Description = f": {position.description}" if position.description else ""
+			# Запись в вывод названия и описания позиции.
+			Help += TextStyler(f"\n{PositionName}", decorations = [Styles.Decorations.Bold]) + MSG_Important + MSG_Description
+
+		# Заголовок аргументов.
+		if position.arguments and IsPosition: Help += f"\n{Indent}  ARGUMENTS:"
+		elif position.arguments: Help += f"\n{Indent}  " + TextStyler("ARGUMENTS:", decorations = [Styles.Decorations.Bold])
+		# Для каждого аргумента.
+		for CurrentArgument in position.arguments:
+			# Добавление описания аргумента в вывод.
+			Help += self.__BuildArgumentDescription(CurrentArgument, Indent)
+
+		# Заголовок флагов.
+		if position.flags and IsPosition: Help += f"\n{Indent}  FLAGS:"
+		elif position.flags: Help += f"\n{Indent}  " + TextStyler("FLAGS:", decorations = [Styles.Decorations.Bold])
+		# Для каждого флага.
+		for CurrentFlag in position.flags:
+			# Добавление описания флага в вывод.
+			Help += self.__BuildFlagDescription(CurrentFlag, Indent)
+
+		# Заголовок ключей.
+		if position.keys and IsPosition: Help += f"\n{Indent}  KEYS:"
+		elif position.keys: Help += f"\n{Indent}  " + TextStyler("KEYS:", decorations = [Styles.Decorations.Bold])
+		# Для каждого ключа.
+		for CurrentKey in position.keys:
+			# Добавление описания ключа в вывод.
+			Help += self.__BuildKeyDescription(CurrentKey, Indent)
+
+		return Help
 
 	def __CreateCommandHelp(self, commands: list[Command], command_name: str):
 		"""
@@ -871,24 +1020,37 @@ class Terminalyzer:
 		"""
 
 		# Обрабатываемая команда.
-		CommandForHelp = None
+		HelpCommand = None
 
 		# Для каждой команды.
 		for CurrentCommand in commands:
 			# Если найдена искомая команда, записать её данные.
-			if CurrentCommand.name == command_name: CommandForHelp = CurrentCommand
+			if CurrentCommand.name == command_name: HelpCommand = CurrentCommand
 
 		# Если команда определена.
-		if CommandForHelp:
+		if HelpCommand:
 			# Текст помощи.
-			Help = TextStyler(CommandForHelp.name, decorations = [Styles.Decorations.Bold])
+			Help = TextStyler(HelpCommand.name, decorations = [Styles.Decorations.Bold])
+			# Составление позиционной карты.
+			Help += self.__GenerateCommandMap(HelpCommand)
 
-			#---> Обработка слоёв.
-			#==========================================================================================#
+			# Если есть описание.
+			if HelpCommand.description:
+				# Форматирование описания.
+				Description = TextStyler(HelpCommand.description, decorations = [Styles.Decorations.Italic])
+				# Добавление описания в вывод.
+				Help += f"\n{Description}"
 
-			# Для каждого слоя.
-			for Layout in CommandForHelp.layouts: pass
+			# Для каждой позиции.
+			for PositionIndex in range(len(HelpCommand.positions)):
+				# Добавление в вывод описания позиции.
+				Help += self.__BuildPositionDescription(HelpCommand.positions[PositionIndex], PositionIndex)
 
+			# Добавление в вывод описания свободных параметров команды.
+			Help += self.__BuildPositionDescription(HelpCommand)
+
+			# Добавление предупреждения о важных параметрах в вывод.
+			Help += f"\n{self.__HelpTranslationObject.important_note}" if self.__HelpTranslationObject.important_note else ""
 			# Отправка помощи в callback-функцию.
 			self.__HelpCallback(Help)
 
@@ -934,6 +1096,35 @@ class Terminalyzer:
 		# Отправка таблицы в callback-функцию.
 		self.__HelpCallback(TableObject.get_string())
 
+	def __GenerateCommandMap(self, command: Command) -> str:
+		"""
+		Генерирует позиционную карту команды.
+			command – описание команды.
+		"""
+		# Позиции команды.
+		Positions = command.positions
+		# Позиционная карта команды.
+		Map = ""
+
+		# Для каждой позиции.
+		for Index in range(len(Positions)):
+			# Литералы описания позиций.
+			MSG_Name = f"{Positions[Index].name}" if Positions[Index].name else f"POSITION_{Index + 1}"
+			MSG_Important = "*" if Positions[Index].is_important else ""
+			# Добавление позиции в вывод.
+			Map += f" [{MSG_Name}{MSG_Important}]"
+
+		# Состояния важности типов параметров.
+		IsArgumentsImportant = "*" if command.has_important_argument else ""
+		IsFlagsImportant = "*" if command.has_important_flag else ""
+		IsKeysImportant = "*" if command.has_important_key else ""
+		# Генерация позиций самой команды.
+		if command.arguments: Map += f" {{ARGUMENTS{IsArgumentsImportant}}}"
+		if command.flags: Map += f" {{FLAGS{IsFlagsImportant}}}"
+		if command.keys: Map += f" {{KEYS{IsKeysImportant}}}"
+
+		return Map
+
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
@@ -950,10 +1141,6 @@ class Terminalyzer:
 		self.__KeysIndicator = "--"
 		# Индикатор флагов.
 		self.__FlagsIndicator = "-"
-		# Список задействованных позиций.
-		self.__PositionsStatuses = list()
-		# Список задействованных слоёв.
-		self.__LayoutsStatuses = list()
 		# Данные спаршенной команды.
 		self.__CommandData = None
 		# Переданные параметры.
@@ -964,10 +1151,11 @@ class Terminalyzer:
 		self.__EnableHelp = False
 		# Функция вывода помощи.
 		self.__HelpCallback = print
-
 		# Состояния блокировки параметров и позиций.
 		self.__ParametersLocks = None
 		self.__PositionsLocks = None
+		# Настройки локализации помощи.
+		self.__HelpTranslationObject = HelpTranslation()
 
 	def enable_help(self, status: bool):
 		"""
@@ -989,8 +1177,8 @@ class Terminalyzer:
 		# Если включена помощь.
 		if self.__EnableHelp:
 			# Генерация команды помощи.
-			Help = Command("help", "Prints a list of supported commands. For details, add the name of the command as an argument.")
-			Help.add_argument(description = "The name of command for which you want to see detailed help.")
+			Help = Command("help", self.__HelpTranslationObject.help_command_description)
+			Help.add_argument(description = self.__HelpTranslationObject.help_command_argument_description)
 			# Добавление команды в обработчик.
 			commands.append(Help)
 

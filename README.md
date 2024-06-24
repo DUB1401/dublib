@@ -9,7 +9,7 @@
 Библиотека включает следующие модули:
 * [CLI](https://github.com/DUB1401/dublib/blob/main/docs/CLI/README.md)
 * [Engine](https://github.com/DUB1401/dublib/blob/main/docs/Engine.md)
-* [Methods](https://github.com/DUB1401/dublib/blob/main/docs/Methods.md)
+* [Methods](https://github.com/DUB1401/dublib/blob/main/docs/Methods/README.md)
 * [Polyglot](https://github.com/DUB1401/dublib/blob/main/docs/Polyglot.md)
 * [TelebotUtils](https://github.com/DUB1401/dublib/blob/main/docs/Terminalyzer.md)
 * [WebRequestor](https://github.com/DUB1401/dublib/blob/main/docs/WebRequestor.md)

@@ -49,6 +49,8 @@ Analyzer.set_flags_indicator("-")
 Analyzer.set_keys_indicator("--")
 # Включение модуля генерации помощи.
 Analyzer.enable_help(True)
+# Удаление стандартного уведомления о важности параметров.
+Analyzer.help_translation.important_note = ""
 # Проверка команд.
 ParsedCommandData = Analyzer.check_commands(CommandsList)
 # Вывод спаршенных данных.
