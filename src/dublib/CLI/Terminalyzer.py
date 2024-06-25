@@ -487,9 +487,10 @@ class HelpTranslation:
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
 		# Переводы строк.
-		self.help_command_description = "Prints a list of supported commands. For details, add the name of the command as an argument."
+		self.help_command_description = "Print list of supported commands. For details, add name of command as argument."
 		self.help_command_argument_description = "The name of command for which you want to see detailed help."
 		self.important_note = "Important parameters marked with * symbol."
+		self.no_command = "Command \"%c\" not found."
 
 class ParsedCommandData:
 	"""Данные обработанной команды."""
@@ -751,11 +752,11 @@ class Terminalyzer:
 		# Список значений аргументов.
 		Arguments = list()
 
-		# Если параметр не блокирован.
-		if not self.__ParametersLocks[parameter_index]:
+		# Для каждой позиции.
+		for PositionIndex in range(len(command.positions)):
 
-			# Для каждой позиции.
-			for PositionIndex in range(len(command.positions)):
+			# Если параметр не блокирован.
+			if not self.__ParametersLocks[parameter_index]:
 				# Текущая позиция.
 				CurrentPosition = command.positions[PositionIndex]
 
@@ -768,14 +769,21 @@ class Terminalyzer:
 					# Переход к следующей итерации.
 					continue
 
-			# Для каждого аргумента.
-			for CurrentArgument in command.arguments:
+				else: break
+
+		# Для каждого аргумента.
+		for CurrentArgument in command.arguments:
+
+			# Если параметр не блокирован.
+			if not self.__ParametersLocks[parameter_index]:
 				# Блокировка параметра.
 				self.__ParametersLocks[parameter_index] = True
 				# Добавление значения аргумента.
 				Arguments.append(self.__ConfirmParametrType(self.__Parameters[parameter_index], CurrentArgument.type))
 				# Переход к следующей итерации.
 				continue
+
+			else: break
 				
 		return Arguments
 
@@ -1050,13 +1058,13 @@ class Terminalyzer:
 			Help += self.__BuildPositionDescription(HelpCommand)
 
 			# Добавление предупреждения о важных параметрах в вывод.
-			Help += f"\n{self.__HelpTranslationObject.important_note}" if self.__HelpTranslationObject.important_note else ""
+			if "*" in Help.split("\n")[0]: Help += f"\n{self.__HelpTranslationObject.important_note}" if self.__HelpTranslationObject.important_note else ""
 			# Отправка помощи в callback-функцию.
 			self.__HelpCallback(Help)
 
 		else: 
 			# Отправка сообщения об отсутствии команды в callback-функцию.
-			self.__HelpCallback(f"Command \"{command_name}\" not found.")
+			self.__HelpCallback(self.__HelpTranslationObject.no_command.replace(r"%c", command_name))
 
 	def __CreateHelpList(self, commands: list[Command]):
 		"""
