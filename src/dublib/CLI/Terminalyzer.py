@@ -487,8 +487,8 @@ class HelpTranslation:
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
 		# Переводы строк.
-		self.help_command_description = "Print list of supported commands. For details, add name of command as argument."
-		self.help_command_argument_description = "The name of command for which you want to see detailed help."
+		self.command_description = "Print list of supported commands. For details, add name of command as argument."
+		self.argument_description = "The name of command for which you want to see detailed help."
 		self.important_note = "Important parameters marked with * symbol."
 		self.no_command = "Command \"%c\" not found."
 
@@ -1185,8 +1185,8 @@ class Terminalyzer:
 		# Если включена помощь.
 		if self.__EnableHelp:
 			# Генерация команды помощи.
-			Help = Command("help", self.__HelpTranslationObject.help_command_description)
-			Help.add_argument(description = self.__HelpTranslationObject.help_command_argument_description)
+			Help = Command("help", self.__HelpTranslationObject.command_description)
+			Help.add_argument(description = self.__HelpTranslationObject.argument_description)
 			# Добавление команды в обработчик.
 			commands.append(Help)
 
