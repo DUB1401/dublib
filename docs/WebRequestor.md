@@ -13,8 +13,10 @@ Config = WebConfig()
 Config.select_lib(WebLibs.curl_cffi)
 # Генерация User-Agent для ПК.
 Config.generate_user_agent("pc")
-# Установка TLS отпечатка Google Chrome 120.
-Config.curl_cffi.select_fingerprint("chrome120")
+# Установка базового количества повторов при неудачном запросе.
+Config.set_tries_count(3)
+# Установка TLS отпечатка Google Chrome 124.
+Config.curl_cffi.select_fingerprint("chrome124")
 # Установка прокси.
 Requestor.add_proxy(
 	Protocols.HTTPS,

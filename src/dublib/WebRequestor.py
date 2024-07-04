@@ -263,9 +263,19 @@ class WebConfig:
 
 		return self.__EnableRedirecting
 
+		"""Количество повторов неуспешных запросов."""
+
+		return self.__Tries
+
+	@property
+	def tries(self):
+		"""Количество повторов запроса при неудачном выполнении."""
+
+		return self.__Tries
+
 	@property
 	def user_agent(self) -> str | None:
-		"""Значение User-Agent."""
+		"""Значение заголовка User-Agent."""
 
 		return self.__UserAgent
 
@@ -290,10 +300,26 @@ class WebConfig:
 		self.__EnableRedirecting = True
 		# Статус ведения логов при помощи стандартного модуля.
 		self.__EnableLogging = True
-		# Значение заголовка UserAgent.
+		# Значение заголовка User-Agent.
 		self.__UserAgent = None
 		# Словарь заголвоков, приоритетно применяемых ко всем запросам.
 		self.__Headers = None
+		# Количество повторов неуспешных запросов.
+		self.__Tries = 1
+
+	def add_header(self, name: str, value: int | bool | dict | str):
+		"""
+		Добавляет заголовок, приоритетно применяемый ко всем запросам.
+			name – название заголовка;
+			value – значение заголовка.
+		"""
+
+		# Если задаётся заголовок User-Agent, выбросить исключение.
+		if name.lower() == "user-agent": raise UserAgentRedefining()
+		# Если заголовки не объявлены, привести их к словарному типу.
+		if self.__Headers == None: self.__Headers = dict()
+		# Добавление заголовка.
+		self.__Headers[name] = value
 
 	def enable_logging(self, status: bool):
 		"""
@@ -311,7 +337,7 @@ class WebConfig:
 
 		self.__EnableRedirecting = status
 
-	def generate_user_agent(self, platform: str):
+	def generate_user_agent(self, platform: str = "pc"):
 		"""
 		Генерирует случайное значение User-Agent при помощи библиотеки fake_useragent.
 			platform – тип платформы.
@@ -319,16 +345,16 @@ class WebConfig:
 
 		self.__UserAgent = UserAgent(platforms = platform).random
 
-	def remove_header(self, key: str):
+	def remove_header(self, name: str):
 		"""
 		Удаляет заголовок, приоритетно применяемый ко всем запросам.
-			key – название заголовка.
+			name – название заголовка.
 		"""
 
 		# Если задаётся заголовок User-Agent, выбросить исключение.
-		if key.lower() == "user-agent": raise UserAgentRedefining()
+		if name.lower() == "user-agent": raise UserAgentRedefining()
 		# Удаление заголовка.
-		del self.__Headers[key]
+		del self.__Headers[name]
 
 	def select_lib(self, lib: WebLibs):
 		"""
@@ -338,19 +364,13 @@ class WebConfig:
 
 		self.__UsedLib = lib
 
-	def set_header(self, key: str, value: int | bool | dict | str):
+	def set_tries_count(self, tries_count: int):
 		"""
-		Добавляет заголовок, приоритетно применяемый ко всем запросам.
-			key – название заголовка;
-			value – значение заголовка.
+		Задаёт количество повторов запроса при неудачном выполнении.
+			tries_count – количество повторов.
 		"""
 
-		# Если задаётся заголовок User-Agent, выбросить исключение.
-		if key.lower() == "user-agent": raise UserAgentRedefining()
-		# Если заголовки не объявлены, привести их к словарному типу.
-		if self.__Headers == None: self.__Headers = dict()
-		# Добавление заголовка.
-		self.__Headers[key] = value
+		self.__Tries = tries_count
 
 	def set_user_agent(self, user_agent: str | None):
 		"""
@@ -627,7 +647,7 @@ class WebRequestor:
 	# >>>>> ЗАПРОСЫ <<<<< #
 	#==========================================================================================#	
 	
-	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, tries: int = 1) -> WebResponse:
+	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, tries: int | None = None) -> WebResponse:
 		"""
 		Отправляет GET запрос.
 			url – адрес запроса;
@@ -637,6 +657,8 @@ class WebRequestor:
 			tries – количество попыток повтора при неудачном выполнении.
 		"""
 
+		# Если не указано количество повторов, использовать оное из конфигурации.
+		if tries == None: tries = self.__Config.tries
 		# Ответ.
 		Response = WebResponse()
 		# Индекс попытки.
@@ -645,7 +667,7 @@ class WebRequestor:
 		LibName = None
 		
 		# Пока не превышено количество попыток.
-		while Try < tries and Response.status_code != 200:
+		while Try < tries and Response.status_code not in [200, 404]:
 			# Инкремент повтора.
 			Try += 1
 			
@@ -678,7 +700,7 @@ class WebRequestor:
 		
 		return Response
 	
-	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, tries: int = 1) -> WebResponse:
+	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, tries: int | None = None) -> WebResponse:
 		"""
 		Отправляет POST запрос.
 			url – адрес запроса;
@@ -690,6 +712,8 @@ class WebRequestor:
 			tries – количество попыток повтора при неудачном выполнении.
 		"""
 
+		# Если не указано количество повторов, использовать оное из конфигурации.
+		if tries == None: tries = self.__Config.tries
 		# Ответ.
 		Response = WebResponse()
 		# Индекс попытки.
@@ -698,7 +722,7 @@ class WebRequestor:
 		LibName = None
 		
 		# Пока не превышено количество попыток.
-		while Try < tries and Response.status_code != 200:
+		while Try < tries and Response.status_code not in [200, 404]:
 			# Инкремент повтора.
 			Try += 1
 			
