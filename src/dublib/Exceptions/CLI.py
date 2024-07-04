@@ -138,6 +138,40 @@ class TooManyParameters(Exception):
 	def __str__(self):
 		return self.__Message
 
+class UnknownFlag(Exception):
+	"""Исключение: неизвестный флаг."""
+
+	def __init__(self, flag: str):
+		"""
+		Исключение: неизвестный флаг.
+			flag – флаг.
+		"""
+		
+		# Добавление данных в сообщение об ошибке.
+		self.__Message = "\"" + flag + "\"."
+		# Обеспечение доступа к оригиналу наследованного свойства.
+		super().__init__(self.__Message) 
+		
+	def __str__(self):
+		return self.__Message
+	
+class UnknownKey(Exception):
+	"""Исключение: неизвестный ключ."""
+
+	def __init__(self, key: str):
+		"""
+		Исключение: неизвестный ключ.
+			key – ключ.
+		"""
+		
+		# Добавление данных в сообщение об ошибке.
+		self.__Message = "\"" + key + "\"."
+		# Обеспечение доступа к оригиналу наследованного свойства.
+		super().__init__(self.__Message) 
+		
+	def __str__(self):
+		return self.__Message
+
 class UnknownCommand(Exception):
 	"""Исключение: неизвестная комманда."""
 

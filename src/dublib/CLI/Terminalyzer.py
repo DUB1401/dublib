@@ -655,8 +655,10 @@ class Terminalyzer:
 			# Для каждого параметра.
 			for Index in range(1, len(self.__Parameters)):
 				# Парсинг аргументов.
-				Arguments += self.__ParseArguments(Index, command)
+				Arguments += self.__ParseArguments(Arguments, Index, command)
 
+			# Проверка незаблокированных параметров.
+			self.__CheckUnlockedParameters(self.__ParametersLocks)
 			# Проверка количества параметров.
 			self.__CheckParametersCount(command)
 			# Заполнение данных спаршенной команды.
@@ -672,6 +674,33 @@ class Terminalyzer:
 		if len(self.__Parameters) - 1 > command.max_parameters_count: raise TooManyParameters(" ".join(self.__Parameters))
 		# Если аргументов слишком мало, выбросить исключение.
 		if len(self.__Parameters) - 1 < command.min_parameters_count: raise NotEnoughParameters(" ".join(self.__Parameters))
+
+	def __CheckUnlockedParameters(self, parameters_locks: list[bool]):
+		"""
+		Проверяет незаблокированные параметры.
+			parameters_locks – список состояний блокировки параметров.
+		"""
+
+		# Порядок проверки индикаторов и исключений.
+		IndicatorsOrder = [self.flags_indicator, self.keys_indicator]
+		ExceptionsOrder = [UnknownFlag, UnknownKey]
+
+		# Если длина индикатора ключей больше длины индикатора флагов.
+		if len(self.keys_indicator) > len(self.flags_indicator):
+			# Инвертирование порядка проверки.
+			IndicatorsOrder.reverse()
+			ExceptionsOrder.reverse()
+
+		# Для каждого параметра.
+		for Index in range(1, len(self.__Parameters)):
+
+			# Если параметр не блокирован.
+			if not parameters_locks[Index]:
+
+				# Для каждого индикатора и исключения.
+				for Indicator, ExceptionType in zip(IndicatorsOrder, ExceptionsOrder):
+					# Если параметр имеет идентификатор ключа или флага, выбросить исключение.
+					if self.__Parameters[Index].startswith(Indicator): raise ExceptionType(self.__Parameters[Index])
 
 	def __ConfirmCommandName(self, command: Command) -> bool:
 		"""
@@ -742,9 +771,10 @@ class Terminalyzer:
 	# >>>>> МЕТОДЫ ПАРСИНГА ПАРАМЕТРОВ <<<<< #
 	#==========================================================================================#
 
-	def __ParseArguments(self, parameter_index: int, command: Command) -> dict[str, any]:
+	def __ParseArguments(self, arguments: list[any], parameter_index: int, command: Command) -> dict[str, any]:
 		"""
 		Возвращает список значений аргументов.
+			arguments – список значений аргументов;
 			parameter_index – индекс параметра;
 			command – описание команды.
 		"""
@@ -771,19 +801,22 @@ class Terminalyzer:
 
 				else: break
 
-		# Для каждого аргумента.
-		for CurrentArgument in command.arguments:
+		# Если текущее количество аргументов команды меньше количества уже спаршенных аргументов.
+		if len(arguments) < len(command.arguments):
 
-			# Если параметр не блокирован.
-			if not self.__ParametersLocks[parameter_index]:
-				# Блокировка параметра.
-				self.__ParametersLocks[parameter_index] = True
-				# Добавление значения аргумента.
-				Arguments.append(self.__ConfirmParametrType(self.__Parameters[parameter_index], CurrentArgument.type))
-				# Переход к следующей итерации.
-				continue
+			# Для каждого аргумента.
+			for CurrentArgument in command.arguments:
 
-			else: break
+				# Если параметр не блокирован.
+				if not self.__ParametersLocks[parameter_index]:
+					# Блокировка параметра.
+					self.__ParametersLocks[parameter_index] = True
+					# Добавление значения аргумента.
+					Arguments.append(self.__ConfirmParametrType(self.__Parameters[parameter_index], CurrentArgument.type))
+					# Переход к следующей итерации.
+					continue
+
+				else: break
 				
 		return Arguments
 
