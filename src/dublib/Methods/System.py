@@ -30,7 +30,7 @@ def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = Tr
 
 	return IsVersionCorrect
 
-def Cls():
+def Clear():
 	"""Очищает консоль."""
 
 	os.system("cls" if os.name == "nt" else "clear")

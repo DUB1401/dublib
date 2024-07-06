@@ -28,10 +28,10 @@ class ExecutionStatus:
 		return self._Code
 
 	@property
-	def data(self) -> any:
-		"""Данные отладки."""
+	def data(self) -> dict:
+		"""Копия словаря дополнительных данных."""
 
-		return self._Data
+		return self._Data.copy()
 
 	@property
 	def message(self) -> str | None:
@@ -47,7 +47,7 @@ class ExecutionStatus:
 	
 	@property
 	def value(self) -> any:
-		"""Значение."""
+		"""Вложенное возвращаемое значение."""
 
 		return self._Value
 
@@ -61,14 +61,8 @@ class ExecutionStatus:
 
 		self._Code = int(new_code)
 
-	@data.setter
-	def data(self, new_data):
-		"""Данные отладки."""
-
-		self._Data = new_data
-
 	@message.setter
-	def message(self, new_message):
+	def message(self, new_message: str | None):
 		"""Сообщение."""
 
 		self._Message = str(new_message) if new_message else None
@@ -81,7 +75,7 @@ class ExecutionStatus:
 	
 	@value.setter
 	def value(self, new_value: any):
-		"""Значение."""
+		"""Вложенное возвращаемое значение."""
 
 		self._Value = new_value
 
@@ -89,13 +83,13 @@ class ExecutionStatus:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, code: int, message: str | None = None, value: str | None = None, data: any = None, type: StatussesTypes = StatussesTypes.Normal):
+	def __init__(self, code: int, message: str | None = None, value: str | None = None, type: StatussesTypes = StatussesTypes.Normal):
 		"""
 		Отчёт о выполнении.
 			code – код выполнения;
 			message – сообщение;
-			value – значение;
-			data – данные отладки;
+			value – вложенное возвращаемое значение;
+			data – словарь дополнительных данных;
 			type – тип отчёта.
 		"""
 
@@ -105,23 +99,52 @@ class ExecutionStatus:
 		self._Code = code
 		# Сообщение.
 		self._Message = message
-		# Зачение.
+		# Вложенное возвращаемое значение.
 		self._Value = value
 		# Словарь дополнительных данных.
-		self._Data = data
+		self._Data = dict()
 		# Тип сообщения.
 		self._Type = StatussesTypes.Normal
+
+	def __getitem__(self, key: str) -> any:
+		"""
+		Возвращает значение поля дополнительных данных.
+			key – ключ.
+		"""
+
+		return self._Data[key]
+	
+	def __setitem__(self, key: str, value: any):
+		"""
+		Задаёт значение поля дополнительных данных.
+			key – ключ;
+			value – значение.
+		"""
+
+		self._Data[key] = value
+
+	def check_data(self, key: str) -> bool:
+		"""
+		Проверяет, заполнено ли поле данных с указанным ключём.
+			key – ключ.
+		"""
+
+		# Состояние: заполнено ли поле.
+		IsSuccess = False
+		# Если поле заполнено, переключить состояние.
+		if key in self._Data.keys(): IsSuccess = True
+
+		return IsSuccess 
 
 class ExecutionWarning(ExecutionStatus):
 	"""Отчёт о предупреждении выполнения."""
 
-	def __init__(self, code: int, message: str | None = None, value: str | None = None, data: any = None):
+	def __init__(self, code: int, message: str | None = None, value: str | None = None):
 		"""
 		Отчёт о предупреждении выполнения.
 			code – код выполнения;
 			message – сообщение;
-			value – значение;
-			data – данные отладки.
+			value – вложенное возвращаемое значение.
 		"""
 
 		#---> Генерация динамичкских свойств.
@@ -132,21 +155,20 @@ class ExecutionWarning(ExecutionStatus):
 		self._Code = code
 		# Сообщение.
 		self._Message = message
-		# Зачение.
+		# Вложенное возвращаемое значение.
 		self._Value = value
 		# Словарь дополнительных данных.
-		self._Data = data
+		self._Data = dict()
 
 class ExecutionError(ExecutionStatus):
 	"""Отчёт об ошибке выполнения."""
 
-	def __init__(self, code: int, message: str | None = None, value: str | None = None, data: any = None):
+	def __init__(self, code: int, message: str | None = None, value: str | None = None):
 		"""
 		Отчёт об ошибке выполнения.
 			code – код выполнения;
 			message – сообщение;
-			value – значение;
-			data – данные отладки.
+			value – вложенное возвращаемое значение.
 		"""
 		
 		#---> Генерация динамичкских свойств.
@@ -155,23 +177,22 @@ class ExecutionError(ExecutionStatus):
 		self._Code = code
 		# Сообщение.
 		self._Message = message
-		# Зачение.
+		# Вложенное возвращаемое значение.
 		self._Value = value
 		# Словарь дополнительных данных.
-		self._Data = data
+		self._Data = dict()
 		# Тип сообщения.
 		self._Type = StatussesTypes.Error
 
 class ExecutionCritical(ExecutionStatus):
 	"""Отчёт о критической ошибке выполнения."""
 
-	def __init__(self, code: int, message: str | None = None, value: str | None = None, data: any = None):
+	def __init__(self, code: int, message: str | None = None, value: str | None = None):
 		"""
 		Отчёт о критической ошибке выполнения.
 			code – код выполнения;
 			message – сообщение;
-			value – значение;
-			data – данные отладки.
+			value – вложенное возвращаемое значение.
 		"""
 
 		#---> Генерация динамичкских свойств.
@@ -182,7 +203,7 @@ class ExecutionCritical(ExecutionStatus):
 		self._Code = code
 		# Краткое описание.
 		self._Message = message
-		# Зачение.
+		# Вложенное возвращаемое значение.
 		self._Value = value
 		# Словарь дополнительных данных.
-		self._Data = data
+		self._Data = dict()

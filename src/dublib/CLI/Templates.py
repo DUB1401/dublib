@@ -38,48 +38,53 @@ def Confirmation(text: str, question: str | None = None, yes: str | None = None,
 def PrintExecutionStatus(
 		status: ExecutionStatus | ExecutionWarning | ExecutionError | ExecutionCritical,
 		colorize: bool = True,
-		format: str | None = None
+		format: str | None = None,
+		printable_data_key: str = "print"
 	):
 	"""
-	Выводит в консоль отчёт о выполнении.
+	Выводит в консоль сообщение из отчёта о выполнении.
 		status – статус выполнения;
 		colorize – указывает, нужно ли окрасить вывод согласно типу отчёта;
-		format – строка, определяющая формат вывода.
+		format – строка, определяющая формат вывода;
+		printable_data_key – ключ для вывода значения из словаря дополнительных данных.
 	Для форматирования используются следующие указатели позиций данных:
+		%a – аргумент ошибки;
 		%c – код выполнения;
-		%d – данные отладки;
+		%d – значение из словаря дополнительных данных;
 		%m – сообщение;
 		%t – тип отчёта;
 		%T – тип отчёта в верхнем регистре;
 		%v – значение.
 	"""
-	
-	# Получение литералов данных.
-	Type = status.type.value.upper()
-	FirstConnector = ": " if status.type.value and status.message else ""
-	Message = status.message or ""
-	SecondConnector = " – " if status.message and status.value else ""
-	Data = f"{status.data}" if status.data else ""
-	# Сообщение для вывода.
-	Message = f"{Type}{FirstConnector}{Message}{SecondConnector}{Data}"
-	# Определение цвета.
-	TextColor = None
 
-	# Если включено форматирование.
-	if format:
-		# Замещение указателей.
-		Message = format.replace(r"%c", str(status.code))
-		Message = Message.replace(r"%d", str(status.data))
-		Message = Message.replace(r"%m", status.message)
-		Message = Message.replace(r"%t", status.type.value)
-		Message = Message.replace(r"%T", status.type.value.upper())
-		Message = Message.replace(r"%v", str(status.value))
-		
-	# Если включена окраска.
-	if colorize: 
+	# Если статус имеет нужный класс.
+	if type(status) in [ExecutionStatus, ExecutionWarning, ExecutionError, ExecutionCritical] and status.message:
+		# Получение литералов данных.
+		Type = status.type.value.upper()
+		FirstConnector = ": " if status.type.value and status.message else ""
+		Message = status.message or ""
+		SecondConnector = " – " if status.message and status.check_data(printable_data_key) else ""
+		Value = str(status.data[printable_data_key]) if status.check_data(printable_data_key) else ""
+		# Сообщение для вывода.
+		Message = f"{Type}{FirstConnector}{Message}{SecondConnector}{Value}"
 		# Определение цвета.
-		if status.type == StatussesTypes.Warning: TextColor = Styles.Colors.Yellow
-		if status.type in [StatussesTypes.Error, StatussesTypes.Critical]: TextColor = Styles.Colors.Red
+		TextColor = None
 
-	# Вывод в консоль: отчёт.
-	StyledPrinter(Message, text_color = TextColor)
+		# Если включено форматирование.
+		if format:
+			# Замещение указателей.
+			Message = format.replace(r"%c", str(status.code))
+			Message = Message.replace(r"%d", str(status.data))
+			Message = Message.replace(r"%m", status.message)
+			Message = Message.replace(r"%t", status.type.value)
+			Message = Message.replace(r"%T", status.type.value.upper())
+			Message = Message.replace(r"%v", str(status.value))
+			
+		# Если включена окраска.
+		if colorize: 
+			# Определение цвета.
+			if status.type == StatussesTypes.Warning: TextColor = Styles.Colors.Yellow
+			if status.type in [StatussesTypes.Error, StatussesTypes.Critical]: TextColor = Styles.Colors.Red
+
+		# Вывод в консоль: отчёт.
+		StyledPrinter(Message, text_color = TextColor)
