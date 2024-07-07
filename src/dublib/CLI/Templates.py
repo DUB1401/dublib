@@ -1,4 +1,5 @@
 from ..CLI.StyledPrinter import StyledPrinter, Styles
+from ..Methods.System import Clear
 from ..Engine.Bus import *
 
 import readline

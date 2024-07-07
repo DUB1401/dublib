@@ -990,12 +990,13 @@ class Terminalyzer:
 		"""
 
 		# Литералы описания ключа.
+		MSG_Indent = indent or "  "
 		MSG_Name = TextStyler(self.__KeysIndicator + key.name, decorations = [Styles.Decorations.Bold])
 		MSG_Type = f" ({key.type.value})"
 		MSG_Important = "*" if key.is_important else ""
 		MSG_Description = f": {key.description}" if key.description else ""
 		# Описание ключа.
-		Description = f"\n{indent}    • {MSG_Name}{MSG_Important}{MSG_Type}{MSG_Description}"
+		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Important}{MSG_Type}{MSG_Description}"
 
 		return Description
 
