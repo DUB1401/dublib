@@ -2,6 +2,7 @@ from .Exceptions.WebRequestor import *
 
 from curl_cffi import requests as curl_cffi_requests
 from fake_useragent import UserAgent
+from time import sleep
 
 import requests
 import logging
@@ -33,6 +34,12 @@ class _curl_cffi_config:
 
 		return self.__EnableHTTP2
 
+	@property
+	def switch_protocol(self) -> bool:
+		"""Состояние автоматического переключения HTTP/HTTPS версий протокола при ошибках."""
+
+		return self.__SwitchProtocol
+
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
@@ -46,6 +53,8 @@ class _curl_cffi_config:
 		self.__EnableHTTP2 = False
 		# Используемый отпечаток.
 		self.__Fingerprint = None
+		# Состояние автоматического переключения HTTP/HTTPS версий протокола при ошибках.
+		self.__SwitchProtocol = False
 	
 	def enable_http2(self, status: bool):
 		"""
@@ -59,6 +68,14 @@ class _curl_cffi_config:
 		"""Выбирает используемый отпечаток браузера."""
 
 		self.__Fingerprint = fingerprint
+
+	def enable_protocol_switching(self, status: bool):
+		"""
+		Переключает режим автоматической смены HTTP/HTTPS версий протокола при ошибках.
+			status – состояние режима.
+		"""
+
+		self.__SwitchProtocol = status
 
 class _httpx_config:
 	"""Дополнительная конфигурация библиотеки httpx."""
@@ -92,6 +109,39 @@ class _httpx_config:
 		"""
 
 		self.__EnableHTTP2 = status
+
+class _requests_config:
+	"""Дополнительная конфигурация библиотеки requests."""
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def switch_protocol(self) -> bool:
+		"""Состояние автоматического переключения HTTP/HTTPS версий протокола при ошибках."""
+
+		return self.__SwitchProtocol
+
+	#==========================================================================================#
+	# >>>>> МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __init__(self):
+		"""Дополнительная конфигурация библиотеки requests."""
+
+		#---> Генерация динамических атрибутов.
+		#==========================================================================================#
+		# Состояние автоматического переключения HTTP/HTTPS версий протокола при ошибках.
+		self.__SwitchProtocol = False
+	
+	def enable_protocol_switching(self, status: bool):
+		"""
+		Переключает режим автоматической смены HTTP/HTTPS версий протокола при ошибках.
+			status – состояние режима.
+		"""
+
+		self.__SwitchProtocol = status
 
 #==========================================================================================#
 # >>>>> ВСПОМОГАТЕЛЬНЫЕ ТИПЫ ДАННЫХ <<<<< #
@@ -231,6 +281,12 @@ class WebConfig:
 	#==========================================================================================#
 
 	@property
+	def delay(self) -> float:
+		"""# Интервал времени между повторами запросов."""
+
+		return self.__Delay
+
+	@property
 	def headers(self) -> dict | None:
 		"""Словарь заголвоков, приоритетно применяемых ко всем запросам."""
 
@@ -310,6 +366,7 @@ class WebConfig:
 		# Дополнительные конфигурации библиотек.
 		self.curl_cffi = _curl_cffi_config()
 		self.httpx = _httpx_config()
+		self.requests = _requests_config()
 
 		#---> Генерация приватных динамических свойств.
 		#==========================================================================================#
@@ -327,6 +384,8 @@ class WebConfig:
 		self.__Tries = 1
 		# Список статусов, считающихся результатом успешного выполнения запроса.
 		self.__GoodStatusses = [200, 404]
+		# Интервал времени между повторами запросов.
+		self.__Delay = 0.25
 
 	def add_header(self, name: str, value: int | bool | dict | str):
 		"""
@@ -385,6 +444,14 @@ class WebConfig:
 
 		self.__UsedLib = lib
 
+	def set_delay(self, delay: float):
+		"""
+		Задаёт интервал времени между повторами запросов.
+			delay – интервал.
+		"""
+
+		self.__Delay = delay
+
 	def set_tries_count(self, tries_count: int):
 		"""
 		Задаёт количество повторов запроса при неудачном выполнении.
@@ -426,8 +493,11 @@ class WebRequestor:
 			# Инициализация сессии.
 			self.__Session = requests.Session()
 		
-	def __GetProxy(self) -> dict | None:
-		"""Возвращает объект прокси для использования конкретной библиотекой."""
+	def __GetProxy(self, switch: bool = False) -> dict | None:
+		"""
+		Возвращает объект прокси для использования конкретной библиотекой.
+			switch – переключает использование шифрования в протоколе HTTP.
+		"""
 		
 		# Объект прокси.
 		Proxy = None
@@ -443,9 +513,16 @@ class WebRequestor:
 					
 			# Если используется библиотека curl_cffi или requests.
 			if self.__Config.lib in [WebLibs.curl_cffi, WebLibs.requests]:
+				# Идентификатор протокола.
+				Protocol = Proxy["protocol"]
+
+				# Если включено изменение протокола, подставить альтернативную версию.
+				if switch and Protocol == "https": Protocol = "http"
+				elif switch and Protocol == "http": Protocol = "https"
+
 				# Создание объекта прокси.
 				Proxy = {
-					Proxy["protocol"]: Proxy["protocol"].replace("https", "http") + "://" + Auth + Proxy["host"] + ":" + Proxy["port"]
+					Protocol: Protocol.replace("https", "http") + "://" + Auth + Proxy["host"] + ":" + Proxy["port"]
 				}
 			
 			# Если используется библиотека httpx.	
@@ -492,7 +569,26 @@ class WebRequestor:
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 		# Выполнение запроса.
-		Response.parse_response(self.__Session.get(url, params = params, headers = headers, cookies = cookies, proxies = self.__GetProxy()))
+		Response.parse_response(self.__Session.get(
+			url = url,
+			params = params,
+			headers = headers,
+			cookies = cookies,
+			proxies = self.__GetProxy()
+		))
+
+		# Если запрос не был успешным и включено изменение протокола.
+		if Response.status_code != 200 and self.__Config.curl_cffi.switch_protocol:
+			# Выжидание интервала.
+			sleep(self.__Config.delay)
+			# Выполнение запроса.
+			Response.parse_response(self.__Session.get(
+				url = url,
+				params = params,
+				headers = headers,
+				cookies = cookies,
+				proxies = self.__GetProxy(switch = True)
+			))
 
 		return Response
 
@@ -512,8 +608,31 @@ class WebRequestor:
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 		# Выполнение запроса.
-		Response.parse_response(self.__Session.post(url, params = params, headers = headers, cookies = cookies, data = data, json = json, proxies = self.__GetProxy()))
+		Response.parse_response(self.__Session.post(
+			url = url,
+			params = params,
+			headers = headers,
+			cookies = cookies,
+			data = data,
+			json = json,
+			proxies = self.__GetProxy()
+		))
 		
+		# Если запрос не был успешным и включено изменение протокола.
+		if Response.status_code != 200 and self.__Config.curl_cffi.switch_protocol:
+			# Выжидание интервала.
+			sleep(self.__Config.delay)
+			# Выполнение запроса.
+			Response.parse_response(self.__Session.post(
+				url = url,
+				params = params,
+				headers = headers,
+				cookies = cookies,
+				data = data,
+				json = json,
+				proxies = self.__GetProxy(switch = True)
+			))
+
 		return Response
 	
 	#==========================================================================================#
@@ -578,7 +697,28 @@ class WebRequestor:
 		
 		try:
 			# Выполнение запроса.
-			Response.parse_response(self.__Session.get(url, params = params, headers = headers, cookies = cookies, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting))
+			Response.parse_response(self.__Session.get(
+				url = url,
+				params = params,
+				headers = headers,
+				cookies = cookies,
+				proxies = self.__GetProxy(),
+				allow_redirects = self.__Config.redirecting
+			))
+
+			# Если запрос не был успешным и включено изменение протокола.
+			if Response.status_code != 200 and self.__Config.requests.switch_protocol:
+				# Выжидание интервала.
+				sleep(self.__Config.delay)
+				# Выполнение запроса.
+				Response.parse_response(self.__Session.get(
+					url = url,
+					params = params,
+					headers = headers,
+					cookies = cookies,
+					proxies = self.__GetProxy(switch = True),
+					allow_redirects = self.__Config.redirecting
+				))
 
 		except requests.exceptions.ProxyError as ExceptionData:
 			# Установка значений ответа.
@@ -605,7 +745,32 @@ class WebRequestor:
 
 		try:
 			# Выполнение запроса.
-			Response.parse_response(self.__Session.post(url, params = params, headers = headers, cookies = cookies, data = data, json = json, proxies = self.__GetProxy(), allow_redirects = self.__Config.redirecting))
+			Response.parse_response(self.__Session.post(
+				url = url,
+				params = params,
+				headers = headers,
+				cookies = cookies,
+				data = data,
+				json = json,
+				proxies = self.__GetProxy(),
+				allow_redirects = self.__Config.redirecting
+			))
+
+			# Если запрос не был успешным и включено изменение протокола.
+			if Response.status_code != 200 and self.__Config.requests.switch_protocol:
+				# Выжидание интервала.
+				sleep(self.__Config.delay)
+				# Выполнение запроса.
+				Response.parse_response(self.__Session.post(
+					url = url,
+					params = params,
+					headers = headers,
+					cookies = cookies,
+					data = data,
+					json = json,
+					proxies = self.__GetProxy(switch = True),
+					allow_redirects = self.__Config.redirecting
+				))
 		
 		except requests.exceptions.ProxyError as ExceptionData:
 			# Установка значений ответа.
@@ -664,6 +829,14 @@ class WebRequestor:
 		# Если используется библиотека httpx, реинициализировать сессию.
 		if self.__Config.lib == WebLibs.httpx: self.__Initialize()
 	
+	def remove_proxies(self):
+		"""Удаляет данные используемых прокси."""
+
+		# Очистка данных.
+		self.__Proxies = list()
+		# Если используется библиотека httpx, реинициализировать сессию.
+		if self.__Config.lib == WebLibs.httpx: self.__Initialize()
+
 	#==========================================================================================#
 	# >>>>> ЗАПРОСЫ <<<<< #
 	#==========================================================================================#	
@@ -689,6 +862,8 @@ class WebRequestor:
 		
 		# Пока не превышено количество попыток.
 		while Try < tries and Response.status_code not in self.__Config.good_statusses:
+			# Если не первая попытка, выждать интервал.
+			if Try > 0: sleep(self.__Config.delay)
 			# Инкремент повтора.
 			Try += 1
 			
@@ -744,6 +919,8 @@ class WebRequestor:
 		
 		# Пока не превышено количество попыток.
 		while Try < tries and Response.status_code not in self.__Config.good_statusses:
+			# Если не первая попытка, выждать интервал.
+			if Try > 0: sleep(self.__Config.delay)
 			# Инкремент повтора.
 			Try += 1
 			
