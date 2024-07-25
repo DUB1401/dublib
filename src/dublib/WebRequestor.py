@@ -1,6 +1,7 @@
 from .Exceptions.WebRequestor import *
 
 from curl_cffi import requests as curl_cffi_requests
+from curl_cffi import CurlHttpVersion
 from fake_useragent import UserAgent
 from time import sleep
 
@@ -29,10 +30,10 @@ class _curl_cffi_config:
 		return self.__Fingerprint
 
 	@property
-	def http2(self) -> bool:
-		"""Состояние использования протокола HTTP/2 для запросов."""
+	def http_version(self) -> CurlHttpVersion:
+		"""Версия используемого протокола HTTP."""
 
-		return self.__EnableHTTP2
+		return self.__HttpVersion
 
 	@property
 	def switch_protocol(self) -> bool:
@@ -49,20 +50,20 @@ class _curl_cffi_config:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		# Состояние использования протокола HTTP/2 для запросов.
-		self.__EnableHTTP2 = False
+		# Версия используемого протокола HTTP.
+		self.__HttpVersion = CurlHttpVersion.V1_1
 		# Используемый отпечаток.
 		self.__Fingerprint = None
 		# Состояние автоматического переключения HTTP/HTTPS версий протокола при ошибках.
 		self.__SwitchProtocol = False
 	
-	def enable_http2(self, status: bool):
+	def select_http_version(self, version: CurlHttpVersion):
 		"""
-		Переключает режим использования протокола HTTP/2 для запросов.
-			status – состояние режима.
+		Указывает используемую версию протокола HTTP.
+			version – версия.
 		"""
 
-		self.__EnableHTTP2 = status
+		self.__HttpVersion = version
 
 	def select_fingerprint(self, fingerprint: str | None):
 		"""Выбирает используемый отпечаток браузера."""
@@ -481,7 +482,11 @@ class WebRequestor:
 		# Если используется библиотека curl_cffi.	
 		if self.__Config.lib == WebLibs.curl_cffi:
 			# Инициализация сессии.
-			self.__Session = curl_cffi_requests.Session(allow_redirects = self.__Config.redirecting)
+			self.__Session = curl_cffi_requests.Session(
+				allow_redirects = self.__Config.redirecting,
+				impersonate = self.__Config.curl_cffi.fingerprint,
+				http_version = self.__Config.curl_cffi.http_version
+			)
 
 		# Если используется библиотека httpx.	
 		if self.__Config.lib == WebLibs.httpx:
