@@ -67,7 +67,7 @@ class HTML:
 	def replace_tag(self, origin: str, new: str):
 		"""
 		Заменяет переданный тип тега HTML другим.
-			origin – замещаемый тег;
+			origin – замещаемый тег;\n
 			new – новый тег.
 		"""
 

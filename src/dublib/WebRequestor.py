@@ -258,9 +258,9 @@ class WebResponse:
 	def set_data(self, status_code: int | None = None, text: str | None = None, content: bytes | None = None, json: dict | None = None):
 		"""
 		Присваивает значения интерпретациям ответа.
-			status_code – код ответа;
-			text – текстовое представление ответа;
-			content – бинарное представление ответа;
+			status_code – код ответа;\n
+			text – текстовое представление ответа;\n
+			content – бинарное представление ответа;\n
 			json – десериализованное в словарь из JSON представление ответа.
 		"""
 
@@ -391,7 +391,7 @@ class WebConfig:
 	def add_header(self, name: str, value: int | bool | dict | str):
 		"""
 		Добавляет заголовок, приоритетно применяемый ко всем запросам.
-			name – название заголовка;
+			name – название заголовка;\n
 			value – значение заголовка.
 		"""
 
@@ -563,9 +563,9 @@ class WebRequestor:
 	def __curl_cffi_GET(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> curl_cffi_requests.Response:
 		"""
 		Отправляет GET запрос через библиотеку curl_cffi.
-			url – адрес запроса;
-			params – словарь параметров запроса;
-			headers – словарь заголовков;
+			url – адрес запроса;\n
+			params – словарь параметров запроса;\n
+			headers – словарь заголовков;\n
 			cookies – словарь куков.
 		"""
 
@@ -600,11 +600,11 @@ class WebRequestor:
 	def __curl_cffi_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None) -> curl_cffi_requests.Response:
 		"""
 		Отправляет POST запрос через библиотеку curl_cffi.
-			url – адрес запроса;
-			params – словарь параметров запроса;
-			headers – словарь заголовков;
-			cookies – словарь куков;
-			data – данные запроса;
+			url – адрес запроса;\n
+			params – словарь параметров запроса;\n
+			headers – словарь заголовков;\n
+			cookies – словарь куков;\n
+			data – данные запроса;\n
 			json – сериализованное тело запроса.
 		"""
 
@@ -647,9 +647,9 @@ class WebRequestor:
 	def __httpx_GET(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> httpx.Response:
 		"""
 		Отправляет GET запрос через библиотеку httpx.
-			url – адрес запроса;
-			params – словарь параметров запроса;
-			headers – словарь заголовков;
+			url – адрес запроса;\n
+			params – словарь параметров запроса;\n
+			headers – словарь заголовков;\n
 			cookies – словарь куков.
 		"""
 
@@ -665,11 +665,11 @@ class WebRequestor:
 	def __httpx_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None) -> httpx.Response:
 		"""
 		Отправляет POST запрос через библиотеку httpx.
-			url – адрес запроса;
-			params – словарь параметров запроса;
-			headers – словарь заголовков;
-			cookies – словарь куков;
-			data – данные запроса;
+			url – адрес запроса;\n
+			params – словарь параметров запроса;\n
+			headers – словарь заголовков;\n
+			cookies – словарь куков;\n
+			data – данные запроса;\n
 			json – сериализованное тело запроса.
 		"""
 
@@ -689,9 +689,9 @@ class WebRequestor:
 	def __requests_GET(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> requests.Response:
 		"""
 		Отправляет GET запрос через библиотеку requests.
-			url – адрес запроса;
-			params – словарь параметров запроса;
-			headers – словарь заголовков;
+			url – адрес запроса;\n
+			params – словарь параметров запроса;\n
+			headers – словарь заголовков;\n
 			cookies – словарь куков.
 		"""
 		
@@ -735,11 +735,11 @@ class WebRequestor:
 	def __requests_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None) -> requests.Response:
 		"""
 		Отправляет POST запрос через библиотеку requests.
-			url – адрес запроса;
-			params – словарь параметров запроса;
-			headers – словарь заголовков;
-			cookies – словарь куков;
-			data – данные запроса;
+			url – адрес запроса;\n
+			params – словарь параметров запроса;\n
+			headers – словарь заголовков;\n
+			cookies – словарь куков;\n
+			data – данные запроса;\n
 			json – сериализованное тело запроса.
 		"""
 		
@@ -816,10 +816,10 @@ class WebRequestor:
 	def add_proxy(self, protocol: Protocols, host: str, port: int | str, login: str | None = None, password: str | None = None):
 		"""
 		Добавляет прокси для использования в запросах. Не работает с Selenium.
-			protocol – протокол прокси-соединения;
-			host – IP или адрес хоста;
-			port – порт сервера;
-			login – логин для авторизации;
+			protocol – протокол прокси-соединения;\n
+			host – IP или адрес хоста;\n
+			port – порт сервера;\n
+			login – логин для авторизации;\n
 			password – пароль для авторизации.
 		"""
 		
@@ -849,10 +849,10 @@ class WebRequestor:
 	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, tries: int | None = None) -> WebResponse:
 		"""
 		Отправляет GET запрос.
-			url – адрес запроса;
-			params – словарь параметров запроса;
-			headers – словарь заголовков;
-			cookies – словарь куков;
+			url – адрес запроса;\n
+			params – словарь параметров запроса;\n
+			headers – словарь заголовков;\n
+			cookies – словарь куков;\n
 			tries – количество попыток повтора при неудачном выполнении.
 		"""
 
@@ -904,12 +904,12 @@ class WebRequestor:
 	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, tries: int | None = None) -> WebResponse:
 		"""
 		Отправляет POST запрос.
-			url – адрес запроса;
-			params – словарь параметров запроса;
-			headers – словарь заголовков;
-			cookies – словарь куков;
-			data – отправляемые данные;
-			json – сериализованное тело запроса;
+			url – адрес запроса;\n
+			params – словарь параметров запроса;\n
+			headers – словарь заголовков;\n
+			cookies – словарь куков;\n
+			data – отправляемые данные;\n
+			json – сериализованное тело запроса;\n
 			tries – количество попыток повтора при неудачном выполнении.
 		"""
 

@@ -1,2 +1,5 @@
 # Python cache.
 __pycache__
+# Local building data.
+src/dublib.egg-info
+build

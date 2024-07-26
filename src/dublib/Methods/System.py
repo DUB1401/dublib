@@ -8,8 +8,8 @@ import os
 def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = True) -> bool:
 	"""
 	Проверяет, соответствует ли используемая версия Python минимальной требуемой.
-		major – идентификатор Major-версии Python;
-		minor – идентификатор Minor-версии Python;
+		major – идентификатор Major-версии Python;\n
+		minor – идентификатор Minor-версии Python;\n
 		raise_exception – указывает, как поступать при несоответствии версии: выбрасывать исключение или возвращать значение.
 	"""
 

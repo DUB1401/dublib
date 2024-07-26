@@ -1,17 +1,17 @@
 # dublib
-**dublib** – это библиотека, поставляющая компоненты, требующиеся в проектах [@DUB1401](https://github.com/DUB1401), написанных на Python.
+**dublib** – это библиотека Python, поставляющая полезные компоненты общего назначения.
 
-Данный набор модулей распространяется по Rolling-модели. Это значит, что разработчик не заботится об обратной совместимости с прошлыми релизами, потому рекомендуется привязывать ваш проект строго к определённой версии библиотеки.
+Данный набор модулей распространяется по Rolling-модели. Это значит, что разработчик не заботится об обратной совместимости с прошлыми релизами, потому рекомендуется привязывать ваш проект строго к определённой версии библиотеки!
 
-Все компоненты поставляют лишь базовую документацию, необходимую для общего понимания принципов работы. Библиотека является самодокументируемой.
+Все компоненты поставляют лишь базовую документацию, необходимую для общего понимания принципов работы.
 
 # Поставляемые компоненты
 Библиотека включает следующие модули:
 * [CLI](https://github.com/DUB1401/dublib/blob/main/docs/CLI/README.md)
-* [Engine](https://github.com/DUB1401/dublib/blob/main/docs/Engine.md)
+* [Engine](https://github.com/DUB1401/dublib/blob/main/docs/Engine/README.md)
 * [Methods](https://github.com/DUB1401/dublib/blob/main/docs/Methods/README.md)
 * [Polyglot](https://github.com/DUB1401/dublib/blob/main/docs/Polyglot.md)
-* [TelebotUtils](https://github.com/DUB1401/dublib/blob/main/docs/Terminalyzer.md)
+* [TelebotUtils](https://github.com/DUB1401/dublib/blob/main/docs/TelebotUtils.md)
 * [WebRequestor](https://github.com/DUB1401/dublib/blob/main/docs/WebRequestor.md)
 
 # Установка

@@ -42,7 +42,7 @@ def IsNotAlpha(text: str) -> bool:
 def ChunkList(value: list, length: int) -> list[list]:
 	"""
 	Разделяет список на фрагменты фиксированной длинны.
-		value – обрабатываемое значение;
+		value – обрабатываемое значение;\n
 		length – длина фрагментов.
 	"""
 
@@ -77,8 +77,8 @@ def ChunkList(value: list, length: int) -> list[list]:
 def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwrite: bool = False) -> dict:
 	"""
 	Объединяет словари.
-		base_dictionary – словарь, в который идёт копирование;
-		mergeable_dictionary – словарь, из котрого идёт копирование;
+		base_dictionary – словарь, в который идёт копирование;\n
+		mergeable_dictionary – словарь, из котрого идёт копирование;\n
 		overwrite – указывает, нужно ли перезаписывать значения конфликтующих ключей базового словаря.
 	"""
 
@@ -100,7 +100,7 @@ def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwri
 def RemoveRecurringSubstrings(string: str, substring: str) -> str:
 	"""
 	Удаляет из строки подряд идущие повторяющиеся подстроки.
-		string – строка, из которой удаляются повторы;
+		string – строка, из которой удаляются повторы;\n
 		Substring – удаляемая подстрока.
 	"""
 
@@ -112,8 +112,8 @@ def RemoveRecurringSubstrings(string: str, substring: str) -> str:
 def ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: any) -> dict:
 	"""
 	Заменяет ключ в словаре, сохраняя исходный порядок элементов.
-		dictionary – обрабатываемый словарь;
-		old_key – старое название ключа;
+		dictionary – обрабатываемый словарь;\n
+		old_key – старое название ключа;\n
 		new_key – новое название ключа.
 	"""
 	

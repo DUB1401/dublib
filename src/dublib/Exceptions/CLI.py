@@ -40,7 +40,7 @@ class InvalidParameterType(Exception):
 	def __init__(self, value: str, type_name: str):
 		"""
 		Исключение: неверное значение аргумента.
-			value – значение аргумента;
+			value – значение аргумента;\n
 			type_name – название ожидаемого типа.
 		"""
 

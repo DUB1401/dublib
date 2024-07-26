@@ -65,8 +65,8 @@ class UserData:
 	def __SetProperty(self, property_type: str, key: str, value: any):
 		"""
 		Задаёт свойство пользователя.
-			property_type – ключ раздела хранения свойства;
-			key – ключ свойства;
+			property_type – ключ раздела хранения свойства;\n
+			key – ключ свойства;\n
 			value – значение.
 		"""
 
@@ -82,8 +82,8 @@ class UserData:
 	def __init__(self, storage_dir: str, user_id: int, data: dict | None = None):
 		"""
 		Объектное представление данных пользователя.
-			storage_dir – путь к директории хранения данных;
-			user_id – ID пользователя;
+			storage_dir – путь к директории хранения данных;\n
+			user_id – ID пользователя;\n
 			data – словарь с описанием данных пользователя для инициализации (если не передан, данные будут загружены из файла).
 		"""
 
@@ -169,6 +169,18 @@ class UserData:
 		if key in self.__Data["temp"].keys(): return self.__Data["temp"][key]
 
 		raise KeyError(key)
+	
+	def get_property_type(self, key: str) -> any:
+		"""
+		Возвращает значение типа свойства пользователя, в том числе временного.
+			key – ключ свойства.
+		"""
+
+		# Получение значения из свойств пользователя.
+		if key in self.__Data["data"].keys(): return type(self.__Data["data"][key])
+		if key in self.__Data["temp"].keys(): return type(self.__Data["temp"][key])
+
+		raise KeyError(key)
 
 	def has_permissions(self, permissions: list[str] | str) -> bool:
 		"""
@@ -242,8 +254,8 @@ class UserData:
 	def set_property(self, key: str, value: any, force: bool = True):
 		"""
 		Задаёт значение свойства пользователя.
-			key – ключ свойства;
-			value – значение;
+			key – ключ свойства;\n
+			value – значение;\n
 			force – указывает, необходимо ли перезаписывать значение уже существующего ключа.
 		"""
 		
@@ -255,7 +267,7 @@ class UserData:
 	def set_temp_property(self, key: str, value: any):
 		"""
 		Задаёт значение временного свойства пользователя.
-			key – ключ свойства;
+			key – ключ свойства;\n
 			value – значение.
 		"""
 		
@@ -396,7 +408,7 @@ class UsersManager:
 	def get_users(self, include_permissions: list[str] | str | None = None, exclude_permissions: list[str] | str | None = None) -> list[UserData]:
 		"""
 		Возвращает список пользователей, подходящих под переданные фильтры. По умолчанию возвращает список всех пользователей.
-			include_permissions – разрешения, которыми должен обладать пользователь;
+			include_permissions – разрешения, которыми должен обладать пользователь;\n
 			exclude_permissions – разрешения, которых у пользователя быть не должно.
 		"""
 

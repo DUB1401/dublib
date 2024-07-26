@@ -1,10 +1,4 @@
-# Engine
-**Engine** – это модуль, содержащий набор инструментов для упрощения организации работы программы.
-
-Включает следующие подмодули:
-* [ExecutionStatus](#executionstatus)
-
-## ExecutionStatus
+# ExecutionStatus
 **ExecutionStatus** – это подмодуль для организации общения между методами и функциями по принципу возвращаемого значения. Отчёты о предупреждении и ошибках наследуются от отчёта о выполнении, потому имеют одинаковую структуру и отличаются лишь типом, который может быть использован при выводе через `CLI.Templates`.
 
 ### Классы
@@ -40,6 +34,6 @@ def some_function(first_value: int, second_value: int) -> ExecutionStatus:
 Result = some_function(10, 0)
 # Если выполнение успешно, вывести результат, иначе вывести отчёт об ошибке.
 if Result.code == 0: print(Result.value)
-else: PrintExecutionStatus(Result, format = r"[%T] %c: %d")
+else: PrintExecutionStatus(Result)
 
 ```

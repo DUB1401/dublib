@@ -61,8 +61,8 @@ class Argument:
 	def __init__(self, type: ParametersTypes, description: str | None, important: bool):
 		"""
 		Аргумент команды.
-			type – тип значения аргумента;
-			description – описание аргумента;
+			type – тип значения аргумента;\n
+			description – описание аргумента;\n
 			important – указывает, является ли аргумент обязательным.
 		"""
 
@@ -107,8 +107,8 @@ class Flag:
 	def __init__(self, name: str, description: str | None, important: bool):
 		"""
 		Флаг команды.
-			name – название флага;
-			description – описание флага;
+			name – название флага;\n
+			description – описание флага;\n
 			important – указывает, является ли флаг обязательным.
 		"""
 
@@ -159,9 +159,9 @@ class Key:
 	def __init__(self, name: str, type: ParametersTypes, description: str | None, important: bool):
 		"""
 		Ключ команды.
-			name – название ключа;
-			type – тип значения ключа;
-			description – описание ключа;
+			name – название ключа;\n
+			type – тип значения ключа;\n
+			description – описание ключа;\n
 			important – указывает, является ли ключ обязательным.
 		"""
 
@@ -229,8 +229,8 @@ class Position:
 	def __init__(self, important: bool = False, name: str | None = None, description: str | None = None):
 		"""
 		Объектное представление позиции команды.
-			important – указывает, является ли позиция обязательной;
-			name – название позиции;
+			important – указывает, является ли позиция обязательной;\n
+			name – название позиции;\n
 			description – описание позиции.
 		"""
 
@@ -250,8 +250,8 @@ class Position:
 	def add_argument(self, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
 		Добавляет аргумент на позицию.
-			type – тип значения аргумента;
-			description – описание позиции;
+			type – тип значения аргумента;\n
+			description – описание позиции;\n
 			important – указывает, является ли позиция обязательной.
 		"""
 
@@ -263,8 +263,8 @@ class Position:
 	def add_flag(self, name: str, description: str | None = None, important: bool = False):
 		"""
 		Добавляет флаг на позицию.
-			name – название флага;
-			description – описание флага;
+			name – название флага;\n
+			description – описание флага;\n
 			important – указывает, является ли флаг обязательным.
 		"""
 
@@ -276,9 +276,9 @@ class Position:
 	def add_key(self, name: str, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
 		Добавляет ключ на позицию.
-			name – название ключа;
-			type – тип значения ключа;
-			description – описание ключа;
+			name – название ключа;\n
+			type – тип значения ключа;\n
+			description – описание ключа;\n
 			important – указывает, является ли ключ обязательным.
 		"""
 
@@ -398,7 +398,7 @@ class Command:
 	def __init__(self, name: str, description: str | None = None):
 		"""
 		Описание команды.
-			name – название команды;
+			name – название команды;\n
 			description – описание команды.
 		"""
 
@@ -422,8 +422,8 @@ class Command:
 	def add_argument(self, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
 		Добавляет аргумент команды.
-			type – тип значения аргумента;
-			description – описание позиции;
+			type – тип значения аргумента;\n
+			description – описание позиции;\n
 			important – указывает, является ли позиция обязательной.
 		"""
 
@@ -435,8 +435,8 @@ class Command:
 	def add_flag(self, name: str, description: str | None = None, important: bool = False):
 		"""
 		Добавляет флаг команды.
-			name – название флага;
-			description – описание флага;
+			name – название флага;\n
+			description – описание флага;\n
 			important – указывает, является ли флаг обязательным.
 		"""
 
@@ -448,9 +448,9 @@ class Command:
 	def add_key(self, name: str, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
 		Добавляет ключ команды.
-			name – название ключа;
-			type – тип значения ключа;
-			description – описание ключа;
+			name – название ключа;\n
+			type – тип значения ключа;\n
+			description – описание ключа;\n
 			important – указывает, является ли ключ обязательным.
 		"""
 
@@ -462,8 +462,8 @@ class Command:
 	def create_position(self, name: str | None = None, description: str | None = None, important: bool = False) -> Position:
 		"""
 		Создаёт позицию.
-			name – название позиции;
-			description – описание позиции;
+			name – название позиции;\n
+			description – описание позиции;\n
 			important – указывает, является ли позиция обязательной.
 		"""
 
@@ -530,9 +530,9 @@ class ParsedCommandData:
 	def __init__(self, name: str, flags: list[str], keys: dict[str, any], arguments: list[str]):
 		"""
 		Данные обработанной команды.
-			name – название команды;
-			flags – список активированных флагов;
-			keys – словарь активированных ключей и их значений;
+			name – название команды;\n
+			flags – список активированных флагов;\n
+			keys – словарь активированных ключей и их значений;\n
 			arguments – список аргументов.
 		"""
 
@@ -584,7 +584,7 @@ class ParsedCommandData:
 	def get_key_value(self, key: str, exception: bool = False) -> any:
 		"""
 		Возвращает значение активированного ключа.
-			key – название ключа;
+			key – название ключа;\n
 			exception – указывает, нужно ли выбросить исключение при отсутствии ключа.
 		"""
 
@@ -718,7 +718,7 @@ class Terminalyzer:
 	def __ConfirmParametrType(self, value: str, type_name: ParametersTypes = ParametersTypes.All) -> any:
 		"""
 		Проверяет и парсит значение параметра согласно его типу.
-			value – значение параметра;
+			value – значение параметра;\n
 			type_name – тип параметра.
 		"""
 		
@@ -774,8 +774,8 @@ class Terminalyzer:
 	def __ParseArguments(self, arguments: list[any], parameter_index: int, command: Command) -> dict[str, any]:
 		"""
 		Возвращает список значений аргументов.
-			arguments – список значений аргументов;
-			parameter_index – индекс параметра;
+			arguments – список значений аргументов;\n
+			parameter_index – индекс параметра;\n
 			command – описание команды.
 		"""
 		
@@ -823,7 +823,7 @@ class Terminalyzer:
 	def __ParseFlags(self, parameter_index: int, command: Command) -> list[str]:
 		"""
 		Возвращает список активных флагов.
-			parameter_index – индекс параметра;
+			parameter_index – индекс параметра;\n
 			command – описание команды.
 		"""
 
@@ -877,7 +877,7 @@ class Terminalyzer:
 	def __ParseKeys(self, parameter_index: int, command: Command) -> dict[str, any]:
 		"""
 		Возвращает словарь активных ключей и их значений.
-			parameter_index – индекс параметра;
+			parameter_index – индекс параметра;\n
 			command – описание команды.
 		"""
 
@@ -950,7 +950,7 @@ class Terminalyzer:
 	def __BuildArgumentDescription(self, argument: Argument, indent: str | None = None) -> str:
 		"""
 		Строит описание для аргумента.
-			argument – аргумент;
+			argument – аргумент;\n
 			indent – отступ, добавляемый к каждой строке.
 		"""
 
@@ -968,7 +968,7 @@ class Terminalyzer:
 	def __BuildFlagDescription(self, flag: Flag, indent: str | None = None) -> str:
 		"""
 		Строит описание для флага.
-			flag – флаг;
+			flag – флаг;\n
 			indent – отступ, добавляемый к каждой строке.
 		"""
 
@@ -985,7 +985,7 @@ class Terminalyzer:
 	def __BuildKeyDescription(self, key: Key, indent: str | None = None) -> str:
 		"""
 		Строит описание для ключа.
-			key – ключ;
+			key – ключ;\n
 			indent – отступ, добавляемый к каждой строке.
 		"""
 
@@ -1003,7 +1003,7 @@ class Terminalyzer:
 	def __BuildPositionDescription(self, position: Command | Position, index: int | None = None) -> str:
 		"""
 		Строит описание позиции или свободных параметров команды.
-			position – позиция или описание команды;
+			position – позиция или описание команды;\n
 			index – индекс обрабатываемой позиции.
 		"""
 
@@ -1057,7 +1057,7 @@ class Terminalyzer:
 	def __CreateCommandHelp(self, commands: list[Command], command_name: str):
 		"""
 		Отправляет подробное описание команды в callback-фнкцию.
-			commands – описательные структуры комманд;
+			commands – описательные структуры комманд;\n
 			command_name – название команды, для которой требуется получить помощь.
 		"""
 

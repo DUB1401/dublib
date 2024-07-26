@@ -41,8 +41,8 @@ class StylesGroup:
 	def __init__(self, decorations: list[Styles.Decorations] = list(), text_color: Styles.Colors | None = None, background_color: Styles.Colors | None = None):
 		"""
 		Контейнер стилей. Предоставляет возможность комбинировать стили для их однократной инициализации с последующим многократным использованием.
-			decorations – список декораций;
-			text_color – цвет текста;
+			decorations – список декораций;\n
+			text_color – цвет текста;\n
 			background_color – цвет фона.
 		"""
 
@@ -66,12 +66,12 @@ class StylesGroup:
 def StyledPrinter(text: str, styles: StylesGroup | None = None, decorations: list[Styles.Decorations] = list(), text_color: Styles.Colors | None = None, background_color: Styles.Colors | None = None, autoreset: bool = True, end: bool = True):
 	"""
 	Выводит в терминал стилизованный с помощью ANSI-кодов текст.
-		text – стилизуемый текст;
-		styles – контейнер стилей;
-		decorations – список декораций;
-		text_color – цвет текста;
-		background_color – цвет фона;
-		autoreset – указывает, необходимо ли сбросить стили после вывода;
+		text – стилизуемый текст;\n
+		styles – контейнер стилей;\n
+		decorations – список декораций;\n
+		text_color – цвет текста;\n
+		background_color – цвет фона;\n
+		autoreset – указывает, необходимо ли сбросить стили после вывода;\n
 		end – переходить ли на новую строку после завершения вывода.
 	Примечание:
 		Не используйте одновременно группу стилей и отдельные стили, так как это приводит к ошибке переопределения.
@@ -89,11 +89,11 @@ def StyledPrinter(text: str, styles: StylesGroup | None = None, decorations: lis
 def TextStyler(text: str, styles: StylesGroup | None = None, decorations: list[Styles.Decorations] = list(), text_color: Styles.Colors | None = None, background_color: Styles.Colors | None = None, autoreset: bool = True) -> str:
 	"""
 	Стилизует текст с помощью ANSI-кодов.
-		text – стилизуемый текст;
-		styles – контейнер стилей;
-		decorations – список декораций;
-		text_color – цвет текста;
-		background_color – цвет фона;
+		text – стилизуемый текст;\n
+		styles – контейнер стилей;\n
+		decorations – список декораций;\n
+		text_color – цвет текста;\n
+		background_color – цвет фона;\n
 		autoreset – указывает, необходимо ли сбросить стили в конце текста.
 	Примечание:
 		Не используйте одновременно группу стилей и отдельные стили, так как это приводит к ошибке переопределения.

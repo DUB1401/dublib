@@ -86,10 +86,10 @@ class ExecutionStatus:
 	def __init__(self, code: int, message: str | None = None, value: str | None = None, type: StatussesTypes = StatussesTypes.Normal):
 		"""
 		Отчёт о выполнении.
-			code – код выполнения;
-			message – сообщение;
-			value – вложенное возвращаемое значение;
-			data – словарь дополнительных данных;
+			code – код выполнения;\n
+			message – сообщение;\n
+			value – вложенное возвращаемое значение;\n
+			data – словарь дополнительных данных;\n
 			type – тип отчёта.
 		"""
 
@@ -117,7 +117,7 @@ class ExecutionStatus:
 	def __setitem__(self, key: str, value: any):
 		"""
 		Задаёт значение поля дополнительных данных.
-			key – ключ;
+			key – ключ;\n
 			value – значение.
 		"""
 
@@ -142,8 +142,8 @@ class ExecutionWarning(ExecutionStatus):
 	def __init__(self, code: int, message: str | None = None, value: str | None = None):
 		"""
 		Отчёт о предупреждении выполнения.
-			code – код выполнения;
-			message – сообщение;
+			code – код выполнения;\n
+			message – сообщение;\n
 			value – вложенное возвращаемое значение.
 		"""
 
@@ -166,8 +166,8 @@ class ExecutionError(ExecutionStatus):
 	def __init__(self, code: int, message: str | None = None, value: str | None = None):
 		"""
 		Отчёт об ошибке выполнения.
-			code – код выполнения;
-			message – сообщение;
+			code – код выполнения;\n
+			message – сообщение;\n
 			value – вложенное возвращаемое значение.
 		"""
 		
@@ -190,8 +190,8 @@ class ExecutionCritical(ExecutionStatus):
 	def __init__(self, code: int, message: str | None = None, value: str | None = None):
 		"""
 		Отчёт о критической ошибке выполнения.
-			code – код выполнения;
-			message – сообщение;
+			code – код выполнения;\n
+			message – сообщение;\n
 			value – вложенное возвращаемое значение.
 		"""
 
