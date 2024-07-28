@@ -248,9 +248,9 @@ class WebResponse:
 		# Если запрос успешен.
 		if text:
 			# Установка интерпретаций.
-			self.__status_code = 200
+			self.__status_code = None
 			self.__text = text
-			self.__content = bytes(text)
+			self.__content = bytes(text, encoding = "utf-8")
 			self.__json = self.__TryDeserialize(text)
 
 	def parse_response(self, response: requests.Response | httpx.Response | curl_cffi_requests.Response):
@@ -614,7 +614,7 @@ class WebRequestor:
 				# Иначе, если переключался протокол, вернуть оригинальный ответ.
 				elif SwitchProtocol: Response = FirstResponse
 				# Иначе, если включено переключение протоколов.
-				elif len(SwitchProtocol) > 1:
+				elif len(SwitchHTTP) > 1:
 					# Запоминание первого ответа.
 					FirstResponse = Response
 					# Выжидание интервала.
@@ -664,7 +664,7 @@ class WebRequestor:
 				# Иначе, если переключался протокол, вернуть оригинальный ответ.
 				elif SwitchProtocol: Response = FirstResponse
 				# Иначе, если включено переключение протоколов.
-				elif len(SwitchProtocol) > 1:
+				elif len(SwitchHTTP) > 1:
 					# Запоминание первого ответа.
 					FirstResponse = Response
 					# Выжидание интервала.
@@ -785,7 +785,7 @@ class WebRequestor:
 				# Иначе, если переключался протокол, вернуть оригинальный ответ.
 				elif SwitchProtocol: Response = FirstResponse
 				# Иначе, если включено переключение протоколов.
-				elif len(SwitchProtocol) > 1:
+				elif len(SwitchHTTP) > 1:
 					# Запоминание первого ответа.
 					FirstResponse = Response
 					# Выжидание интервала.
@@ -836,7 +836,7 @@ class WebRequestor:
 				# Иначе, если переключался протокол, вернуть оригинальный ответ.
 				elif SwitchProtocol: Response = FirstResponse
 				# Иначе, если включено переключение протоколов.
-				elif len(SwitchProtocol) > 1:
+				elif len(SwitchHTTP) > 1:
 					# Запоминание первого ответа.
 					FirstResponse = Response
 					# Выжидание интервала.
