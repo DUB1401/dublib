@@ -5,6 +5,10 @@
 ```Python
 from dublib.WebRequestor import Protocols, WebConfig, WebLibs, WebRequestor
 
+import logging
+
+# Настройка вывода логов модуля в консоль.
+logging.getLogger("dublib.WebRequestor").addHandler(logging.StreamHandler())
 # Инициализация менеджера запросов.
 Requestor = WebRequestor()
 # Создание конфигурации (по умолчанию используется requests).
@@ -12,7 +16,7 @@ Config = WebConfig()
 # Выбор библиотеки.
 Config.select_lib(WebLibs.curl_cffi)
 # Генерация User-Agent для ПК.
-Config.generate_user_agent("pc")
+Config.generate_user_agent(platforms = "pc")
 # Установка базового количества повторов при неудачном запросе.
 Config.set_tries_count(3)
 # Установка TLS отпечатка Google Chrome 124.
