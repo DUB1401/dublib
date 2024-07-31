@@ -596,33 +596,27 @@ class WebRequestor:
 		# Статусы подмены HTTP/S протокола прокси.
 		SwitchHTTP = set([False, self.__Config.requests.switch_proxy_protocol])
 
-		try:
+		# Для каждого статуса подмены.
+		for SwitchProtocol in SwitchHTTP:
+			# Выполнение запроса.
+			Response.parse_response(self.__Session.get(
+				url = url,
+				params = params,
+				headers = headers,
+				cookies = cookies,
+				proxies = self.__GetProxy(SwitchProtocol)
+			))
 
-			# Для каждого статуса подмены.
-			for SwitchProtocol in SwitchHTTP:
-				# Выполнение запроса.
-				Response.parse_response(self.__Session.get(
-					url = url,
-					params = params,
-					headers = headers,
-					cookies = cookies,
-					proxies = self.__GetProxy(SwitchProtocol)
-				))
-
-				# Если запрос успешен, прервать выполнение.
-				if Response.status_code in self.__Config.good_statusses: break
-				# Иначе, если переключался протокол, вернуть оригинальный ответ.
-				elif SwitchProtocol: Response = FirstResponse
-				# Иначе, если включено переключение протоколов.
-				elif len(SwitchHTTP) > 1:
-					# Запоминание первого ответа.
-					FirstResponse = Response
-					# Выжидание интервала.
-					sleep(self.__Config.delay)
-		
-		except Exception as ExceptionData:
-			# Установка значений ответа.
-			Response.generate_by_text(str(ExceptionData))
+			# Если запрос успешен, прервать выполнение.
+			if Response.status_code in self.__Config.good_statusses: break
+			# Иначе, если переключался протокол, вернуть оригинальный ответ.
+			elif SwitchProtocol: Response = FirstResponse
+			# Иначе, если включено переключение протоколов.
+			elif len(SwitchHTTP) > 1:
+				# Запоминание первого ответа.
+				FirstResponse = Response
+				# Выжидание интервала.
+				sleep(self.__Config.delay)
 
 		return Response
 
@@ -644,35 +638,29 @@ class WebRequestor:
 		# Статусы подмены HTTP/S протокола прокси.
 		SwitchHTTP = set([False, self.__Config.requests.switch_proxy_protocol])
 
-		try:
+		# Для каждого статуса подмены.
+		for SwitchProtocol in SwitchHTTP:
+			# Выполнение запроса.
+			Response.parse_response(self.__Session.post(
+				url = url,
+				params = params,
+				headers = headers,
+				cookies = cookies,
+				data = data,
+				json = json,
+				proxies = self.__GetProxy(SwitchProtocol)
+			))
 
-			# Для каждого статуса подмены.
-			for SwitchProtocol in SwitchHTTP:
-				# Выполнение запроса.
-				Response.parse_response(self.__Session.post(
-					url = url,
-					params = params,
-					headers = headers,
-					cookies = cookies,
-					data = data,
-					json = json,
-					proxies = self.__GetProxy(SwitchProtocol)
-				))
-
-				# Если запрос успешен, прервать выполнение.
-				if Response.status_code in self.__Config.good_statusses: break
-				# Иначе, если переключался протокол, вернуть оригинальный ответ.
-				elif SwitchProtocol: Response = FirstResponse
-				# Иначе, если включено переключение протоколов.
-				elif len(SwitchHTTP) > 1:
-					# Запоминание первого ответа.
-					FirstResponse = Response
-					# Выжидание интервала.
-					sleep(self.__Config.delay)
-		
-		except Exception as ExceptionData:
-			# Установка значений ответа.
-			Response.generate_by_text(str(ExceptionData))
+			# Если запрос успешен, прервать выполнение.
+			if Response.status_code in self.__Config.good_statusses: break
+			# Иначе, если переключался протокол, вернуть оригинальный ответ.
+			elif SwitchProtocol: Response = FirstResponse
+			# Иначе, если включено переключение протоколов.
+			elif len(SwitchHTTP) > 1:
+				# Запоминание первого ответа.
+				FirstResponse = Response
+				# Выжидание интервала.
+				sleep(self.__Config.delay)
 
 		return Response
 	
@@ -694,19 +682,14 @@ class WebRequestor:
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 
-		try:
-			# Выполнение запроса.
-			Response.parse_response(self.__Session.get(
-				uel = url,
-				params = params,
-				headers = headers,
-				cookies = cookies,
-				follow_redirects = self.__Config.redirecting
-			))
-		
-		except Exception as ExceptionData:
-			# Установка значений ответа.
-			Response.generate_by_text(str(ExceptionData))
+		# Выполнение запроса.
+		Response.parse_response(self.__Session.get(
+			uel = url,
+			params = params,
+			headers = headers,
+			cookies = cookies,
+			follow_redirects = self.__Config.redirecting
+		))
 
 		return Response
 
@@ -726,21 +709,16 @@ class WebRequestor:
 		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 
-		try:
-			# Выполнение запроса.
-			Response.parse_response(self.__Session.post(
-				url = url,
-				params = params,
-				headers = headers,
-				cookies = cookies,
-				data = data,
-				json = json,
-				follow_redirects = self.__Config.redirecting
-			))
-
-		except Exception as ExceptionData:
-			# Установка значений ответа.
-			Response.generate_by_text(str(ExceptionData))
+		# Выполнение запроса.
+		Response.parse_response(self.__Session.post(
+			url = url,
+			params = params,
+			headers = headers,
+			cookies = cookies,
+			data = data,
+			json = json,
+			follow_redirects = self.__Config.redirecting
+		))
 
 		return Response
 	
@@ -766,34 +744,28 @@ class WebRequestor:
 		# Результат первого запроса.
 		FirstResponse = None
 
-		try:
+		# Для каждого статуса подмены.
+		for SwitchProtocol in SwitchHTTP:
+			# Выполнение запроса.
+			Response.parse_response(self.__Session.get(
+				url = url,
+				params = params,
+				headers = headers,
+				cookies = cookies,
+				proxies = self.__GetProxy(SwitchProtocol),
+				allow_redirects = self.__Config.redirecting
+			))
 
-			# Для каждого статуса подмены.
-			for SwitchProtocol in SwitchHTTP:
-				# Выполнение запроса.
-				Response.parse_response(self.__Session.get(
-					url = url,
-					params = params,
-					headers = headers,
-					cookies = cookies,
-					proxies = self.__GetProxy(SwitchProtocol),
-					allow_redirects = self.__Config.redirecting
-				))
-
-				# Если запрос успешен, прервать выполнение.
-				if Response.status_code in self.__Config.good_statusses: break
-				# Иначе, если переключался протокол, вернуть оригинальный ответ.
-				elif SwitchProtocol: Response = FirstResponse
-				# Иначе, если включено переключение протоколов.
-				elif len(SwitchHTTP) > 1:
-					# Запоминание первого ответа.
-					FirstResponse = Response
-					# Выжидание интервала.
-					sleep(self.__Config.delay)
-		
-		except Exception as ExceptionData:
-			# Установка значений ответа.
-			Response.generate_by_text(str(ExceptionData))
+			# Если запрос успешен, прервать выполнение.
+			if Response.status_code in self.__Config.good_statusses: break
+			# Иначе, если переключался протокол, вернуть оригинальный ответ.
+			elif SwitchProtocol: Response = FirstResponse
+			# Иначе, если включено переключение протоколов.
+			elif len(SwitchHTTP) > 1:
+				# Запоминание первого ответа.
+				FirstResponse = Response
+				# Выжидание интервала.
+				sleep(self.__Config.delay)
 
 		return Response
 	
@@ -815,36 +787,30 @@ class WebRequestor:
 		# Статусы подмены HTTP/S протокола прокси.
 		SwitchHTTP = set([False, self.__Config.requests.switch_proxy_protocol])
 
-		try:
+		# Для каждого статуса подмены.
+		for SwitchProtocol in SwitchHTTP:
+			# Выполнение запроса.
+			Response.parse_response(self.__Session.post(
+				url = url,
+				params = params,
+				headers = headers,
+				cookies = cookies,
+				data = data,
+				json = json,
+				proxies = self.__GetProxy(SwitchProtocol),
+				allow_redirects = self.__Config.redirecting
+			))
 
-			# Для каждого статуса подмены.
-			for SwitchProtocol in SwitchHTTP:
-				# Выполнение запроса.
-				Response.parse_response(self.__Session.post(
-					url = url,
-					params = params,
-					headers = headers,
-					cookies = cookies,
-					data = data,
-					json = json,
-					proxies = self.__GetProxy(SwitchProtocol),
-					allow_redirects = self.__Config.redirecting
-				))
-
-				# Если запрос успешен, прервать выполнение.
-				if Response.status_code in self.__Config.good_statusses: break
-				# Иначе, если переключался протокол, вернуть оригинальный ответ.
-				elif SwitchProtocol: Response = FirstResponse
-				# Иначе, если включено переключение протоколов.
-				elif len(SwitchHTTP) > 1:
-					# Запоминание первого ответа.
-					FirstResponse = Response
-					# Выжидание интервала.
-					sleep(self.__Config.delay)
-		
-		except Exception as ExceptionData:
-			# Установка значений ответа.
-			Response.generate_by_text(str(ExceptionData))
+			# Если запрос успешен, прервать выполнение.
+			if Response.status_code in self.__Config.good_statusses: break
+			# Иначе, если переключался протокол, вернуть оригинальный ответ.
+			elif SwitchProtocol: Response = FirstResponse
+			# Иначе, если включено переключение протоколов.
+			elif len(SwitchHTTP) > 1:
+				# Запоминание первого ответа.
+				FirstResponse = Response
+				# Выжидание интервала.
+				sleep(self.__Config.delay)
 
 		return Response
 		
@@ -960,6 +926,8 @@ class WebRequestor:
 					Response = self.__requests_GET(url, params, headers, cookies)
 
 			except Exception as ExceptionData:
+				# Установка значений ответа.
+				Response.generate_by_text(str(ExceptionData))
 				# Запись в лог ошибки: не удалось выполнить запрос.
 				if self.__Config.logging: Logger.error(f"[{LibName}-GET] Description: \"" + str(ExceptionData) + "\".")
 		
@@ -1017,6 +985,8 @@ class WebRequestor:
 					Response = self.__requests_POST(url, params, headers, cookies, data, json)
 				
 			except Exception as ExceptionData:
+				# Установка значений ответа.
+				Response.generate_by_text(str(ExceptionData))
 				# Запись в лог ошибки: не удалось выполнить запрос.
 				if self.__Config.logging: Logger.error(f"[{LibName}-POST] Description: \"" + str(ExceptionData) + "\".")
 		
