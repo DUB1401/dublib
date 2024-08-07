@@ -32,7 +32,7 @@ class UserData:
 	def is_premium(self) -> bool:
 		"""Состояние: есть ли Premium-подписка у пользователя."""
 
-		return self.__Data["premium"]
+		return self.__Data["is_premium"]
 
 	@property
 	def language(self) -> str:
@@ -317,20 +317,6 @@ class UsersManager:
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА <<<<< #
 	#==========================================================================================#
-
-	@property
-	def admins(self) -> list[UserData]:
-		"""Список пользователей с правами администратора."""
-
-		# Список администраторов.
-		Admins = list()
-
-		# Для каждого пользователя.
-		for UserID in self.__Users.keys():
-			# Добавление пользователя в список.
-			if self.__Users[UserID].is_admin: Admins.append(self.__Users[UserID])
-
-		return Admins
 
 	@property
 	def premium_users(self) -> list[UserData]:
