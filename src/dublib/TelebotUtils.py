@@ -103,6 +103,8 @@ class UserData:
 			"data": {},
 			"temp": {}
 		}
+		# Словарь объектов пользователя.
+		self.__Objects = dict()
 
 		# Если переданы данные в виде словаря.
 		if type(data) == dict:
@@ -157,6 +159,14 @@ class UserData:
 		self.__Data["temp"] = dict()
 		# Сохранение данных.
 		self.__SaveData()		
+
+	def get_object(self, key: str) -> any:
+		"""
+		Возвращает объект Python из свойств пользователя.
+			key – ключ объекта.
+		"""
+
+		return self.__Objects[key]
 
 	def get_property(self, key: str) -> any:
 		"""
@@ -250,6 +260,16 @@ class UserData:
 		self.__Data["expected_type"] = type_name
 		# Сохранение данных.
 		self.__SaveData()
+
+	def set_object(self, key: str, object: any):
+		"""
+		Сохраняет объект Python в оперативной памяти и привязывает его к текущему пользователю наподобие свойства.
+			key – ключ объекта;\n
+			object – объект.
+		"""
+		
+		# Если клю объекта не существует, создать его и поместить объект.
+		if key not in self.__Objects.keys(): self.__Objects[key] = object
 
 	def set_property(self, key: str, value: any, force: bool = True):
 		"""
