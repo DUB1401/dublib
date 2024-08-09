@@ -59,11 +59,8 @@ class _curl_cffi_config:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		# Версия используемого протокола HTTP.
 		self.__HttpVersion = CurlHttpVersion.V1_1
-		# Используемый отпечаток.
 		self.__Fingerprint = None
-		# Состояние автоматического переключения HTTP/HTTPS версий протокола при ошибках.
 		self.__SwitchProtocol = False
 	
 	def select_http_version(self, version: CurlHttpVersion):
@@ -109,7 +106,6 @@ class _httpx_config:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		# Состояние использования протокола HTTP/2 для запросов.
 		self.__EnableHTTP2 = False
 	
 	def enable_http2(self, status: bool):
@@ -142,7 +138,6 @@ class _requests_config:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		# Состояние автоматического переключения HTTP/HTTPS версий протокола прокси при ошибках.
 		self.__SwitchProtocol = False
 	
 	def enable_proxy_protocol_switching(self, status: bool):
@@ -210,11 +205,9 @@ class WebResponse:
 	#==========================================================================================#
 
 	def __TryDeserialize(self, text: str) -> dict | None:
-		# Результат десериализации.
 		Result = None
 
 		try:
-			# Попытка десериализации.
 			Result = json.loads(text)
 
 		except: pass
@@ -230,13 +223,9 @@ class WebResponse:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		# Статус ответа.
 		self.__status_code = None
-		# Бинарное представление ответа.
 		self.__content = None
-		# Десериализованное в словарь из JSON представление ответа.
 		self.__json = None
-		# Текстовое представление ответа.
 		self.__text = None
 
 	def generate_by_text(self, text: str | None):
@@ -245,9 +234,7 @@ class WebResponse:
 			text – текстовое представление ответа.
 		"""
 
-		# Если запрос успешен.
 		if text:
-			# Установка интерпретаций.
 			self.__status_code = None
 			self.__text = text
 			self.__content = bytes(text, encoding = "utf-8")
@@ -259,7 +246,6 @@ class WebResponse:
 			response – ответ библиотеки.
 		"""
 
-		# Установка кода ответа.
 		self.__status_code = response.status_code
 		self.__text = response.text
 		self.__content = response.content
@@ -274,7 +260,6 @@ class WebResponse:
 			json – десериализованное в словарь из JSON представление ответа.
 		"""
 
-		# Проверка и установка типов значений.
 		if status_code: self.__status_code = status_code
 		if text: self.__text = text
 		if content: self.__content = content
@@ -301,14 +286,10 @@ class WebConfig:
 	def headers(self) -> dict | None:
 		"""Словарь заголвоков, приоритетно применяемых ко всем запросам."""
 
-		# Возвращаемый словарь заголовков.
 		Headers = self.__Headers
 
-		# Если установлено значение User-Agent.
 		if self.__UserAgent:
-			# Если заголовки не определены, привести их к словарному типу.
 			if not Headers: Headers = dict()
-			# Добавление заголовка User-Agent.
 			Headers["User-Agent"] = self.__UserAgent
 
 		return Headers
@@ -361,7 +342,6 @@ class WebConfig:
 	def good_statusses(self, new_good_statusses: list[int, None]):
 		"""Список статусов, считающихся результатом успешного выполнения запроса."""
 
-		# Если указан нужный тип, сохранить, иначе выбросить исключение.
 		if type(new_good_statusses) == list: self.__GoodStatusses = new_good_statusses
 		else: raise TypeError("list() required.")
 
@@ -374,28 +354,19 @@ class WebConfig:
 
 		#---> Генерация публичных динамических свойств.
 		#==========================================================================================#
-		# Дополнительные конфигурации библиотек.
 		self.curl_cffi = _curl_cffi_config()
 		self.httpx = _httpx_config()
 		self.requests = _requests_config()
 
 		#---> Генерация приватных динамических свойств.
 		#==========================================================================================#
-		# Тип используемой библиотеки.
 		self.__UsedLib = WebLibs.requests
-		# Состояние режима автоматического перенаправления запросов.
 		self.__EnableRedirecting = True
-		# Статус ведения логов при помощи стандартного модуля.
 		self.__EnableLogging = True
-		# Значение заголовка User-Agent.
 		self.__UserAgent = None
-		# Словарь заголвоков, приоритетно применяемых ко всем запросам.
 		self.__Headers = None
-		# Количество повторов неуспешных запросов.
 		self.__Tries = 1
-		# Список статусов, считающихся результатом успешного выполнения запроса.
 		self.__GoodStatusses = [200, 404]
-		# Интервал времени между повторами запросов.
 		self.__Delay = 0.25
 
 	def add_header(self, name: str, value: int | bool | dict | str):
@@ -405,11 +376,8 @@ class WebConfig:
 			value – значение заголовка.
 		"""
 
-		# Если задаётся заголовок User-Agent, выбросить исключение.
 		if name.lower() == "user-agent": raise UserAgentRedefining()
-		# Если заголовки не объявлены, привести их к словарному типу.
 		if self.__Headers == None: self.__Headers = dict()
-		# Добавление заголовка.
 		self.__Headers[name] = value
 
 	def enable_logging(self, status: bool):
@@ -452,9 +420,7 @@ class WebConfig:
 			name – название заголовка.
 		"""
 
-		# Если задаётся заголовок User-Agent, выбросить исключение.
 		if name.lower() == "user-agent": raise UserAgentRedefining()
-		# Удаление заголовка.
 		del self.__Headers[name]
 
 	def select_lib(self, lib: WebLibs):
@@ -499,23 +465,17 @@ class WebRequestor:
 	def __Initialize(self):
 		"""Инициализирует сессию."""
 
-		# Если используется библиотека curl_cffi.	
 		if self.__Config.lib == WebLibs.curl_cffi:
-			# Инициализация сессии.
 			self.__Session = curl_cffi_requests.Session(
 				allow_redirects = self.__Config.redirecting,
 				impersonate = self.__Config.curl_cffi.fingerprint,
 				http_version = self.__Config.curl_cffi.http_version
 			)
 
-		# Если используется библиотека httpx.	
 		if self.__Config.lib == WebLibs.httpx:
-			# Инициализация сессии.
 			self.__Session = httpx.Client(http2 = self.__Config.httpx.http2, proxies = self.__GetProxy())
 					
-		# Если используется библиотека requests.		
 		if self.__Config.lib == WebLibs.requests:
-			# Инициализация сессии.
 			self.__Session = requests.Session()
 		
 	def __GetProxy(self, switch: bool = False) -> dict | None:
@@ -524,35 +484,24 @@ class WebRequestor:
 			switch – переключает использование шифрования в протоколе HTTP.
 		"""
 		
-		# Объект прокси.
 		Proxy = None
 		
-		# Если задан хотя бы один прокси..
 		if len(self.__Proxies) > 0:
-			# Случайный выбор прокси.
 			Proxy = random.choice(self.__Proxies)
-			# Данные авторизации.
 			Auth = ""
-			# Если указаны логин и пароль, составить авторизационные данные.
 			if Proxy["login"] != None and Proxy["password"] != None: Auth = Proxy["login"] + ":" + Proxy["password"] + "@"
 					
-			# Если используется библиотека curl_cffi или requests.
 			if self.__Config.lib in [WebLibs.curl_cffi, WebLibs.requests]:
-				# Идентификатор протокола.
 				Protocol = Proxy["protocol"]
 
-				# Если включено изменение протокола, подставить альтернативную версию.
 				if switch and Protocol == "https": Protocol = "http"
 				elif switch and Protocol == "http": Protocol = "https"
 
-				# Создание объекта прокси.
 				Proxy = {
 					Protocol: Protocol.replace("https", "http") + "://" + Auth + Proxy["host"] + ":" + Proxy["port"]
 				}
 			
-			# Если используется библиотека httpx.	
 			if self.__Config.lib == WebLibs.httpx:
-				# Создание объекта прокси.
 				Proxy = {
 					Proxy["protocol"] + "://": Proxy["protocol"].replace("https", "http") + "://" + Auth + Proxy["host"] + ":" + Proxy["port"]
 				}
@@ -562,16 +511,12 @@ class WebRequestor:
 	def __MergeHeaders(self, headers: dict | None) -> dict | None:
 		"""Объединяет заголовки конфигурации и параметров запроса."""
 
-		# Если конфигурация содержит заголовки.
 		if self.__Config.headers:
 
-			# Если переданы заголовки.
 			if headers: 
-				# Объединение заголовков с приоритетом конфигурационным.
 				headers = self.__Config.headers | headers
 				
 			else:
-				# Установка словаря заголовков из конфигурации.
 				headers = self.__Config.headers
 
 		return headers
@@ -589,16 +534,11 @@ class WebRequestor:
 			cookies – словарь куков.
 		"""
 
-		# Эмуляция ответа.
 		Response = WebResponse()
-		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
-		# Статусы подмены HTTP/S протокола прокси.
 		SwitchHTTP = set([False, self.__Config.requests.switch_proxy_protocol])
 
-		# Для каждого статуса подмены.
 		for SwitchProtocol in SwitchHTTP:
-			# Выполнение запроса.
 			Response.parse_response(self.__Session.get(
 				url = url,
 				params = params,
@@ -607,15 +547,10 @@ class WebRequestor:
 				proxies = self.__GetProxy(SwitchProtocol)
 			))
 
-			# Если запрос успешен, прервать выполнение.
 			if Response.status_code in self.__Config.good_statusses: break
-			# Иначе, если переключался протокол, вернуть оригинальный ответ.
 			elif SwitchProtocol: Response = FirstResponse
-			# Иначе, если включено переключение протоколов.
 			elif len(SwitchHTTP) > 1:
-				# Запоминание первого ответа.
 				FirstResponse = Response
-				# Выжидание интервала.
 				sleep(self.__Config.delay)
 
 		return Response
@@ -631,16 +566,11 @@ class WebRequestor:
 			json – сериализованное тело запроса.
 		"""
 
-		# Эмуляция ответа.
 		Response = WebResponse()
-		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
-		# Статусы подмены HTTP/S протокола прокси.
 		SwitchHTTP = set([False, self.__Config.requests.switch_proxy_protocol])
 
-		# Для каждого статуса подмены.
 		for SwitchProtocol in SwitchHTTP:
-			# Выполнение запроса.
 			Response.parse_response(self.__Session.post(
 				url = url,
 				params = params,
@@ -651,15 +581,10 @@ class WebRequestor:
 				proxies = self.__GetProxy(SwitchProtocol)
 			))
 
-			# Если запрос успешен, прервать выполнение.
 			if Response.status_code in self.__Config.good_statusses: break
-			# Иначе, если переключался протокол, вернуть оригинальный ответ.
 			elif SwitchProtocol: Response = FirstResponse
-			# Иначе, если включено переключение протоколов.
 			elif len(SwitchHTTP) > 1:
-				# Запоминание первого ответа.
 				FirstResponse = Response
-				# Выжидание интервала.
 				sleep(self.__Config.delay)
 
 		return Response
@@ -677,12 +602,9 @@ class WebRequestor:
 			cookies – словарь куков.
 		"""
 
-		# Эмуляция ответа.
 		Response = WebResponse()
-		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 
-		# Выполнение запроса.
 		Response.parse_response(self.__Session.get(
 			uel = url,
 			params = params,
@@ -704,12 +626,9 @@ class WebRequestor:
 			json – сериализованное тело запроса.
 		"""
 
-		# Эмуляция ответа.
 		Response = WebResponse()
-		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
 
-		# Выполнение запроса.
 		Response.parse_response(self.__Session.post(
 			url = url,
 			params = params,
@@ -735,18 +654,12 @@ class WebRequestor:
 			cookies – словарь куков.
 		"""
 		
-		# Эмуляция ответа.
 		Response = WebResponse()
-		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
-		# Статусы подмены HTTP/S протокола прокси.
 		SwitchHTTP = set([False, self.__Config.requests.switch_proxy_protocol])
-		# Результат первого запроса.
 		FirstResponse = None
 
-		# Для каждого статуса подмены.
 		for SwitchProtocol in SwitchHTTP:
-			# Выполнение запроса.
 			Response.parse_response(self.__Session.get(
 				url = url,
 				params = params,
@@ -756,15 +669,10 @@ class WebRequestor:
 				allow_redirects = self.__Config.redirecting
 			))
 
-			# Если запрос успешен, прервать выполнение.
 			if Response.status_code in self.__Config.good_statusses: break
-			# Иначе, если переключался протокол, вернуть оригинальный ответ.
 			elif SwitchProtocol: Response = FirstResponse
-			# Иначе, если включено переключение протоколов.
 			elif len(SwitchHTTP) > 1:
-				# Запоминание первого ответа.
 				FirstResponse = Response
-				# Выжидание интервала.
 				sleep(self.__Config.delay)
 
 		return Response
@@ -780,16 +688,11 @@ class WebRequestor:
 			json – сериализованное тело запроса.
 		"""
 		
-		# Эмуляция ответа.
 		Response = WebResponse()
-		# Обработка заголовков.
 		headers = self.__MergeHeaders(headers)
-		# Статусы подмены HTTP/S протокола прокси.
 		SwitchHTTP = set([False, self.__Config.requests.switch_proxy_protocol])
 
-		# Для каждого статуса подмены.
 		for SwitchProtocol in SwitchHTTP:
-			# Выполнение запроса.
 			Response.parse_response(self.__Session.post(
 				url = url,
 				params = params,
@@ -801,15 +704,10 @@ class WebRequestor:
 				allow_redirects = self.__Config.redirecting
 			))
 
-			# Если запрос успешен, прервать выполнение.
 			if Response.status_code in self.__Config.good_statusses: break
-			# Иначе, если переключался протокол, вернуть оригинальный ответ.
 			elif SwitchProtocol: Response = FirstResponse
-			# Иначе, если включено переключение протоколов.
 			elif len(SwitchHTTP) > 1:
-				# Запоминание первого ответа.
 				FirstResponse = Response
-				# Выжидание интервала.
 				sleep(self.__Config.delay)
 
 		return Response
@@ -826,20 +724,15 @@ class WebRequestor:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		# Список прокси.
 		self.__Proxies = list()
-		# Конфигурация.
 		self.__Config = config
-		# Сессия запросов.
 		self.__Session = None
 
-		# Инициализация сессии.
 		self.__Initialize()
 
 	def close(self):
 		"""Закрывает менеджер запросов."""
 			
-		# Закрытие и обнуление сессии.
 		self.__Session.close()
 		self.__Session = None
 			
@@ -853,7 +746,6 @@ class WebRequestor:
 			password – пароль для авторизации.
 		"""
 		
-		# Добавление прокси в список.
 		self.__Proxies.append({
 			"protocol": protocol.value,
 			"host": host,
@@ -861,15 +753,12 @@ class WebRequestor:
 			"login": login,
 			"password": password
 		})
-		# Если используется библиотека httpx, реинициализировать сессию.
 		if self.__Config.lib == WebLibs.httpx: self.__Initialize()
 	
 	def remove_proxies(self):
 		"""Удаляет данные используемых прокси."""
 
-		# Очистка данных.
 		self.__Proxies = list()
-		# Если используется библиотека httpx, реинициализировать сессию.
 		if self.__Config.lib == WebLibs.httpx: self.__Initialize()
 
 	#==========================================================================================#
@@ -886,49 +775,31 @@ class WebRequestor:
 			tries – количество попыток повтора при неудачном выполнении.
 		"""
 
-		# Если не указано количество повторов, использовать оное из конфигурации.
 		if tries == None: tries = self.__Config.tries
-		# Ответ.
 		Response = WebResponse()
-		# Индекс попытки.
 		Try = 0
-		# Название библиотеки.
 		LibName = None
 		
-		# Пока не превышено количество попыток.
 		while Try < tries and Response.status_code not in self.__Config.good_statusses:
-			# Если не первая попытка, выждать интервал.
 			if Try > 0: sleep(self.__Config.delay)
-			# Инкремент повтора.
 			Try += 1
 			
 			try:
 
-				# Если используется библиотека curl_cffi.
 				if self.__Config.lib == WebLibs.curl_cffi:
-					# Установка имени библиотеки.
 					LibName = "CURL_CFFI"
-					# Выполнение запроса.
 					Response = self.__curl_cffi_GET(url, params, headers, cookies)
 
-				# Если используется библиотека httpx.
 				if self.__Config.lib == WebLibs.httpx:
-					# Установка имени библиотеки.
 					LibName = "HTTPX"
-					# Выполнение запроса.
 					Response = self.__httpx_GET(url, params, headers, cookies)
 				
-				# Если используется библиотека requests.
 				if self.__Config.lib == WebLibs.requests:
-					# Установка имени библиотеки.
 					LibName = "REQUESTS"
-					# Выполнение запроса.
 					Response = self.__requests_GET(url, params, headers, cookies)
 
 			except Exception as ExceptionData:
-				# Установка значений ответа.
 				Response.generate_by_text(str(ExceptionData))
-				# Запись в лог ошибки: не удалось выполнить запрос.
 				if self.__Config.logging: Logger.error(f"[{LibName}-GET] Description: \"" + str(ExceptionData) + "\".")
 		
 		return Response
@@ -945,49 +816,31 @@ class WebRequestor:
 			tries – количество попыток повтора при неудачном выполнении.
 		"""
 
-		# Если не указано количество повторов, использовать оное из конфигурации.
 		if tries == None: tries = self.__Config.tries
-		# Ответ.
 		Response = WebResponse()
-		# Индекс попытки.
 		Try = 0
-		# Название библиотеки.
 		LibName = None
 		
-		# Пока не превышено количество попыток.
 		while Try < tries and Response.status_code not in self.__Config.good_statusses:
-			# Если не первая попытка, выждать интервал.
 			if Try > 0: sleep(self.__Config.delay)
-			# Инкремент повтора.
 			Try += 1
 			
 			try:
 				
-				# Если используется библиотека curl_cffi.
 				if self.__Config.lib == WebLibs.curl_cffi:
-					# Установка имени библиотеки.
 					LibName = "CURL_CFFI"
-					# Выполнение запроса.
 					Response = self.__curl_cffi_POST(url, params, headers, cookies, data, json)
 
-				# Если используется библиотека httpx.
 				if self.__Config.lib == WebLibs.httpx:
-					# Установка имени библиотеки.
 					LibName = "HTTPX"
-					# Выполнение запроса.
 					Response = self.__httpx_POST(url, params, headers, cookies, data, json)
 				
-				# Если используется библиотека requests.
 				if self.__Config.lib == WebLibs.requests:
-					# Установка имени библиотеки.
 					LibName = "REQUESTS"
-					# Выполнение запроса.
 					Response = self.__requests_POST(url, params, headers, cookies, data, json)
 				
 			except Exception as ExceptionData:
-				# Установка значений ответа.
 				Response.generate_by_text(str(ExceptionData))
-				# Запись в лог ошибки: не удалось выполнить запрос.
 				if self.__Config.logging: Logger.error(f"[{LibName}-POST] Description: \"" + str(ExceptionData) + "\".")
 		
 		return Response

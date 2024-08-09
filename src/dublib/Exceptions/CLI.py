@@ -8,9 +8,7 @@ class DuplicatedStyles(Exception):
 	def __init__(self):
 		"""Исключение: использованы оба способа указания стилей."""
 		
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "Use only StyledGroup() or arguments styles."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message)
 			
 	def __str__(self):
@@ -26,9 +24,7 @@ class IdenticalIndicators(Exception):
 	def __init__(self):
 		"""Исключение: попытка установки одинаковых индикаторов ключей и флагов."""
 
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "Cannot set same indicators for keys and flags."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 			
 	def __str__(self):
@@ -44,9 +40,7 @@ class InvalidParameterType(Exception):
 			type_name – название ожидаемого типа.
 		"""
 
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "\"" + value + "\" isn't \"" + type_name + "\"."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 			
 	def __str__(self):
@@ -61,9 +55,7 @@ class MutuallyExclusiveFlags(Exception):
 			command – команда, вызвавшая исключение.
 		"""
 
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "\"" + command + "\"."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 			
 	def __str__(self):
@@ -78,9 +70,7 @@ class MutuallyExclusiveKeys(Exception):
 			command – команда, вызвавшая исключение.
 		"""
 
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "\"" + command + "\"."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 		
 			
@@ -96,9 +86,7 @@ class MutuallyExclusivePositions(Exception):
 			command – команда, вызвавшая исключение.
 		"""
 
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "\"" + command + "\"."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 		
 	def __str__(self):
@@ -113,9 +101,7 @@ class NotEnoughParameters(Exception):
 			command – команда, вызвавшая исключение.
 		"""
 
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "\"" + command + "\"."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 
 	def __str__(self):
@@ -130,9 +116,7 @@ class TooManyParameters(Exception):
 			command – команда, вызвавшая исключение.
 		"""
 
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "\"" + command + "\"."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 			
 	def __str__(self):
@@ -147,9 +131,7 @@ class UnknownFlag(Exception):
 			flag – флаг.
 		"""
 		
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "\"" + flag + "\"."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 		
 	def __str__(self):
@@ -164,9 +146,7 @@ class UnknownKey(Exception):
 			key – ключ.
 		"""
 		
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "\"" + key + "\"."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 		
 	def __str__(self):
@@ -181,9 +161,7 @@ class UnknownCommand(Exception):
 			command – команда, вызвавшая исключение.
 		"""
 		
-		# Добавление данных в сообщение об ошибке.
 		self.__Message = "\"" + command + "\"."
-		# Обеспечение доступа к оригиналу наследованного свойства.
 		super().__init__(self.__Message) 
 		
 	def __str__(self):

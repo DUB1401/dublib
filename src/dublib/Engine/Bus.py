@@ -95,15 +95,10 @@ class ExecutionStatus:
 
 		#---> Генерация динамичкских свойств.
 		#==========================================================================================#
-		# Код выполнения.
 		self._Code = code
-		# Сообщение.
 		self._Message = message
-		# Вложенное возвращаемое значение.
 		self._Value = value
-		# Словарь дополнительных данных.
 		self._Data = dict()
-		# Тип сообщения.
 		self._Type = StatussesTypes.Normal
 
 	def __getitem__(self, key: str) -> any:
@@ -129,9 +124,7 @@ class ExecutionStatus:
 			key – ключ.
 		"""
 
-		# Состояние: заполнено ли поле.
 		IsSuccess = False
-		# Если поле заполнено, переключить состояние.
 		if key in self._Data.keys(): IsSuccess = True
 
 		return IsSuccess 
@@ -149,15 +142,10 @@ class ExecutionWarning(ExecutionStatus):
 
 		#---> Генерация динамичкских свойств.
 		#==========================================================================================#
-		# Тип сообщения.
 		self._Type = StatussesTypes.Warning
-		# Код выполнения.
 		self._Code = code
-		# Сообщение.
 		self._Message = message
-		# Вложенное возвращаемое значение.
 		self._Value = value
-		# Словарь дополнительных данных.
 		self._Data = dict()
 
 class ExecutionError(ExecutionStatus):
@@ -173,15 +161,10 @@ class ExecutionError(ExecutionStatus):
 		
 		#---> Генерация динамичкских свойств.
 		#==========================================================================================#
-		# Код выполнения.
 		self._Code = code
-		# Сообщение.
 		self._Message = message
-		# Вложенное возвращаемое значение.
 		self._Value = value
-		# Словарь дополнительных данных.
 		self._Data = dict()
-		# Тип сообщения.
 		self._Type = StatussesTypes.Error
 
 class ExecutionCritical(ExecutionStatus):
@@ -197,13 +180,8 @@ class ExecutionCritical(ExecutionStatus):
 
 		#---> Генерация динамичкских свойств.
 		#==========================================================================================#
-		# Тип сообщения.
 		self._Type = StatussesTypes.Critical
-		# Код выполнения.
 		self._Code = code
-		# Краткое описание.
 		self._Message = message
-		# Вложенное возвращаемое значение.
 		self._Value = value
-		# Словарь дополнительных данных.
 		self._Data = dict()

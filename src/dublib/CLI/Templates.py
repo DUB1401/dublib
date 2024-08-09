@@ -17,21 +17,15 @@ def Confirmation(text: str, question: str | None = None, yes: str | None = None,
 		yes – строка, обозначающая отсутствие согласия при вводе в консоль.
 	"""
 
-	# Ответ.
 	Response = None
-	# Если не заданы необязательные параметры, использовать стандартные.
 	if not question: question = "Confirm?"
 	if not yes: yes = "Y"
 	if not no: no = "N"
 
-	# Постоянно.
 	while True:
-		# Запрос подтверждения.
 		InputLine = input(f"{text}\n{question} [{yes}/{no}]: ").strip().lower()
-		# Проверка ответов.
 		if InputLine == yes.lower(): Response = True
 		if InputLine == no.lower(): Response = False
-		# Если ответ дан, остановить цикл.
 		if Response != None: break
 
 	return Response
@@ -58,22 +52,16 @@ def PrintExecutionStatus(
 		%v – значение.
 	"""
 
-	# Если статус имеет нужный класс.
 	if type(status) in [ExecutionStatus, ExecutionWarning, ExecutionError, ExecutionCritical] and status.message:
-		# Получение литералов данных.
 		Type = status.type.value.upper()
 		FirstConnector = ": " if status.type.value and status.message else ""
 		Message = status.message or ""
 		SecondConnector = " – " if status.message and status.check_data(printable_data_key) else ""
 		Value = str(status.data[printable_data_key]) if status.check_data(printable_data_key) else ""
-		# Сообщение для вывода.
 		Message = f"{Type}{FirstConnector}{Message}{SecondConnector}{Value}"
-		# Определение цвета.
 		TextColor = None
 
-		# Если включено форматирование.
 		if format:
-			# Замещение указателей.
 			Message = format.replace(r"%c", str(status.code))
 			Message = Message.replace(r"%d", str(status.data))
 			Message = Message.replace(r"%m", status.message)
@@ -81,11 +69,8 @@ def PrintExecutionStatus(
 			Message = Message.replace(r"%T", status.type.value.upper())
 			Message = Message.replace(r"%v", str(status.value))
 			
-		# Если включена окраска.
 		if colorize: 
-			# Определение цвета.
 			if status.type == StatussesTypes.Warning: TextColor = Styles.Colors.Yellow
 			if status.type in [StatussesTypes.Error, StatussesTypes.Critical]: TextColor = Styles.Colors.Red
 
-		# Вывод в консоль: отчёт.
 		StyledPrinter(Message, text_color = TextColor)

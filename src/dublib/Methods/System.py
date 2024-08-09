@@ -13,19 +13,14 @@ def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = Tr
 		raise_exception – указывает, как поступать при несоответствии версии: выбрасывать исключение или возвращать значение.
 	"""
 
-	# Состояние: корректна ли версия.
 	IsVersionCorrect = True
 	
-	# Если версия Python старше минимальной требуемой.
 	if sys.version_info < (major, minor): 
 		
-		# Если указано выбросить исключение.
 		if raise_exception == True:
-			# Выброс исключения.
 			raise RuntimeError(f"Python {major}.{minor} or newer is required.")
 
 		else: 
-			# Переключение статуса проверки.
 			IsVersionCorrect = False
 
 	return IsVersionCorrect
@@ -38,7 +33,5 @@ def Clear():
 def Shutdown():
 	"""Выключает устройство."""
 
-	# Если устройство работает под управлением ОС семейства Linux.
 	if sys.platform in ["linux", "linux2"]: os.system("sudo shutdown now")
-	# Если устройство работает под управлением ОС семейства Windows.
 	if sys.platform == "win32": os.system("shutdown /s")

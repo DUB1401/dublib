@@ -36,9 +36,7 @@ class Patch:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		# Путь к файлу.
 		self.__Path = NormalizePath(path)
-		# Содержимое файла.
 		self.__Text = ReadTextFile(path)
 
 	def append_line(self, line: int, text: str):
@@ -48,11 +46,8 @@ class Patch:
 			text – текст новой строки.
 		"""
 
-		# Список строк.
 		Lines = self.__Text.split("\n")
-		# Добавление строки.
 		Lines.insert(line, text)
-		# Объединение строк.
 		self.__Text = "\n".join(Lines)
 
 	def comment(self, line: int, character: str = "#", space: bool = True):
@@ -63,13 +58,9 @@ class Patch:
 			space – указывает, отделять ли символ комментария от строки пробелом.
 		"""
 
-		# Список строк.
 		Lines = self.__Text.split("\n")
-		# Определение использование пробела.
 		space = " " if space else ""
-		# Комментирование строки.
 		Lines[line - 1] = character + space + Lines[line - 1]
-		# Объединение строк.
 		self.__Text = "\n".join(Lines)
 
 	def remove_line(self, line: int):
@@ -78,11 +69,8 @@ class Patch:
 			line – номер строки.
 		"""
 
-		# Список строк.
 		Lines = self.__Text.split("\n")
-		# Удаление строки.
 		del Lines[line]
-		# Объединение строк.
 		self.__Text = "\n".join(Lines)
 
 	def replace_by_regex(self, regex: str, text: str, count: int = 0):
@@ -102,21 +90,14 @@ class Patch:
 			indentation – указывает, заменять ли также отступы.
 		"""
 
-		# Список строк.
 		Lines = self.__Text.split("\n")
-		# Отступ.
 		Indentation = ""
 
-		# Если замена отступов отключена.
 		if not indentation:
-			# Поиск отступа.
 			Result = re.match("^\\s+", Lines[line - 1])
-			# Если поиск успешен, сохранить отступ.
 			if Result: Indentation = Result[0]
 
-		# Замена строки.
 		Lines[line - 1] = Indentation + text
-		# Объединение строк.
 		self.__Text = "\n".join(Lines)
 
 	def uncomment(self, line: int, character: str = "#", space: bool = True):
@@ -127,13 +108,9 @@ class Patch:
 			space – указывает, отделён ли символ комментария от строки пробелом.
 		"""
 
-		# Список строк.
 		Lines = self.__Text.split("\n")
-		# Определение использование пробела.
 		space = 1 if space else 0
-		# Раскомментирование строки.
 		Lines[line - 1] = Lines[line - 1][len(character) + space:]
-		# Объединение строк.
 		self.__Text = "\n".join(Lines)
 
 	def save(self):
