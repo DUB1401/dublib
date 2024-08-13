@@ -15,25 +15,22 @@ def MakeRootDirectories(directories: list[str]):
 	for Name in directories:
 		if os.path.exists(Name) == False: os.makedirs(Name)
 
-def NormalizePath(path: str, use_unix_separator: bool | None = None, separator_at_end: bool | None = None):
+def NormalizePath(path: str, unix_separator: bool | None = None, separator_at_end: bool = False):
 	"""
 	Нормализует путь к файлу по заданным параметрам, которые по умолчанию определяет автоматически.
 		path – путь к файлу или каталогу;\n
 		use_unix_separator – указывает, следует ли использовать Unix-разделитель или стиль Windows;\n
-		separator_at_end – указывает, что в конце пути обязан находиться разделитель (при автоматическом определении всегда добавляется к каталогам).
+		separator_at_end – указывает, что в конце пути обязан находиться разделитель.
 	"""
 
-	if use_unix_separator == None:
-		if sys.platform == "win32": use_unix_separator = False
-		else: use_unix_separator = True
+	if unix_separator == None:
+		if sys.platform == "win32": unix_separator = False
+		else: unix_separator = True
 
-	if use_unix_separator and "\\" in path: path = path.replace("\\", "/")
-	elif not use_unix_separator and "/" in path: path = path.replace("/", "\\")
+	if unix_separator and "\\" in path: path = path.replace("\\", "/")
+	elif not unix_separator and "/" in path: path = path.replace("/", "\\")
 
-	if separator_at_end == None:
-		separator_at_end = os.path.isdir(path)
-
-	UsedSeparator = "/" if use_unix_separator else "\\"
+	UsedSeparator = "/" if unix_separator else "\\"
 
 	if separator_at_end and not path.endswith(UsedSeparator): path += UsedSeparator
 	elif not separator_at_end and path.endswith(UsedSeparator): path = path.rstrip(UsedSeparator)

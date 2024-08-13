@@ -29,6 +29,14 @@ class UserData:
 		return self.__ID
 
 	@property
+	def is_chat_forbidden(self) -> bool | None:
+		"""Состояние: запретил ли пользователь бота."""
+		
+		if "is_chat_forbidden" in self.__Data.keys(): return self.__Data["is_chat_forbidden"]
+
+		return None
+
+	@property
 	def is_premium(self) -> bool:
 		"""Состояние: есть ли Premium-подписка у пользователя."""
 
@@ -91,6 +99,7 @@ class UserData:
 		self.__Data = {
 			"username": None,
 			"language": None,
+			"is_chat_forbidden": None,
 			"is_premium": None,
 			"expected_type": None,
 			"permissions": [],
@@ -134,6 +143,11 @@ class UserData:
 
 		self.__Data["temp"] = dict()
 		self.__SaveData()		
+
+	def delete(self):
+		"""Удаляет локальный файл пользователя."""
+
+		os.remove(self.__StorageDirectory + f"/{self.__ID}.json")
 
 	def get_object(self, key: str) -> any:
 		"""
@@ -180,11 +194,6 @@ class UserData:
 
 		return IsOwned
 
-	def remove(self):
-		"""Удаляет локальный файл пользователя."""
-
-		os.remove(self.__StorageDirectory + f"/{self.__ID}.json")
-
 	def remove_permissions(self, permissions: list[str] | str):
 		"""
 		Удаляет разрешения.
@@ -209,6 +218,15 @@ class UserData:
 		if key in self.__Data["data"].keys():
 			del self.__Data["data"][key]
 			self.__SaveData()
+
+	def set_chat_forbidden(self, status: bool):
+		"""
+		Задаёт ожидаемый от пользователя тип данных.
+			status – состояние.
+		"""
+
+		self.__Data["is_chat_forbidden"] = status
+		self.__SaveData()
 
 	def set_expected_type(self, type_name: str):
 		"""
@@ -248,19 +266,21 @@ class UserData:
 		
 		self.__SetProperty("temp", key, value)
 
-	def update(self, user: User):
+	def update(self, user: User, is_chat_forbidden: bool | None = None):
 		"""
 		Обновляет данные пользователя из параметров, содержащихся в сообщении.
-			user – объект представления пользователя.
+			user – объект представления пользователя;\n
+			is_chat_forbidden – указывает, заблокировал ли пользователь бота.
 		"""
 
 		if user.id == self.__ID:
+			if is_chat_forbidden != None: self.__Data["is_chat_forbidden"] = is_chat_forbidden
 			self.__Data["is_premium"] = bool(user.is_premium)
 			self.__Data["language"] = user.language_code
 			self.__Data["username"] = user.username
 			self.__SaveData()
 
-		else: raise UpdateByOtherUser()
+		else: raise IncorrectUserToUpdate()
 
 class UsersManager:
 	"""Менеджер пользователей."""
@@ -334,6 +354,16 @@ class UsersManager:
 
 		return CurrentUser
 
+	def delete_user(self, user_id: int | str):
+		"""
+		Удаляет пользователя из системы.
+			user_id – ID пользователя.
+		"""
+
+		user_id = int(user_id)
+		self.__Users[user_id].delete()
+		del self.__Users[user_id]
+
 	def get_user(self, user_id: int | str) -> UserData:
 		"""
 		Возвращает объект данных пользователя.
@@ -368,13 +398,3 @@ class UsersManager:
 			Users = Buffer
 
 		return Users
-
-	def remove_user(self, user_id: int | str):
-		"""
-		Удаляет пользователя из системы.
-			user_id – ID пользователя.
-		"""
-
-		user_id = int(user_id)
-		self.__Users[user_id].remove()
-		del self.__Users[user_id]

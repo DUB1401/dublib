@@ -1,4 +1,4 @@
-class UpdateByOtherUser(Exception):
+class IncorrectUserToUpdate(Exception):
 	"""Исключение: использование данных другого пользователя для обновления."""
 
 	def __init__(self):
