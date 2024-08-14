@@ -606,7 +606,7 @@ class WebRequestor:
 		headers = self.__MergeHeaders(headers)
 
 		Response.parse_response(self.__Session.get(
-			uel = url,
+			url = url,
 			params = params,
 			headers = headers,
 			cookies = cookies,
