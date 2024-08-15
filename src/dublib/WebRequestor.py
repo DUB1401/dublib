@@ -317,10 +317,10 @@ class WebConfig:
 		return self.__Tries
 
 	@property
-	def tries(self):
+	def retries(self):
 		"""Количество повторов запроса при неудачном выполнении."""
 
-		return self.__Tries
+		return self.__Retries
 
 	@property
 	def user_agent(self) -> str | None:
@@ -365,7 +365,7 @@ class WebConfig:
 		self.__EnableLogging = True
 		self.__UserAgent = None
 		self.__Headers = None
-		self.__Tries = 1
+		self.__Retries = 0
 		self.__GoodStatusses = [200, 404]
 		self.__Delay = 0.25
 
@@ -439,13 +439,13 @@ class WebConfig:
 
 		self.__Delay = delay
 
-	def set_tries_count(self, tries_count: int):
+	def set_retries_count(self, retries: int):
 		"""
 		Задаёт количество повторов запроса при неудачном выполнении.
-			tries_count – количество повторов.
+			retries – количество повторов.
 		"""
 
-		self.__Tries = tries_count
+		self.__Retries = retries
 
 	def set_user_agent(self, user_agent: str | None):
 		"""
@@ -765,17 +765,17 @@ class WebRequestor:
 	# >>>>> ЗАПРОСЫ <<<<< #
 	#==========================================================================================#	
 	
-	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, tries: int | None = None) -> WebResponse:
+	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, retries: int | None = None) -> WebResponse:
 		"""
 		Отправляет GET запрос.
 			url – адрес запроса;\n
 			params – словарь параметров запроса;\n
 			headers – словарь заголовков;\n
 			cookies – словарь куков;\n
-			tries – количество попыток повтора при неудачном выполнении.
+			retries – количество попыток повтора при неудачном выполнении.
 		"""
 
-		if tries == None: tries = self.__Config.tries
+		tries = 1 + self.__Config.retries
 		Response = WebResponse()
 		Try = 0
 		LibName = None
@@ -804,7 +804,7 @@ class WebRequestor:
 		
 		return Response
 	
-	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, tries: int | None = None) -> WebResponse:
+	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, retries: int | None = None) -> WebResponse:
 		"""
 		Отправляет POST запрос.
 			url – адрес запроса;\n
@@ -816,7 +816,7 @@ class WebRequestor:
 			tries – количество попыток повтора при неудачном выполнении.
 		"""
 
-		if tries == None: tries = self.__Config.tries
+		tries = 1 + self.__Config.retries
 		Response = WebResponse()
 		Try = 0
 		LibName = None
