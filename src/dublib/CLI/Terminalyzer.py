@@ -242,6 +242,10 @@ class Position:
 		"""
 
 		if important: self.__IsImportant = True
+
+		for CurrentArgument in self.__Arguments: 
+			if CurrentArgument.type == type: raise IdenticalArguments(type.value)
+
 		self.__Arguments.append(Argument(type, description, important))
 
 	def add_flag(self, name: str, description: str | None = None, important: bool = False):
@@ -343,7 +347,12 @@ class Command:
 			for Part in Element: 
 
 				if Part.is_important: 
-					if type(Part) == Position and Part.keys: MinParametersCount += 2
+
+					if type(Part) == Position:
+						if Part.keys and not Part.flags and not Part.arguments: MinParametersCount += 2
+						else: MinParametersCount += 1
+
+					elif type(Part) == Position and Part.keys: MinParametersCount += 2
 					elif type(Part) == Position and not Part.keys: MinParametersCount += 1
 					elif type(Part) == Key: MinParametersCount += 2
 					else: MinParametersCount += 1
@@ -637,43 +646,47 @@ class Terminalyzer:
 		
 		return IsDetermined
 
-	def __ConfirmParametrType(self, value: str, type_name: ParametersTypes = ParametersTypes.All) -> any:
+	def __ConfirmParametrType(self, value: str, type_name: ParametersTypes = ParametersTypes.All, raise_exception: bool = True) -> any:
 		"""
 		Проверяет и парсит значение параметра согласно его типу.
 			value – значение параметра;\n
-			type_name – тип параметра.
+			type_name – тип параметра;\n
+			raise_exception – указывает, нужно ли выбрасывать исключение при ошибке проверки типа.
 		"""
 		
+		Value = None
+
 		if type_name != ParametersTypes.All:
 
 			if type_name == ParametersTypes.Bool:
-				value = value.lower()
-				if value == "true": value = True
-				elif value == "false": value = False
-				elif value.isdigit(): value = bool(int(value))
-				else: raise InvalidParameterType(value, ParametersTypes.Bool.value)
+				Buffer = value.lower()
+				if Buffer == "true": Value = True
+				elif Buffer == "false": Value = False
 
-			if type_name == ParametersTypes.Date:
+			elif type_name == ParametersTypes.Date:
 
 				try:
-					value = dateparser.parse(value).date()
+					Value = dateparser.parse(value).date()
 
-				except: raise InvalidParameterType(value, ParametersTypes.Date.value)
+				except: pass
 			
-			if type_name == ParametersTypes.Number:
-				if not value.lstrip("-").isdigit(): raise InvalidParameterType(value, ParametersTypes.Number.value)
-				else: value = int(value)
+			elif type_name == ParametersTypes.Number:
+				if value.lstrip("-").isdigit(): Value = int(value)
 				
-			if type_name == ParametersTypes.ValidPath:
-				if not os.path.exists(value): raise InvalidParameterType(value, ParametersTypes.ValidPath.value)
+			elif type_name == ParametersTypes.ValidPath:
+				if os.path.exists(value): Value = value
 
-			if type_name == ParametersTypes.Text:
-				if not value.isalpha(): raise InvalidParameterType(value, ParametersTypes.Text.value)
+			elif type_name == ParametersTypes.Text:
+				if value.isalpha(): Value = value
 
-			if type_name == ParametersTypes.URL:
-				if not bool(urlparse(value).scheme): raise InvalidParameterType(value, ParametersTypes.URL.value)
+			elif type_name == ParametersTypes.URL:
+				if bool(urlparse(value).scheme): Value = value 
 
-		return value
+		else: Value = value
+
+		if Value == None and raise_exception: raise InvalidParameterType(value, ParametersTypes.URL.value)
+
+		return Value
 
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ ПАРСИНГА ПАРАМЕТРОВ <<<<< #
@@ -696,7 +709,19 @@ class Terminalyzer:
 
 				if CurrentPosition.arguments and not self.__PositionsLocks[PositionIndex]:
 					self.__ParametersLocks[parameter_index] = True
-					Arguments.append(self.__ConfirmParametrType(self.__Parameters[parameter_index], CurrentPosition.arguments[0].type))
+
+					for Argument in CurrentPosition.arguments:
+						Value = self.__ConfirmParametrType(self.__Parameters[parameter_index], Argument.type, raise_exception = False)
+
+						if Value:
+							Arguments.append(Value)
+							break
+
+						elif Argument == CurrentPosition.arguments[-1]: 
+							Types = list()
+							for Argument in CurrentPosition.arguments: Types.append(Argument.type.value)
+							raise InvalidPositionalArgumentTypes(self.__Parameters[parameter_index], Types)
+					
 					continue
 
 				else: break
@@ -812,9 +837,8 @@ class Terminalyzer:
 		MSG_Indent = indent or "  "
 		MSG_Name = TextStyler("Argument", decorations = [Styles.Decorations.Bold])
 		MSG_Type = f" ({argument.type.value})"
-		MSG_Important = "*" if argument.is_important else ""
 		MSG_Description = f": {argument.description}" if argument.description else ""
-		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Important}{MSG_Type}{MSG_Description}"
+		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Type}{MSG_Description}"
 
 		return Description
 	
@@ -827,9 +851,8 @@ class Terminalyzer:
 
 		MSG_Indent = indent or "  "
 		MSG_Name = TextStyler(self.__FlagsIndicator + flag.name, decorations = [Styles.Decorations.Bold])
-		MSG_Important = "*" if flag.is_important else ""
 		MSG_Description = f": {flag.description}" if flag.description else ""
-		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Important}{MSG_Description}"
+		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Description}"
 
 		return Description
 	
@@ -843,9 +866,8 @@ class Terminalyzer:
 		MSG_Indent = indent or "  "
 		MSG_Name = TextStyler(self.__KeysIndicator + key.name, decorations = [Styles.Decorations.Bold])
 		MSG_Type = f" ({key.type.value})"
-		MSG_Important = "*" if key.is_important else ""
 		MSG_Description = f": {key.description}" if key.description else ""
-		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Important}{MSG_Type}{MSG_Description}"
+		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Type}{MSG_Description}"
 
 		return Description
 
@@ -864,9 +886,8 @@ class Terminalyzer:
 			Indent = "  "
 			IsPosition = True
 			PositionName = f"{Indent}{position.name}" if position.name else f"{Indent}POSITION_{index + 1}"
-			MSG_Important = "*" if position.is_important else""
 			MSG_Description = f": {position.description}" if position.description else ""
-			Help += TextStyler(f"\n{PositionName}", decorations = [Styles.Decorations.Bold]) + MSG_Important + MSG_Description
+			Help += TextStyler(f"\n{PositionName}", decorations = [Styles.Decorations.Bold]) + MSG_Description
 
 		if position.arguments and IsPosition: Help += f"\n{Indent}  ARGUMENTS:"
 		elif position.arguments: Help += f"\n{Indent}  " + TextStyler("ARGUMENTS:", decorations = [Styles.Decorations.Bold])

@@ -18,6 +18,18 @@ class DuplicatedStyles(Exception):
 # >>>>> Terminalyzer <<<<< #
 #==========================================================================================#
 	
+class IdenticalArguments(Exception):
+	"""Исключение: попытка установки одинаковых аргументов на одну позицию."""
+
+	def __init__(self, type_name: str):
+		"""Исключение: попытка установки одинаковых аргументов на одну позицию."""
+
+		self.__Message = f"Can't set same arguments \"{type_name}\" on position."
+		super().__init__(self.__Message) 
+			
+	def __str__(self):
+		return self.__Message
+
 class IdenticalIndicators(Exception):
 	"""Исключение: попытка установки одинаковых индикаторов ключей и флагов."""
 
@@ -31,16 +43,32 @@ class IdenticalIndicators(Exception):
 		return self.__Message
 
 class InvalidParameterType(Exception):
-	"""Исключение: неверное значение аргумента."""
+	"""Исключение: неверное значение параметра."""
 
 	def __init__(self, value: str, type_name: str):
 		"""
-		Исключение: неверное значение аргумента.
-			value – значение аргумента;\n
+		Исключение: неверное значение параметра.
+			value – значение параметра;\n
 			type_name – название ожидаемого типа.
 		"""
 
 		self.__Message = "\"" + value + "\" isn't \"" + type_name + "\"."
+		super().__init__(self.__Message) 
+			
+	def __str__(self):
+		return self.__Message
+	
+class InvalidPositionalArgumentTypes(Exception):
+	"""Исключение: неверное значение аргумента."""
+
+	def __init__(self, value: str, types_names: list[str]):
+		"""
+		Исключение: неверное значение аргумента.
+			value – значение аргумента;\n
+			types_names – список названий ожидаемых типов.
+		"""
+
+		self.__Message = "\"" + value + "\" isn't: " + ", ".join(types_names) + "."
 		super().__init__(self.__Message) 
 			
 	def __str__(self):

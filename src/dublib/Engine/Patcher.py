@@ -70,8 +70,19 @@ class Patch:
 		"""
 
 		Lines = self.__Text.split("\n")
-		del Lines[line]
+		del Lines[line - 1]
 		self.__Text = "\n".join(Lines)
+
+	def replace(self, old: str, new: str, count: int | None = None):
+		"""
+		Заменяет текст.
+			old – старый текст;\n
+			new – новый текст;\n
+			count – количество замен.
+		"""
+
+		if count == None: count = -1
+		self.__Text = self.__Text.replace(old, new, count)
 
 	def replace_by_regex(self, regex: str, text: str, count: int = 0):
 		"""
