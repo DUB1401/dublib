@@ -11,7 +11,7 @@
 * [Engine](https://github.com/DUB1401/dublib/blob/main/docs/Engine/README.md)
 * [Methods](https://github.com/DUB1401/dublib/blob/main/docs/Methods/README.md)
 * [Polyglot](https://github.com/DUB1401/dublib/blob/main/docs/Polyglot.md)
-* [TelebotUtils](https://github.com/DUB1401/dublib/blob/main/docs/TelebotUtils.md)
+* [TelebotUtils](https://github.com/DUB1401/dublib/blob/main/docs/TelebotUtils/README.md)
 * [WebRequestor](https://github.com/DUB1401/dublib/blob/main/docs/WebRequestor.md)
 
 # Установка

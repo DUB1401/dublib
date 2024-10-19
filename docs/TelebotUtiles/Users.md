@@ -1,11 +1,9 @@
-# TelebotUtils
-**TelebotUtils** – это коллекция инструментов для упрощения проектирования ботов Telegram при помощи библиотеки [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI). Включает в себя средства для межсессионного хранения базовых данных пользователя в файлах JSON, управления уровнем доступа, а также ожидания от пользователя определённых значений.
-
-Для использования нужно установить дополнительные зависимости: `pip install dublib[telebot]`.
+# Users
+**Users** – это подмодуль, включающий в себя средства для межсессионного хранения базовых данных пользователя в файлах JSON, управления уровнем доступа, а также ожидания от пользователя определённых значений.
 
 ## Пример
 ```Python
-from dublib.TelebotUtils import UsersManager, UserData
+from dublib.TelebotUtils.Users import UsersManager, UserData
 from telebot import types
 
 # Инициализация менеджера с указанием каталога для хранения JSON файлов.
