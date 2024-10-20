@@ -5,4 +5,5 @@
 
 Включает следующие подмодули:
 * [Cache](./Cache.md)
+* [Master](./Master.md)
 * [Users](./Users.md)
