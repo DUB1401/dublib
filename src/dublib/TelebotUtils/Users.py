@@ -1,6 +1,6 @@
+from ..Methods.Filesystem import NormalizePath
 from ..Methods.JSON import ReadJSON, WriteJSON
 from ..Exceptions.TelebotUtils import *
-
 from telebot.types import User
 
 import os
@@ -324,7 +324,7 @@ class UsersManager:
 			UserID = int(File.replace(".json", ""))
 			self.__Users[UserID] = UserData(self.__StorageDirectory, UserID, Buffer)
 
-	def __init__(self, dir: str):
+	def __init__(self, directory: str):
 		"""
 		Менеджер пользователей.
 			dir – путь к директории хранения данных.
@@ -333,7 +333,7 @@ class UsersManager:
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
 		self.__Users = dict()
-		self.__StorageDirectory = dir.replace("\\", "/").rstrip("/")
+		self.__StorageDirectory = NormalizePath(directory)
 
 		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
 		self.__LoadUsers()

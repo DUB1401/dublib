@@ -127,7 +127,7 @@ class TeleCache:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, storage: str, type: StorageTypes = StorageTypes.JSON):
+	def __init__(self, storage: str | None = None, type: StorageTypes = StorageTypes.JSON):
 		"""
 		Менеджер кэша загружаемых в Telegram файлов.
 			storage – путь к файлу базы данных;\n
@@ -268,7 +268,7 @@ class TeleCache:
 				FileID = Message.document.file_id
 			
 			case types.InputMediaPhoto:
-				Message = self.__Bot.send_photo(chat_id = self.__ChatID, photo = types.InputFile(path))
+				Message = self.__Bot.send_photo(chat_id = self.__ChatID, photo = types.InputMediaPhoto(path))
 				FileID = Message.photo[-1].file_id
 
 			case types.InputMediaVideo:
