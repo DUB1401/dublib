@@ -174,16 +174,18 @@ class TeleCache:
 		self.__Data = {"cache": []}
 		if autosave: self.save()
 
-	def get_cached_file(self, path: str, upload: bool = True, autosave: bool = True) -> CachedFile:
+	def get_cached_file(self, path: str, upload: bool = True, type: types.InputMedia | None = None, autosave: bool = True) -> CachedFile:
 		"""
-		Возвращает данные кэшированного файла.
+		Возвращает данные кэшированного файла. Если кэш не обнаружен, выполняет автоматическое кэширование.
 			path – путь к файлу или его виртуальный идентификатор;\n
 			upload – указывает, нужно ли кэшировать новый файл;\n
+			type – тип файла при автозагрузке (по умолчанию документ);\n
 			autosave – включает автосохранение базы данных.
 		"""
 
 		path = NormalizePath(path)
-		if path not in self.__Data.keys() and upload: self.__Data[path] = self.upload_file(path, autosave = False)
+		if not type: type = types.InputMediaDocument
+		if path not in self.__Data.keys() and upload: self.__Data[path] = self.upload_file(path, type, autosave = False)
 		if autosave: self.save()
 
 		return self.__Data[path]
