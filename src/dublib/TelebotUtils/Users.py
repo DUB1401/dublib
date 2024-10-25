@@ -193,6 +193,17 @@ class UserData:
 			if Permission not in self.__Data["permissions"]: IsOwned = False
 
 		return IsOwned
+	
+	def has_property(self, key: str) -> bool:
+		"""
+		Проверяет, имеет ли пользователь свойство с таким ключом.
+			key – ключ свойства.
+		"""
+
+		IsExists = True
+		if key in self.__Data["data"].keys() or key in self.__Data["temp"].keys() : IsExists = True
+
+		return IsExists
 
 	def remove_permissions(self, permissions: list[str] | str):
 		"""
