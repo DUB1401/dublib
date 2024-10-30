@@ -17,7 +17,7 @@ Cacher = TeleCache()
 Cacher.set_options(BOT_TOKEN, CHAT_ID)
 
 # Ручная выгрузка файла на сервер Telegram.
-Cacher.upload_file("test.jpg", types.InputPaidMediaPhoto)
+Cacher.upload_file("test.jpg", types.InputMediaPhoto)
 # Получение структуры данных кэшированного файла.
 File = Cacher.get_cached_file("test.jpg")
 # Получение ID кэшированного файла.

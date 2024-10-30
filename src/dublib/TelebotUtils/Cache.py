@@ -270,7 +270,7 @@ class TeleCache:
 				FileID = Message.document.file_id
 			
 			case types.InputMediaPhoto:
-				Message = self.__Bot.send_photo(chat_id = self.__ChatID, photo = types.InputMediaPhoto(path))
+				Message = self.__Bot.send_photo(chat_id = self.__ChatID, photo = types.InputFile(path))
 				FileID = Message.photo[-1].file_id
 
 			case types.InputMediaVideo:
