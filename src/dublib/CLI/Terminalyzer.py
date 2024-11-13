@@ -1,4 +1,4 @@
-from ..CLI.StyledPrinter import Styles, TextStyler
+from .TextStyler import Styles, TextStyler
 from ..Methods.Data import MergeDictionaries
 from ..Exceptions.CLI import *
 

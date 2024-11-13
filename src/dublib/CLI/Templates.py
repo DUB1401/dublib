@@ -1,5 +1,4 @@
-from ..CLI.StyledPrinter import StyledPrinter, Styles
-from ..Methods.System import Clear
+from .TextStyler import Styles, TextStyler
 from ..Engine.Bus import *
 
 import readline
@@ -73,4 +72,4 @@ def PrintExecutionStatus(
 			if status.type == StatussesTypes.Warning: TextColor = Styles.Colors.Yellow
 			if status.type in [StatussesTypes.Error, StatussesTypes.Critical]: TextColor = Styles.Colors.Red
 
-		StyledPrinter(Message, text_color = TextColor)
+		TextStyler(Message, text_color = TextColor).print()
