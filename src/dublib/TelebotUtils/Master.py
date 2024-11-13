@@ -1,6 +1,7 @@
 from .Users import UserData
 
-from telebot import TeleBot
+from telebot import apihelper, TeleBot, types
+from time import sleep
 
 class TeleMaster:
 	"""Набор дополнительного функционала для бота Telegram."""
@@ -52,5 +53,60 @@ class TeleMaster:
 			except: pass
 		
 		if Subscriptions == len(chats): IsSubscripted = True
+		self.__Bot.send_message()
 		
 		return IsSubscripted
+	
+	def send_message(
+			self,
+			chat_id: int | str,
+			text: str,
+			parse_mode: str | None = None,
+			entities: types.List[types.MessageEntity] | None = None,
+			disable_web_page_preview: bool | None = None,
+			disable_notification: bool | None = None,
+			protect_content: bool | None = None,
+			reply_to_message_id: int | None = None,
+			allow_sending_without_reply: bool | None = None,
+			reply_markup: types.REPLY_MARKUP_TYPES | None = None,
+			timeout: int | None = None,
+			message_thread_id: int | None = None,
+			reply_parameters: types.ReplyParameters | None = None,
+			link_preview_options: types.LinkPreviewOptions | None = None,
+			business_connection_id: str | None = None,
+			message_effect_id: str | None = None,
+		) -> types.Message:
+		"""Отправляет сообщение. Автоматически выдерживает интервал при ошибке слишком частых запросов."""
+
+		Message = None
+
+		while not Message:
+			try:
+				Message = self.__Bot(
+					chat_id,
+					text,
+					parse_mode,
+					entities,
+					disable_web_page_preview,
+					disable_notification,
+					protect_content,
+					reply_to_message_id,
+					allow_sending_without_reply,
+					reply_markup,
+					timeout,
+					message_thread_id,
+					reply_parameters,
+					link_preview_options,
+					business_connection_id,
+					message_effect_id
+				)
+
+			except apihelper.ApiTelegramException as ExceptionData:
+
+				if "Error code: 429. Description: Too Many Requests" in str(ExceptionData):
+					Seconds = float(str(ExceptionData).split(" ")[-1])
+					sleep(Seconds)
+
+				else: raise ExceptionData
+
+		return Message
