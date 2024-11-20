@@ -1,6 +1,6 @@
 from .Users import UserData
 
-from telebot import apihelper, TeleBot, types
+from telebot import apihelper, REPLY_MARKUP_TYPES, TeleBot, types
 from time import sleep
 
 class TeleMaster:
@@ -68,7 +68,7 @@ class TeleMaster:
 			protect_content: bool | None = None,
 			reply_to_message_id: int | None = None,
 			allow_sending_without_reply: bool | None = None,
-			reply_markup: types.REPLY_MARKUP_TYPES | None = None,
+			reply_markup: REPLY_MARKUP_TYPES | None = None,
 			timeout: int | None = None,
 			message_thread_id: int | None = None,
 			reply_parameters: types.ReplyParameters | None = None,
@@ -82,7 +82,7 @@ class TeleMaster:
 
 		while not Message:
 			try:
-				Message = self.__Bot(
+				Message = self.__Bot.send_message(
 					chat_id,
 					text,
 					parse_mode,
