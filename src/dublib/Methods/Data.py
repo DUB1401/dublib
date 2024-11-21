@@ -76,6 +76,18 @@ def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwri
 
 	return base_dictionary
 
+def MultipleReplace(string: str, values: list[str], new_value: str) -> str:
+	"""
+	Поочердёно выполняет замену подстрок в строке на новое значение.
+		string – обрабатываемая строка;\n
+		values – список значений;\n
+		new_value – значение для замены.
+	"""
+	
+	for Value in values: string = string.replace(Value, new_value)
+
+	return string
+
 def RemoveRecurringSubstrings(string: str, substring: str) -> str:
 	"""
 	Удаляет из строки подряд идущие повторяющиеся подстроки.

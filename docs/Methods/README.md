@@ -3,5 +3,4 @@
 
 * [Data](/docs/Methods/Data.md)
 * [Filesystem](/docs/Methods/Filesystem.md)
-* [JSON](/docs/Methods/JSON.md)
 * [System](/docs/Methods/System.md)

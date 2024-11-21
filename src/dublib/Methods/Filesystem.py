@@ -1,3 +1,5 @@
+from .JSON import ReadJSON, WriteJSON
+
 import shutil
 import sys
 import os
