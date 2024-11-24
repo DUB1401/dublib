@@ -1,5 +1,5 @@
-from .TextStyler import Styles, TextStyler
 from ..Methods.Data import MergeDictionaries
+from .TextStyler import TextStyler
 from ..Exceptions.CLI import *
 
 from prettytable import PLAIN_COLUMNS, PrettyTable
@@ -835,7 +835,7 @@ class Terminalyzer:
 		"""
 
 		MSG_Indent = indent or "  "
-		MSG_Name = TextStyler("Argument", decorations = [Styles.Decorations.Bold])
+		MSG_Name = TextStyler("Argument").decorate.bold
 		MSG_Type = f" ({argument.type.value})"
 		MSG_Description = f": {argument.description}" if argument.description else ""
 		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Type}{MSG_Description}"
@@ -850,7 +850,7 @@ class Terminalyzer:
 		"""
 
 		MSG_Indent = indent or "  "
-		MSG_Name = TextStyler(self.__FlagsIndicator + flag.name, decorations = [Styles.Decorations.Bold])
+		MSG_Name = TextStyler(self.__FlagsIndicator + flag.name).decorate.bold
 		MSG_Description = f": {flag.description}" if flag.description else ""
 		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Description}"
 
@@ -864,7 +864,7 @@ class Terminalyzer:
 		"""
 
 		MSG_Indent = indent or "  "
-		MSG_Name = TextStyler(self.__KeysIndicator + key.name, decorations = [Styles.Decorations.Bold])
+		MSG_Name = TextStyler(self.__KeysIndicator + key.name).decorate.bold
 		MSG_Type = f" ({key.type.value})"
 		MSG_Description = f": {key.description}" if key.description else ""
 		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Type}{MSG_Description}"
@@ -887,20 +887,20 @@ class Terminalyzer:
 			IsPosition = True
 			PositionName = f"{Indent}{position.name}" if position.name else f"{Indent}POSITION_{index + 1}"
 			MSG_Description = f": {position.description}" if position.description else ""
-			Help += TextStyler(f"\n{PositionName}", decorations = [Styles.Decorations.Bold]) + MSG_Description
+			Help += TextStyler(f"\n{PositionName}").decorate.bold + MSG_Description
 
 		if position.arguments and IsPosition: Help += f"\n{Indent}  ARGUMENTS:"
-		elif position.arguments: Help += f"\n{Indent}  " + TextStyler("ARGUMENTS:", decorations = [Styles.Decorations.Bold])
+		elif position.arguments: Help += f"\n{Indent}  " + TextStyler("ARGUMENTS:").decorate.bold
 		for CurrentArgument in position.arguments:
 			Help += self.__BuildArgumentDescription(CurrentArgument, Indent)
 
 		if position.flags and IsPosition: Help += f"\n{Indent}  FLAGS:"
-		elif position.flags: Help += f"\n{Indent}  " + TextStyler("FLAGS:", decorations = [Styles.Decorations.Bold])
+		elif position.flags: Help += f"\n{Indent}  " + TextStyler("FLAGS:").decorate.bold
 		for CurrentFlag in position.flags:
 			Help += self.__BuildFlagDescription(CurrentFlag, Indent)
 
 		if position.keys and IsPosition: Help += f"\n{Indent}  KEYS:"
-		elif position.keys: Help += f"\n{Indent}  " + TextStyler("KEYS:", decorations = [Styles.Decorations.Bold])
+		elif position.keys: Help += f"\n{Indent}  " + TextStyler("KEYS:").decorate.bold
 		for CurrentKey in position.keys:
 			Help += self.__BuildKeyDescription(CurrentKey, Indent)
 
@@ -919,11 +919,11 @@ class Terminalyzer:
 			if CurrentCommand.name == command_name: HelpCommand = CurrentCommand
 
 		if HelpCommand:
-			Help = TextStyler(HelpCommand.name, decorations = [Styles.Decorations.Bold])
+			Help = TextStyler(HelpCommand.name).decorate.bold
 			Help += self.__GenerateCommandMap(HelpCommand)
 
 			if HelpCommand.description:
-				Description = TextStyler(HelpCommand.description, decorations = [Styles.Decorations.Italic])
+				Description = TextStyler(HelpCommand.description).decorate.bold
 				Help += f"\n{Description}"
 
 			for PositionIndex in range(len(HelpCommand.positions)):
@@ -960,7 +960,7 @@ class Terminalyzer:
 		TableObject.set_style(PLAIN_COLUMNS)
 
 		for ColumnName in HelpTable.keys():
-			Buffer = TextStyler(ColumnName, decorations = [Styles.Decorations.Bold])
+			Buffer = TextStyler(ColumnName).decorate.bold
 			TableObject.add_column(Buffer, HelpTable[ColumnName])
 
 		TableObject.align = "l"

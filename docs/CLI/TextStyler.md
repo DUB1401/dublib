@@ -19,7 +19,7 @@ print(Text)
 
 # Использование быстрого форматирования.
 print(TextStyler("This is a fast green text.").colorize.green)
-print(TextStyler("This is a fast throughline text.").decorate.throughline)
+print(TextStyler("This is a fast throughlined text.").decorate.throughline)
 print(TextStyler("This is a fast backgrounded text.").background.blue)
 ```
 
