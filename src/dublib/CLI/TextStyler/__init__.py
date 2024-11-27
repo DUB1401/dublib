@@ -273,6 +273,11 @@ class TextStyler:
 		self.__Colorize = Colorize(self)
 		self.__Decorate = Decorate(self)
 
+	def __str__(self) -> str:
+		"""Возвращает стилизованный текст."""
+
+		return self.text
+
 	def print(self):
 		"""Выводит в консоль стилизованный текст."""
 
