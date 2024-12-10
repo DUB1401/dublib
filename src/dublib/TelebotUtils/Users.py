@@ -1,7 +1,9 @@
 from ..Methods.Filesystem import NormalizePath
 from ..Methods.JSON import ReadJSON, WriteJSON
 from ..Exceptions.TelebotUtils import *
+
 from telebot.types import User
+from typing import Any
 
 import os
 
@@ -69,7 +71,7 @@ class UserData:
 
 		WriteJSON(self.__StorageDirectory + f"/{self.__ID}.json", self.__Data)
 
-	def __SetProperty(self, property_type: str, key: str, value: any):
+	def __SetProperty(self, property_type: str, key: str, value: Any):
 		"""
 		Задаёт свойство пользователя.
 			property_type – ключ раздела хранения свойства;\n
@@ -149,7 +151,7 @@ class UserData:
 
 		os.remove(self.__StorageDirectory + f"/{self.__ID}.json")
 
-	def get_object(self, key: str) -> any:
+	def get_object(self, key: str) -> Any:
 		"""
 		Возвращает объект Python из свойств пользователя.
 			key – ключ объекта.
@@ -157,7 +159,7 @@ class UserData:
 
 		return self.__Objects[key]
 
-	def get_property(self, key: str) -> any:
+	def get_property(self, key: str) -> Any:
 		"""
 		Возвращает значение свойства пользователя, в том числе временного.
 			key – ключ свойства.
@@ -168,7 +170,7 @@ class UserData:
 
 		raise KeyError(key)
 	
-	def get_property_type(self, key: str) -> any:
+	def get_property_type(self, key: str) -> Any:
 		"""
 		Возвращает значение типа свойства пользователя, в том числе временного.
 			key – ключ свойства.
@@ -201,7 +203,7 @@ class UserData:
 		"""
 
 		IsExists = True
-		if key in self.__Data["data"].keys() or key in self.__Data["temp"].keys() : IsExists = True
+		if key in self.__Data["data"].keys() or key in self.__Data["temp"].keys(): IsExists = True
 
 		return IsExists
 
@@ -248,7 +250,7 @@ class UserData:
 		self.__Data["expected_type"] = type_name
 		self.__SaveData()
 
-	def set_object(self, key: str, object: any):
+	def set_object(self, key: str, object: Any):
 		"""
 		Сохраняет объект Python в оперативной памяти и привязывает его к текущему пользователю наподобие свойства.
 			key – ключ объекта;\n
@@ -257,7 +259,7 @@ class UserData:
 		
 		if key not in self.__Objects.keys(): self.__Objects[key] = object
 
-	def set_property(self, key: str, value: any, force: bool = True):
+	def set_property(self, key: str, value: Any, force: bool = True):
 		"""
 		Задаёт значение свойства пользователя.
 			key – ключ свойства;\n
@@ -268,7 +270,7 @@ class UserData:
 		if key not in self.__Data["data"].keys(): self.__SetProperty("data", key, value)
 		elif key in self.__Data["data"].keys() and force: self.__SetProperty("data", key, value)
 
-	def set_temp_property(self, key: str, value: any):
+	def set_temp_property(self, key: str, value: Any):
 		"""
 		Задаёт значение временного свойства пользователя.
 			key – ключ свойства;\n

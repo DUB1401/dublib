@@ -3,6 +3,7 @@ from .Exceptions.WebRequestor import *
 from curl_cffi import requests as curl_cffi_requests
 from curl_cffi import CurlHttpVersion
 from fake_useragent import UserAgent
+from typing import Any
 from time import sleep
 
 import requests
@@ -569,7 +570,7 @@ class WebRequestor:
 
 		return Response
 
-	def __curl_cffi_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None) -> curl_cffi_requests.Response:
+	def __curl_cffi_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> curl_cffi_requests.Response:
 		"""
 		Отправляет POST запрос через библиотеку curl_cffi.
 			url – адрес запроса;\n
@@ -629,7 +630,7 @@ class WebRequestor:
 
 		return Response
 
-	def __httpx_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None) -> httpx.Response:
+	def __httpx_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> httpx.Response:
 		"""
 		Отправляет POST запрос через библиотеку httpx.
 			url – адрес запроса;\n
@@ -691,7 +692,7 @@ class WebRequestor:
 
 		return Response
 	
-	def __requests_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None) -> requests.Response:
+	def __requests_POST(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> requests.Response:
 		"""
 		Отправляет POST запрос через библиотеку requests.
 			url – адрес запроса;\n
@@ -818,7 +819,7 @@ class WebRequestor:
 		
 		return Response
 	
-	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: any = None, json: dict | None = None, retries: int | None = None) -> WebResponse:
+	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None, retries: int | None = None) -> WebResponse:
 		"""
 		Отправляет POST запрос.
 			url – адрес запроса;\n

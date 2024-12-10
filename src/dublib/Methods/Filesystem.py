@@ -1,12 +1,19 @@
-from .JSON import ReadJSON, WriteJSON
-
 import shutil
+import json
 import sys
 import os
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ФАЙЛАМИ И ДИРЕКТОРИЯМИ <<<<< #
 #==========================================================================================#
+
+def ListDir(path: str | None = None) -> list[str]:
+	"""
+	Основана на os.scandir(), более быстром и подробном варианте os.listdir(). Возвращает список названий каталогов и имён файлов по указанному пути.
+		path – путь для сканирования.
+	"""
+
+	return [Entry.name for Entry in os.scandir(path)]
 
 def MakeRootDirectories(directories: list[str]):
 	"""
@@ -39,6 +46,17 @@ def NormalizePath(path: str, unix_separator: bool | None = None, separator_at_en
 
 	return path
 
+def ReadJSON(path: str) -> dict:
+	"""
+	Считывает файл JSON и конвертирует его в словарь.
+		path – путь к файлу.
+	"""
+
+	JSON = dict()
+	with open(path, encoding = "utf-8") as FileReader: JSON = json.load(FileReader)
+
+	return JSON
+
 def ReadTextFile(path: str, split: str | None = None) -> str | list[str]:
 	"""
 	Считывает содержимое текстового файла.
@@ -67,6 +85,15 @@ def RemoveDirectoryContent(path: str):
 
 		else:
 			os.remove(path + "/" + Item)
+
+def WriteJSON(path: str, dictionary: dict):
+	"""
+	Записывает стандартизированный JSON файл. Для отступов используются символы табуляции.
+		path – путь к файлу;\n
+		dictionary – словарь, конвертируемый в формат JSON.
+	"""
+
+	with open(path, "w", encoding = "utf-8") as FileWriter: json.dump(dictionary, FileWriter, ensure_ascii = False, indent = "\t", separators = (",", ": "))
 
 def WriteTextFile(path: str, text: str | list[str], join: str | None = None):
 	"""

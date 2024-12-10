@@ -49,7 +49,7 @@ ___
 * _string_ – строка, из которой удаляются повторы;
 * _substring_ – удаляемая подстрока.
 ___
-`ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: any) -> dict`
+`ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: Any) -> dict`
 
 **Описание:** Заменяет ключ в словаре, сохраняя исходный порядок элементов.
 
@@ -65,7 +65,16 @@ ___
 **Аргументы:**
 * _text_ – обрабатываемая строка.
 ___
-`Zerotify(value: any) -> any`
+`ToIterable(value: Any, iterable_type = list, exclude: tuple = (bytes, str)) -> Iterable`
+
+**Описание:** Преобразует значение в итерируемый тип.
+
+**Аргументы:**
+* _value_ – обрабатываемое значение;
+* _iterable_type_ – тип итогового итерируемого объекта;
+* _exclude_ – типы-исключения, условно считающиеся не итерируемыми.
+___
+`Zerotify(value) `
 
 **Описание:** Преобразует значения, логически интерпретируемые в False, в тип None.
 

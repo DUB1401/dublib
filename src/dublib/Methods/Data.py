@@ -1,3 +1,5 @@
+from typing import Any, Iterable
+
 #==========================================================================================#
 # >>>>> ФУНКЦИИ ПРОВЕРКИ ДАННЫХ <<<<< #
 #==========================================================================================#
@@ -99,7 +101,7 @@ def RemoveRecurringSubstrings(string: str, substring: str) -> str:
 
 	return string
 
-def ReplaceDictionaryKey(dictionary: dict, old_key: any, new_key: any) -> dict:
+def ReplaceDictionaryKey(dictionary: dict, old_key, new_key) -> dict:
 	"""
 	Заменяет ключ в словаре, сохраняя исходный порядок элементов.
 		dictionary – обрабатываемый словарь;\n
@@ -133,7 +135,20 @@ def StripAlpha(text: str) -> str:
 	except:
 		text = ""
 
-def Zerotify(value: any) -> any:
+def ToIterable(value: Any, iterable_type = list, exclude: tuple = (bytes, str)) -> Iterable:
+	"""
+	Преобразует значение в итерируемый тип.
+		value – обрабатываемое значение;\n
+		iterable_type – тип итогового итерируемого объекта;\n
+		exclude – типы-исключения, условно считающиеся не итерируемыми.
+	"""
+
+	if isinstance(value, Iterable) and not isinstance(value, exclude): return value
+	else: value = iterable_type([value])
+
+	return value
+
+def Zerotify(value: Any) -> Any:
 	"""
 	Преобразует значения, логически интерпретируемые в False, в тип None.
 		value – обрабатываемое значение.

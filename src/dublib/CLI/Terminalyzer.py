@@ -4,6 +4,7 @@ from ..Exceptions.CLI import *
 
 from prettytable import PLAIN_COLUMNS, PrettyTable
 from urllib.parse import urlparse
+from typing import Any, Callable
 
 import dateparser
 import enum
@@ -539,7 +540,7 @@ class ParsedCommandData:
 
 		return IsActivated
 	
-	def get_key_value(self, key: str, exception: bool = False) -> any:
+	def get_key_value(self, key: str, exception: bool = False) -> Any:
 		"""
 		Возвращает значение активированного ключа.
 			key – название ключа;\n
@@ -646,7 +647,7 @@ class Terminalyzer:
 		
 		return IsDetermined
 
-	def __ConfirmParametrType(self, value: str, type_name: ParametersTypes = ParametersTypes.All, raise_exception: bool = True) -> any:
+	def __ConfirmParametrType(self, value: str, type_name: ParametersTypes = ParametersTypes.All, raise_exception: bool = True) -> Any:
 		"""
 		Проверяет и парсит значение параметра согласно его типу.
 			value – значение параметра;\n
@@ -1064,7 +1065,7 @@ class Terminalyzer:
 		else:
 			raise IdenticalIndicators()
 
-	def set_help_callback(self, callback: any):
+	def set_help_callback(self, callback: Callable):
 		"""
 		Задаёт функцию, в которую будет передан вывод помощи.
 			callback – функция, принимающая строку в качестве аргумента.

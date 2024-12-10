@@ -1,3 +1,5 @@
+from typing import Any
+
 import enum
 
 #==========================================================================================#
@@ -46,7 +48,7 @@ class ExecutionStatus:
 		return self._Type
 	
 	@property
-	def value(self) -> any:
+	def value(self) -> Any:
 		"""Вложенное возвращаемое значение."""
 
 		return self._Value
@@ -74,7 +76,7 @@ class ExecutionStatus:
 		self._Type = new_type
 	
 	@value.setter
-	def value(self, new_value: any):
+	def value(self, new_value: Any) -> Any:
 		"""Вложенное возвращаемое значение."""
 
 		self._Value = new_value
@@ -101,7 +103,7 @@ class ExecutionStatus:
 		self._Data = dict()
 		self._Type = StatussesTypes.Normal
 
-	def __getitem__(self, key: str) -> any:
+	def __getitem__(self, key: str) -> Any:
 		"""
 		Возвращает значение поля дополнительных данных.
 			key – ключ.
@@ -109,7 +111,7 @@ class ExecutionStatus:
 
 		return self._Data[key]
 	
-	def __setitem__(self, key: str, value: any):
+	def __setitem__(self, key: str, value: Any) -> Any:
 		"""
 		Задаёт значение поля дополнительных данных.
 			key – ключ;\n
