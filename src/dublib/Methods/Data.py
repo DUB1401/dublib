@@ -1,3 +1,5 @@
+from .Decorators import deprecated
+
 from typing import Any, Iterable
 
 #==========================================================================================#
@@ -34,13 +36,13 @@ def IsNotAlpha(text: str) -> bool:
 # >>>>> ФУНКЦИИ ОБРАБОТКИ ДАННЫХ <<<<< #
 #==========================================================================================#
 
+@deprecated(message = "Use itertools.batched() instead.")
 def ChunkList(value: list, length: int) -> list[list]:
 	"""
 	Разделяет список на фрагменты фиксированной длинны.
 		value – обрабатываемое значение;\n
 		length – длина фрагментов.
 	"""
-
 	Result = list()
 	CutIndex = 1
 	Buffer = list()

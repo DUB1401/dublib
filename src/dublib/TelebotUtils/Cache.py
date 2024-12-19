@@ -1,5 +1,4 @@
-from ..Methods.Filesystem import NormalizePath
-from ..Methods.JSON import ReadJSON, WriteJSON
+from ..Methods.Filesystem import NormalizePath, ReadJSON, WriteJSON
 
 from telebot import TeleBot, types
 

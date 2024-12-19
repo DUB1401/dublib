@@ -31,4 +31,4 @@ pip install dublib=={version}
 pip install git+https://github.com/DUB1401/dublib
 ```
 
-_Copyright © DUB1401. 2023-2024._
+_Copyright © DUB1401. 2023-2025._

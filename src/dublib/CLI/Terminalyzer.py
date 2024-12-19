@@ -1,10 +1,11 @@
-from ..Methods.Data import MergeDictionaries
 from .TextStyler import TextStyler
 from ..Exceptions.CLI import *
 
 from prettytable import PLAIN_COLUMNS, PrettyTable
 from urllib.parse import urlparse
 from typing import Any, Callable
+from datetime import datetime
+from functools import reduce
 
 import dateparser
 import enum
@@ -196,6 +197,12 @@ class Position:
 		return self.__Flags
 	
 	@property
+	def is_base(self) -> bool:
+		"""Состояние: является ли позиция базовой для команды."""
+
+		return self.__IsBase
+
+	@property
 	def is_important(self) -> bool:
 		"""Состояние: является ли позиция обязательной."""
 
@@ -208,6 +215,25 @@ class Position:
 		return self.__Keys
 
 	@property
+	def max_parameters_count(self) -> int:
+		"""Максимальное количество параметров на позиции."""
+
+		if self.keys: return 2
+		elif self.__Arguments or self.__Flags: return 1
+		else: return 0
+
+	@property
+	def min_parameters_count(self) -> int:
+		"""Минимальное количество параметров на позиции."""
+
+		if self.__IsImportant:
+			if self.keys: return 2
+			elif self.__Arguments or self.__Flags: return 1
+			else: return 0
+
+		else: return 0
+
+	@property
 	def name(self) -> str | None:
 		"""Название позиции."""
 
@@ -217,7 +243,7 @@ class Position:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, important: bool = False, name: str | None = None, description: str | None = None):
+	def __init__(self, name: str | None = None, description: str | None = None, important: bool = False, is_base: bool = False):
 		"""
 		Объектное представление позиции команды.
 			important – указывает, является ли позиция обязательной;\n
@@ -227,9 +253,11 @@ class Position:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
+		self.__IsImportant = important
 		self.__Name = name
 		self.__Description = description
-		self.__IsImportant = important
+		self.__IsBase = is_base
+		
 		self.__Arguments = list()
 		self.__Flags = list()
 		self.__Keys = list()
@@ -243,10 +271,6 @@ class Position:
 		"""
 
 		if important: self.__IsImportant = True
-
-		for CurrentArgument in self.__Arguments: 
-			if CurrentArgument.type == type: raise IdenticalArguments(type.value)
-
 		self.__Arguments.append(Argument(type, description, important))
 
 	def add_flag(self, name: str, description: str | None = None, important: bool = False):
@@ -281,21 +305,27 @@ class Command:
 
 	@property
 	def arguments(self) -> list[Argument]:
-		"""Список аргументов команды без позиций."""
+		"""Список аргументов на базовой позиции."""
 
-		return self.__Arguments
+		return self.__BasePosition.arguments
+
+	@property
+	def check_parameters_count(self) -> bool:
+		"""Состояние: нужно ли проверять количество переданных параметров."""
+
+		return self.__ChackParametersCount
 
 	@property
 	def description(self) -> str:
 		"""Описание команды."""
 
-		return self.__Description
+		return self.__BasePosition.description
 
 	@property
 	def flags(self) -> list[Flag]:
-		"""Список флагов команды без позиций."""
+		"""Список флагов на базовой позиции."""
 
-		return self.__Flags
+		return self.__BasePosition.flags
 
 	@property
 	def has_important_argument(self) -> bool:
@@ -305,95 +335,75 @@ class Command:
 
 	@property
 	def has_important_flag(self) -> bool:
-		"""Состояние: имеет ли команда обязательный важный аргумент."""
+		"""Состояние: имеет ли команда обязательный важный флаг."""
 
 		return self.__HasImportantFlag
 
 	@property
 	def has_important_key(self) -> bool:
-		"""Состояние: имеет ли команда обязательный важный аргумент."""
+		"""Состояние: имеет ли команда обязательный важный ключ."""
 
 		return self.__HasImportantKey
 
 	@property
 	def keys(self) -> list[Key]:
-		"""Список ключей команды без позиций."""
+		"""Список ключей на базовой позиции."""
 
-		return self.__Keys
+		return self.__BasePosition.keys
 
 	@property
 	def max_parameters_count(self) -> int:
 		"""Максимальное количество параметров."""
 
-		MaxParametersCount = 0
+		if self.__MaxParametersCount != None: return self.__MaxParametersCount
 
-		for Element in [self.__Positions, self.__Arguments, self.__Flags, self.__Keys]:
-
-			for Part in Element: 
-				if type(Part) == Position and Part.keys: MaxParametersCount += 2
-				elif type(Part) == Position and not Part.keys: MaxParametersCount += 1
-				elif type(Part) == Key: MaxParametersCount += 2
-				else: MaxParametersCount += 1
-
-		return MaxParametersCount
+		return reduce(lambda x, y: x + y, [Position.max_parameters_count for Position in self.positions])
 
 	@property
 	def min_parameters_count(self) -> int:
 		"""Минимальное количество параметров."""
 
-		MinParametersCount = 0
+		if self.__MinParametersCount != None: return self.__MinParametersCount
 
-		for Element in [self.__Positions, self.__Arguments, self.__Flags, self.__Keys]:
-
-			for Part in Element: 
-
-				if Part.is_important: 
-
-					if type(Part) == Position:
-						if Part.keys and not Part.flags and not Part.arguments: MinParametersCount += 2
-						else: MinParametersCount += 1
-
-					elif type(Part) == Position and Part.keys: MinParametersCount += 2
-					elif type(Part) == Position and not Part.keys: MinParametersCount += 1
-					elif type(Part) == Key: MinParametersCount += 2
-					else: MinParametersCount += 1
-
-		return MinParametersCount
+		return reduce(lambda x, y: x + y, [Position.min_parameters_count for Position in self.positions])
 
 	@property
 	def name(self) -> str:
 		"""Название команды."""
 
-		return self.__Name
+		return self.__BasePosition.name
 
 	@property
 	def positions(self) -> list[Position]:
 		"""Список позиций."""
 
-		return self.__Positions
+		return self.__Positions + [self.__BasePosition]
 
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, name: str, description: str | None = None):
+	def __init__(self, name: str, description: str | None = None, check_parameters_count: bool = True):
 		"""
-		Описание команды.
+		Структура описания команды.
 			name – название команды;\n
-			description – описание команды.
+			description – описание команды;\n
+			check_parameters_count – указывает, нужно ли проверять количество переданных параметров.
 		"""
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		self.__Name = name
-		self.__Description = description
+		self.__ChackParametersCount = check_parameters_count
+
+		self.__BasePosition = Position(name = name, description = description, is_base = True)
 		self.__Positions: list[Position] = list()
-		self.__Arguments: list[Argument] = list()
-		self.__Flags: list[Flag] = list()
-		self.__Keys: list[Key] = list()
+
 		self.__HasImportantArgument = False
 		self.__HasImportantFlag = False
 		self.__HasImportantKey = False
+
+		self.__MinParametersCount = None
+		self.__MaxParametersCount = None
 
 	def add_argument(self, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
@@ -404,7 +414,7 @@ class Command:
 		"""
 
 		if important: self.__HasImportantArgument = True
-		self.__Arguments.append(Argument(type, description, important))
+		self.__BasePosition.add_argument(type, description, important)
 
 	def add_flag(self, name: str, description: str | None = None, important: bool = False):
 		"""
@@ -415,7 +425,7 @@ class Command:
 		"""
 
 		if important: self.__HasImportantFlag = True
-		self.__Flags.append(Flag(name, description, important))
+		self.__BasePosition.add_flag(name, description, important)
 
 	def add_key(self, name: str, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
@@ -427,7 +437,7 @@ class Command:
 		"""
 
 		if important: self.__HasImportantKey = True
-		self.__Keys.append(Key(name, type, description, important))
+		self.__BasePosition.add_key(name, type, description, important)
 
 	def create_position(self, name: str | None = None, description: str | None = None, important: bool = False) -> Position:
 		"""
@@ -437,10 +447,26 @@ class Command:
 			important – указывает, является ли позиция обязательной.
 		"""
 
-		NewPosition = Position(important, name, description)
+		NewPosition = Position(name, description, important)
 		self.__Positions.append(NewPosition)
 
 		return self.__Positions[-1]
+	
+	def set_max_parameters_count(self, count: int | None):
+		"""
+		Задаёт максимальное количество параметров команды.
+			count – количество параметров или None для автоматического подсчёта.
+		"""
+
+		self.__MaxParametersCount = count
+
+	def set_min_parameters_count(self, count: int | None):
+		"""
+		Задаёт минимальное количество параметров команды.
+			count – количество параметров или None для автоматического подсчёта.
+		"""
+
+		self.__MinParametersCount = count
 
 class HelpTranslation:
 	"""Модуль поддержки локализаций помощью."""
@@ -592,35 +618,28 @@ class Terminalyzer:
 			Flags = list()
 			Keys = dict()
 			Arguments = list()
+
+			self.__Command = command
 			self.__ParametersLocks = [False] * len(self.__Parameters)
-			self.__PositionsLocks = [False] * len(command.positions)
 			self.__ParametersLocks[0] = True
+			for Position in command.positions: self.__PositionsLocks[Position.name] = False
 
-			for Index in range(1, len(self.__Parameters)):
-				Flags += self.__ParseFlags(Index, command)	
-				Keys = MergeDictionaries(Keys, self.__ParseKeys(Index, command))
+			Flags, Keys, Arguments = self.__ParseParameters()
 
-			for Index in range(1, len(self.__Parameters)):
-				Arguments += self.__ParseArguments(Arguments, Index, command)
+			if not self.__FreeMode: self.__CheckUnlockedParameters()
+			self.__CheckParametersCount()
 
-			self.__CheckUnlockedParameters(self.__ParametersLocks)
-			self.__CheckParametersCount(command)
 			self.__CommandData = ParsedCommandData(command.name, Flags, Keys, Arguments)
 
-	def __CheckParametersCount(self, command: Command):
-		"""
-		Проверяет соответвтсие количества параметров.
-			command – описание команды.
-		"""
+	def __CheckParametersCount(self):
+		"""Проверяет соответвтсие количества параметров."""
+		
+		if not self.__Command.check_parameters_count: return
+		if len(self.__Parameters) - 1 > self.__Command.max_parameters_count: raise TooManyParameters(" ".join(self.__Parameters))
+		if len(self.__Parameters) - 1 < self.__Command.min_parameters_count: raise NotEnoughParameters(" ".join(self.__Parameters))
 
-		if len(self.__Parameters) - 1 > command.max_parameters_count: raise TooManyParameters(" ".join(self.__Parameters))
-		if len(self.__Parameters) - 1 < command.min_parameters_count: raise NotEnoughParameters(" ".join(self.__Parameters))
-
-	def __CheckUnlockedParameters(self, parameters_locks: list[bool]):
-		"""
-		Проверяет незаблокированные параметры.
-			parameters_locks – список состояний блокировки параметров.
-		"""
+	def __CheckUnlockedParameters(self):
+		"""Проверяет незаблокированные параметры."""
 
 		IndicatorsOrder = [self.flags_indicator, self.keys_indicator]
 		ExceptionsOrder = [UnknownFlag, UnknownKey]
@@ -631,7 +650,7 @@ class Terminalyzer:
 
 		for Index in range(1, len(self.__Parameters)):
 
-			if not parameters_locks[Index]:
+			if not self.__ParametersLocks[Index]:
 
 				for Indicator, ExceptionType in zip(IndicatorsOrder, ExceptionsOrder):
 					if self.__Parameters[Index].startswith(Indicator): raise ExceptionType(self.__Parameters[Index])
@@ -647,7 +666,7 @@ class Terminalyzer:
 		
 		return IsDetermined
 
-	def __ConfirmParametrType(self, value: str, type_name: ParametersTypes = ParametersTypes.All, raise_exception: bool = True) -> Any:
+	def __ConfirmParameterType(self, value: str, type_name: ParametersTypes = ParametersTypes.All, raise_exception: bool = True) -> bool | int | str | datetime:
 		"""
 		Проверяет и парсит значение параметра согласно его типу.
 			value – значение параметра;\n
@@ -665,10 +684,7 @@ class Terminalyzer:
 				elif Buffer == "false": Value = False
 
 			elif type_name == ParametersTypes.Date:
-
-				try:
-					Value = dateparser.parse(value).date()
-
+				try: Value = dateparser.parse(value).date()
 				except: pass
 			
 			elif type_name == ParametersTypes.Number:
@@ -685,7 +701,7 @@ class Terminalyzer:
 
 		else: Value = value
 
-		if Value == None and raise_exception: raise InvalidParameterType(value, ParametersTypes.URL.value)
+		if Value == None and raise_exception: raise InvalidParameterType(value, type_name.value)
 
 		return Value
 
@@ -693,136 +709,135 @@ class Terminalyzer:
 	# >>>>> МЕТОДЫ ПАРСИНГА ПАРАМЕТРОВ <<<<< #
 	#==========================================================================================#
 
-	def __ParseArguments(self, arguments: list[any], parameter_index: int, command: Command) -> dict[str, any]:
+	def __CheckFlag(self, parameter: str, index: int) -> str | None:
 		"""
-		Возвращает список значений аргументов.
-			arguments – список значений аргументов;\n
-			parameter_index – индекс параметра;\n
-			command – описание команды.
+		Проверяет, является ли параметр флагом. При успехе возвращает имя флага.
+			parameter – проверяемый параметр;\n
+			index – индекс параметра.
 		"""
-		
-		Arguments = list()
 
-		for PositionIndex in range(len(command.positions)):
+		HasFlagIndicator = parameter.startswith(self.__FlagsIndicator)
+		ParameterName = parameter
 
-			if not self.__ParametersLocks[parameter_index]:
-				CurrentPosition = command.positions[PositionIndex]
+		if HasFlagIndicator and not self.__FreeMode: ParameterName = ParameterName[len(self.__FlagsIndicator):]
+		elif not HasFlagIndicator and not self.__FreeMode: return
 
-				if CurrentPosition.arguments and not self.__PositionsLocks[PositionIndex]:
-					self.__ParametersLocks[parameter_index] = True
+		for Position in self.__Command.positions:
+			if self.__PositionsLocks[Position.name]: continue
 
-					for Argument in CurrentPosition.arguments:
-						Value = self.__ConfirmParametrType(self.__Parameters[parameter_index], Argument.type, raise_exception = False)
+			if ParameterName in [Flag.name for Flag in Position.flags]:
+				if not Position.is_base: self.__PositionsLocks[Position.name] = parameter
+				self.__ParametersLocks[index] = True
+				return ParameterName
+			
+		return None
 
-						if Value:
-							Arguments.append(Value)
-							break
+	def __CheckKey(self, parameter: str, index: int) -> tuple[str | None, Any]:
+		"""
+		Проверяет, является ли параметр ключом. При успехе возвращает имя ключа.
+			parameter – проверяемый параметр;\n
+			index – индекс параметра.
+		"""
 
-						elif Argument == CurrentPosition.arguments[-1]: 
-							Types = list()
-							for Argument in CurrentPosition.arguments: Types.append(Argument.type.value)
-							raise InvalidPositionalArgumentTypes(self.__Parameters[parameter_index], Types)
-					
-					continue
+		HasKeyIndicator = parameter.startswith(self.__KeysIndicator)
+		ParameterName = parameter
 
-				else: break
+		if HasKeyIndicator and not self.__FreeMode: ParameterName = ParameterName[len(self.__KeysIndicator):]
+		elif not HasKeyIndicator and not self.__FreeMode: return None, None
 
-		if len(arguments) < len(command.arguments):
+		for Position in self.__Command.positions:
+			if self.__PositionsLocks[Position.name]: continue
 
-			for CurrentArgument in command.arguments:
+			for Key in Position.keys:
 
-				if not self.__ParametersLocks[parameter_index]:
-					self.__ParametersLocks[parameter_index] = True
-					Arguments.append(self.__ConfirmParametrType(self.__Parameters[parameter_index], CurrentArgument.type))
-					continue
+				if ParameterName == Key.name:
+					if not Position.is_base: self.__PositionsLocks[Position.name] = ParameterName
+					self.__ParametersLocks[index] = True
 
-				else: break
+					try:
+						if not self.__ParametersLocks[index + 1]: self.__ParametersLocks[index + 1] = True
+
+					except IndexError:
+						if not self.__FreeMode: raise UnboundKey(parameter)
+
+					Value = self.__ConfirmParameterType(self.__Parameters[index + 1], Key.type) 
+
+					return ParameterName, Value
 				
-		return Arguments
+		return None, None
 
-	def __ParseFlags(self, parameter_index: int, command: Command) -> list[str]:
+	def __CheckArgument(self, parameter: str, index: int) -> Any:
 		"""
-		Возвращает список активных флагов.
-			parameter_index – индекс параметра;\n
-			command – описание команды.
+		Проверяет, является ли параметр аргументом. При успехе возвращает значение аргумента.
+			parameter – проверяемый параметр;\n
+			index – индекс параметра.
 		"""
+
+		#---> Проверка переполнения заблокированных позиций.
+		#==========================================================================================#
+		for Position in self.__Command.positions:
+			if not self.__PositionsLocks[Position.name]: continue
+			ParameterName = parameter
+
+			HasFlagIndicator = parameter.startswith(self.__FlagsIndicator)
+			HasKeyIndicator = parameter.startswith(self.__KeysIndicator)
+
+			if HasFlagIndicator and not self.__FreeMode: ParameterName = ParameterName[len(self.__FlagsIndicator):]
+			if HasKeyIndicator and not self.__FreeMode: ParameterName = ParameterName[len(self.__KeysIndicator):]
+
+			if ParameterName in [Flag.name for Flag in Position.flags]: raise MutuallyExclusiveParameters(Position.name, self.__PositionsLocks[Position.name], parameter)
+			if ParameterName in [Key.name for Key in Position.keys]: raise MutuallyExclusiveParameters(Position.name, self.__PositionsLocks[Position.name], parameter)
+
+		#---> Определение принадлежности аргумента.
+		#==========================================================================================#
+		for Position in self.__Command.positions:
+			if self.__PositionsLocks[Position.name]: continue
+
+			for CurrentArgument in Position.arguments:
+
+				try: parameter = self.__ConfirmParameterType(parameter, CurrentArgument.type)
+				except InvalidParameterType: pass
+				else:
+					if not Position.is_base: self.__PositionsLocks[Position.name] = True
+					self.__ParametersLocks[index] = True
+					return parameter
+
+		return parameter
+
+	def __ParseParameters(self):
+		"""Выполняет проверку соответствия параметров конкретной команде."""
 
 		Flags = list()
-		Parameter = self.__Parameters[parameter_index]
-
-		if Parameter.startswith(self.__FlagsIndicator):
-			Parameter = Parameter[len(self.__FlagsIndicator):]
-
-			for PositionIndex in range(len(command.positions)):
-				CurrentPosition = command.positions[PositionIndex]
-				PositionFlagsNames = list()
-				for PositionFlag in CurrentPosition.flags: PositionFlagsNames.append(PositionFlag.name)
-				
-				if Parameter in PositionFlagsNames:
-					if not self.__ParametersLocks[parameter_index]: self.__ParametersLocks[parameter_index] = True
-					else: raise MutuallyExclusiveFlags(" ".join(self.__Parameters))
-					if not self.__PositionsLocks[PositionIndex]: self.__PositionsLocks[PositionIndex] = True
-					else: raise MutuallyExclusivePositions(" ".join(self.__Parameters))
-					Flags.append(Parameter)
-					continue
-
-			for CurrentFlag in command.flags:
-
-				if Parameter == CurrentFlag.name: 
-					if not self.__ParametersLocks[parameter_index]: self.__ParametersLocks[parameter_index] = True
-					else: raise MutuallyExclusiveFlags(" ".join(self.__Parameters))
-					Flags.append(Parameter)
-					continue
-
-		return Flags
-
-	def __ParseKeys(self, parameter_index: int, command: Command) -> dict[str, any]:
-		"""
-		Возвращает словарь активных ключей и их значений.
-			parameter_index – индекс параметра;\n
-			command – описание команды.
-		"""
-
 		Keys = dict()
-		Parameter = self.__Parameters[parameter_index]
+		Arguments = list()
 
-		if Parameter.startswith(self.__KeysIndicator):
-			Parameter = Parameter[len(self.__KeysIndicator):]
+		for Index in range(1, len(self.__Parameters)):
+			if self.__ParametersLocks[Index]: continue
+			Parameter = self.__Parameters[Index]
 
-			for PositionIndex in range(len(command.positions)):
-				CurrentPosition = command.positions[PositionIndex]
+			#---> Проверка флагов.
+			#==========================================================================================#
+			ParameterCache = self.__CheckFlag(Parameter, Index)
+
+			if ParameterCache:
 				
-				for PositionKey in CurrentPosition.keys:
+				Flags.append(ParameterCache)
+				continue
 
-					if Parameter == PositionKey.name:
+			#---> Проверка ключей.
+			#==========================================================================================#
+			ParameterCache, Value = self.__CheckKey(Parameter, Index)
 
-						if not self.__ParametersLocks[parameter_index]:
-							self.__ParametersLocks[parameter_index] = True
-							self.__ParametersLocks[parameter_index + 1] = True
+			if ParameterCache:
+				self.__ParametersLocks[Index] = True
+				Keys[ParameterCache] = Value
+				continue
 
-						else:
-							raise MutuallyExclusiveKeys(" ".join(self.__Parameters))
+			#---> Проверка аргументов.
+			#==========================================================================================#
+			Arguments.append(self.__CheckArgument(Parameter, Index))
 
-						if not self.__PositionsLocks[PositionIndex]: self.__PositionsLocks[PositionIndex] = True
-						else: raise MutuallyExclusivePositions(" ".join(self.__Parameters))
-						Keys[Parameter] = self.__ConfirmParametrType(self.__Parameters[parameter_index + 1], PositionKey.type)
-						continue
-
-			for CurrentKey in command.keys:
-
-				if Parameter == CurrentKey.name: 
-						
-						if not self.__ParametersLocks[parameter_index]:
-							self.__ParametersLocks[parameter_index] = True
-							self.__ParametersLocks[parameter_index + 1] = True
-
-						else:
-							raise MutuallyExclusiveKeys(" ".join(self.__Parameters))
-
-						Keys[Parameter] = self.__ConfirmParametrType(self.__Parameters[parameter_index + 1], CurrentKey.type)
-						continue
-
-		return Keys
+		return Flags, Keys, Arguments
 
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ ГЕНЕРАЦИИ ПОМОЩИ <<<<< #
@@ -836,10 +851,9 @@ class Terminalyzer:
 		"""
 
 		MSG_Indent = indent or "  "
-		MSG_Name = TextStyler("Argument").decorate.bold
-		MSG_Type = f" ({argument.type.value})"
+		MSG_Type = f" <{argument.type.value}>"
 		MSG_Description = f": {argument.description}" if argument.description else ""
-		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Type}{MSG_Description}"
+		Description = f"\n{MSG_Indent}    • [argument{MSG_Type}]{MSG_Description}"
 
 		return Description
 	
@@ -853,7 +867,7 @@ class Terminalyzer:
 		MSG_Indent = indent or "  "
 		MSG_Name = TextStyler(self.__FlagsIndicator + flag.name).decorate.bold
 		MSG_Description = f": {flag.description}" if flag.description else ""
-		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Description}"
+		Description = f"\n{MSG_Indent}    • [flag] {MSG_Name}{MSG_Description}"
 
 		return Description
 	
@@ -866,44 +880,32 @@ class Terminalyzer:
 
 		MSG_Indent = indent or "  "
 		MSG_Name = TextStyler(self.__KeysIndicator + key.name).decorate.bold
-		MSG_Type = f" ({key.type.value})"
+		MSG_Type = f" <{key.type.value}>"
 		MSG_Description = f": {key.description}" if key.description else ""
-		Description = f"\n{MSG_Indent}    • {MSG_Name}{MSG_Type}{MSG_Description}"
+		Description = f"\n{MSG_Indent}    • [key{MSG_Type}] {MSG_Name}{MSG_Description}"
 
 		return Description
 
-	def __BuildPositionDescription(self, position: Command | Position, index: int | None = None) -> str:
+	def __BuildPositionDescription(self, position: Command | Position) -> str:
 		"""
 		Строит описание позиции или свободных параметров команды.
-			position – позиция или описание команды;\n
-			index – индекс обрабатываемой позиции.
+			position – позиция или описание команды.
 		"""
 
 		Help = ""
-		Indent = ""
-		IsPosition = False
+		Indent = "  "
+		PositionName = f"{Indent}{position.name}" if position.name else f"{Indent}POS"
+		Description = f": {position.description}" if position.description else ""
+		
+		if position.is_base:
+			PositionName = f"{Indent}Other parameters:"
+			Description = ""
 
-		if type(index) == int:
-			Indent = "  "
-			IsPosition = True
-			PositionName = f"{Indent}{position.name}" if position.name else f"{Indent}POSITION_{index + 1}"
-			MSG_Description = f": {position.description}" if position.description else ""
-			Help += TextStyler(f"\n{PositionName}").decorate.bold + MSG_Description
-
-		if position.arguments and IsPosition: Help += f"\n{Indent}  ARGUMENTS:"
-		elif position.arguments: Help += f"\n{Indent}  " + TextStyler("ARGUMENTS:").decorate.bold
-		for CurrentArgument in position.arguments:
-			Help += self.__BuildArgumentDescription(CurrentArgument, Indent)
-
-		if position.flags and IsPosition: Help += f"\n{Indent}  FLAGS:"
-		elif position.flags: Help += f"\n{Indent}  " + TextStyler("FLAGS:").decorate.bold
-		for CurrentFlag in position.flags:
-			Help += self.__BuildFlagDescription(CurrentFlag, Indent)
-
-		if position.keys and IsPosition: Help += f"\n{Indent}  KEYS:"
-		elif position.keys: Help += f"\n{Indent}  " + TextStyler("KEYS:").decorate.bold
-		for CurrentKey in position.keys:
-			Help += self.__BuildKeyDescription(CurrentKey, Indent)
+		Help += TextStyler(f"\n{PositionName}").decorate.bold + Description
+		
+		for CurrentArgument in position.arguments: Help += self.__BuildArgumentDescription(CurrentArgument, Indent)
+		for CurrentFlag in position.flags: Help += self.__BuildFlagDescription(CurrentFlag, Indent)
+		for CurrentKey in position.keys: Help += self.__BuildKeyDescription(CurrentKey, Indent)
 
 		return Help
 
@@ -914,29 +916,20 @@ class Terminalyzer:
 			command_name – название команды, для которой требуется получить помощь.
 		"""
 
-		HelpCommand = None
+		CommandForHelp = None
 
 		for CurrentCommand in commands:
-			if CurrentCommand.name == command_name: HelpCommand = CurrentCommand
+			if CurrentCommand.name == command_name: CommandForHelp = CurrentCommand
 
-		if HelpCommand:
-			Help = TextStyler(HelpCommand.name).decorate.bold
-			Help += self.__GenerateCommandMap(HelpCommand)
-
-			if HelpCommand.description:
-				Description = TextStyler(HelpCommand.description).decorate.bold
-				Help += f"\n{Description}"
-
-			for PositionIndex in range(len(HelpCommand.positions)):
-				Help += self.__BuildPositionDescription(HelpCommand.positions[PositionIndex], PositionIndex)
-
-			Help += self.__BuildPositionDescription(HelpCommand)
-
-			if "*" in Help.split("\n")[0]: Help += f"\n{self.__HelpTranslationObject.important_note}" if self.__HelpTranslationObject.important_note else ""
+		if CommandForHelp:
+			Help = TextStyler(CommandForHelp.name).decorate.bold
+			Help += self.__GenerateCommandMap(CommandForHelp)
+			if CommandForHelp.description: Help += "\n" + TextStyler(CommandForHelp.description).decorate.italic
+			for Position in CommandForHelp.positions: Help += self.__BuildPositionDescription(Position)
+			if any((CommandForHelp.has_important_flag, CommandForHelp.has_important_key, CommandForHelp.has_important_argument)): Help += "\n" + self.__HelpTranslationObject.important_note or ""
 			self.__HelpCallback(Help)
 
-		else: 
-			self.__HelpCallback(self.__HelpTranslationObject.no_command.replace(r"%c", command_name))
+		else: self.__HelpCallback(self.__HelpTranslationObject.no_command.replace(r"%c", command_name))
 
 	def __CreateHelpList(self, commands: list[Command]):
 		"""
@@ -972,47 +965,47 @@ class Terminalyzer:
 		Генерирует позиционную карту команды.
 			command – описание команды.
 		"""
-		Positions = command.positions
-		Map = ""
 
-		for Index in range(len(Positions)):
-			MSG_Name = f"{Positions[Index].name}" if Positions[Index].name else f"POSITION_{Index + 1}"
-			MSG_Important = "*" if Positions[Index].is_important else ""
-			Map += f" [{MSG_Name}{MSG_Important}]"
+		CommandMap = str()
 
-		IsArgumentsImportant = "*" if command.has_important_argument else ""
-		IsFlagsImportant = "*" if command.has_important_flag else ""
-		IsKeysImportant = "*" if command.has_important_key else ""
-		if command.arguments: Map += f" {{ARGUMENTS{IsArgumentsImportant}}}"
-		if command.flags: Map += f" {{FLAGS{IsFlagsImportant}}}"
-		if command.keys: Map += f" {{KEYS{IsKeysImportant}}}"
+		for Position in command.positions:
+			if Position.is_base: continue
+			Name = {Position.name} or "POSITION"
+			IsImportant = "*" if Position.is_important else ""
+			CommandMap += f" [{Name}{IsImportant}]"
 
-		return Map
+		return CommandMap
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, parameters: list[str] | None = None):
+	def __init__(self, parameters: list[str] | None = None, free_mode: bool = False):
 		"""
 		Обработчик консольных параметров.
-			parameters – список параметров (по умолчанию берётся из аргументов запуска скрипта).
+			parameters – список параметров (по умолчанию берётся из аргументов запуска скрипта);\n
+			free_mode – включает свободный режим анализатора, в котором не используются индикаторы ключей и флагов.
 		"""
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
+		self.__Parameters = parameters or sys.argv[1:]
+		self.__FreeMode = free_mode
+
 		self.__KeysIndicator = "--"
 		self.__FlagsIndicator = "-"
 		self.__CommandData = None
-		self.__Parameters = parameters or sys.argv[1:]
 		self.__CommandName = self.__Parameters[0] if self.__Parameters else None
 		self.__EnableHelp = False
 		self.__HelpCallback = print
+
+		self.__Command: Command = None
 		self.__ParametersLocks = None
-		self.__PositionsLocks = None
+		self.__PositionsLocks = dict()
+
 		self.__HelpTranslationObject = HelpTranslation()
 
-	def enable_help(self, status: bool):
+	def enable_help(self, status: bool = True):
 		"""
 		Переключает использование модуля помощи.
 			status – состояние использования модуля помощи.

@@ -42,63 +42,16 @@ class InvalidParameterType(Exception):
 	def __str__(self):
 		return self.__Message
 	
-class InvalidPositionalArgumentTypes(Exception):
-	"""Исключение: неверное значение аргумента."""
+class MutuallyExclusiveParameters(Exception):
+	"""Исключение: переданы взаимоисключающие параметры."""
 
-	def __init__(self, value: str, types_names: list[str]):
-		"""
-		Исключение: неверное значение аргумента.
-			value – значение аргумента;\n
-			types_names – список названий ожидаемых типов.
-		"""
-
-		self.__Message = "\"" + value + "\" isn't: " + ", ".join(types_names) + "."
-		super().__init__(self.__Message) 
-			
-	def __str__(self):
-		return self.__Message
-
-class MutuallyExclusiveFlags(Exception):
-	"""Исключение: активированы взаимоисключающие флаги."""
-
-	def __init__(self, command: str):
-		"""
-		Исключение: активированы взаимоисключающие флаги.
-			command – команда, вызвавшая исключение.
-		"""
-
-		self.__Message = "\"" + command + "\"."
-		super().__init__(self.__Message) 
-			
-	def __str__(self):
-		return self.__Message
-
-class MutuallyExclusiveKeys(Exception):
-	"""Исключение: активированы взаимоисключающие ключи."""
-
-	def __init__(self, command: str):
-		"""
-		Исключение: активированы взаимоисключающие ключи.
-			command – команда, вызвавшая исключение.
-		"""
-
-		self.__Message = "\"" + command + "\"."
-		super().__init__(self.__Message) 
-		
-			
-	def __str__(self):
-		return self.__Message
-	
-class MutuallyExclusivePositions(Exception):
-	"""Исключение: активированы разные позиции на одном слое."""
-
-	def __init__(self, command: str): 
+	def __init__(self, position: str, blocked_parameter: str, parameter: str): 
 		"""
 		Исключение: активированы разные позиции на одном слое.
 			command – команда, вызвавшая исключение.
 		"""
 
-		self.__Message = "\"" + command + "\"."
+		self.__Message = f"\"{blocked_parameter}\" blocked \"{parameter}\" on position \"{position}\"."
 		super().__init__(self.__Message) 
 		
 	def __str__(self):
@@ -131,6 +84,21 @@ class TooManyParameters(Exception):
 		self.__Message = "\"" + command + "\"."
 		super().__init__(self.__Message) 
 			
+	def __str__(self):
+		return self.__Message
+
+class UnboundKey(Exception):
+	"""Исключение: ключ не связан со значением."""
+
+	def __init__(self, key: str):
+		"""
+		Исключение: ключ не связан со значением.
+			key – ключ.
+		"""
+		
+		self.__Message = "\"" + key + "\"."
+		super().__init__(self.__Message) 
+		
 	def __str__(self):
 		return self.__Message
 

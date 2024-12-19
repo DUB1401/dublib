@@ -1,6 +1,7 @@
 from .Users import UserData
 
-from telebot import apihelper, REPLY_MARKUP_TYPES, TeleBot, types
+from telebot import apihelper, TeleBot, types
+from typing import Callable
 from time import sleep
 
 class TeleMaster:
@@ -57,56 +58,27 @@ class TeleMaster:
 		
 		return IsSubscripted
 	
-	def send_message(
-			self,
-			chat_id: int | str,
-			text: str,
-			parse_mode: str | None = None,
-			entities: types.List[types.MessageEntity] | None = None,
-			disable_web_page_preview: bool | None = None,
-			disable_notification: bool | None = None,
-			protect_content: bool | None = None,
-			reply_to_message_id: int | None = None,
-			allow_sending_without_reply: bool | None = None,
-			reply_markup: REPLY_MARKUP_TYPES | None = None,
-			timeout: int | None = None,
-			message_thread_id: int | None = None,
-			reply_parameters: types.ReplyParameters | None = None,
-			link_preview_options: types.LinkPreviewOptions | None = None,
-			business_connection_id: str | None = None,
-			message_effect_id: str | None = None,
-		) -> types.Message:
-		"""Отправляет сообщение. Автоматически выдерживает интервал при ошибке слишком частых запросов."""
+	#==========================================================================================#
+	# >>>>> ДЕКОРАТОРЫ <<<<< #
+	#==========================================================================================#
 
-		Message = None
+	def ignore_frecuency_errors(function: Callable) -> Callable:
+		"""Игнорирует ошибки частоты запросов, автоматически выжидая необходимый интервал."""
 
-		while not Message:
-			try:
-				Message = self.__Bot.send_message(
-					chat_id,
-					text,
-					parse_mode,
-					entities,
-					disable_web_page_preview,
-					disable_notification,
-					protect_content,
-					reply_to_message_id,
-					allow_sending_without_reply,
-					reply_markup,
-					timeout,
-					message_thread_id,
-					reply_parameters,
-					link_preview_options,
-					business_connection_id,
-					message_effect_id
-				)
+		def new_function(*args, **kwargs) -> types.Message:
+			Message = None
 
-			except apihelper.ApiTelegramException as ExceptionData:
+			while not Message:
+				
+				try: 
+					Message = function(*args, **kwargs)
 
-				if "Error code: 429. Description: Too Many Requests" in str(ExceptionData):
-					Seconds = float(str(ExceptionData).split(" ")[-1])
-					sleep(Seconds)
+				except apihelper.ApiTelegramException as ExceptionData:
 
-				else: raise ExceptionData
+					if "Error code: 429. Description: Too Many Requests" in str(ExceptionData):
+						Seconds = float(str(ExceptionData).split(" ")[-1])
+						sleep(Seconds)
 
-		return Message
+					else: raise ExceptionData
+
+			return Message

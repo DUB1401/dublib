@@ -263,7 +263,7 @@ class TextStyler:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		self.__Text = text
+		self.__Text = str(text)
 		self.__Decorations = decorations
 		self.__TextColor = text_color
 		self.__BackgroundColor = background_color
