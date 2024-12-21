@@ -1,7 +1,8 @@
 from .TextStyler import Styles, TextStyler
 from ..Engine.Bus import *
 
-import readline
+try: import readline
+except ImportError: pass
 
 #==========================================================================================#
 # >>>>> ШАБЛОНЫ ВВОДА-ВЫВОДА <<<<< #
