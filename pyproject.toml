@@ -3,7 +3,7 @@ requires = ["setuptools", "cython"]
 
 [project]
 name = "dublib"
-version = "0.15.0"
+version = "0.15.1"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}

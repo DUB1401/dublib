@@ -218,6 +218,12 @@ class Position:
 	def max_parameters_count(self) -> int:
 		"""Максимальное количество параметров на позиции."""
 
+		if self.__IsBase:
+			Count = len(self.__Flags)
+			Count += len(self.__Arguments)
+			Count += len(self.__Keys) * 2
+			return Count
+
 		if self.keys: return 2
 		elif self.__Arguments or self.__Flags: return 1
 		else: return 0
@@ -225,6 +231,20 @@ class Position:
 	@property
 	def min_parameters_count(self) -> int:
 		"""Минимальное количество параметров на позиции."""
+
+		if self.__IsBase:
+			Count = 0
+			for Flag in self.__Flags:
+				if Flag.is_important: Count += 1
+
+			for Key in self.__Keys:
+				if Key.is_important: Count += 2
+
+			for Argument in self.__Arguments:
+				if Argument.is_important: Count += 1
+				break
+
+			return Count
 
 		if self.__IsImportant:
 			if self.keys: return 2
@@ -258,9 +278,9 @@ class Position:
 		self.__Description = description
 		self.__IsBase = is_base
 		
-		self.__Arguments = list()
-		self.__Flags = list()
-		self.__Keys = list()
+		self.__Arguments: list[Argument] = list()
+		self.__Flags: list[Flag] = list()
+		self.__Keys: list[Key] = list()
 		
 	def add_argument(self, type: ParametersTypes = ParametersTypes.All, description: str | None = None, important: bool = False):
 		"""
@@ -892,11 +912,13 @@ class Terminalyzer:
 			position – позиция или описание команды.
 		"""
 
+		if not any((position.flags, position.keys, position.arguments)): return str()
+
 		Help = ""
 		Indent = "  "
 		PositionName = f"{Indent}{position.name}" if position.name else f"{Indent}POS"
 		Description = f": {position.description}" if position.description else ""
-		
+
 		if position.is_base:
 			PositionName = f"{Indent}Other parameters:"
 			Description = ""
@@ -926,7 +948,7 @@ class Terminalyzer:
 			Help += self.__GenerateCommandMap(CommandForHelp)
 			if CommandForHelp.description: Help += "\n" + TextStyler(CommandForHelp.description).decorate.italic
 			for Position in CommandForHelp.positions: Help += self.__BuildPositionDescription(Position)
-			if any((CommandForHelp.has_important_flag, CommandForHelp.has_important_key, CommandForHelp.has_important_argument)): Help += "\n" + self.__HelpTranslationObject.important_note or ""
+			if any((CommandForHelp.has_important_flag, CommandForHelp.has_important_key, CommandForHelp.has_important_argument)) and self.__HelpTranslationObject.important_note: Help += "\n" + self.__HelpTranslationObject.important_note or ""
 			self.__HelpCallback(Help)
 
 		else: self.__HelpCallback(self.__HelpTranslationObject.no_command.replace(r"%c", command_name))
@@ -970,7 +992,7 @@ class Terminalyzer:
 
 		for Position in command.positions:
 			if Position.is_base: continue
-			Name = {Position.name} or "POSITION"
+			Name = Position.name or "POSITION"
 			IsImportant = "*" if Position.is_important else ""
 			CommandMap += f" [{Name}{IsImportant}]"
 
