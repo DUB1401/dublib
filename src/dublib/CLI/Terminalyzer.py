@@ -1017,7 +1017,7 @@ class Terminalyzer:
 		self.__KeysIndicator = "--"
 		self.__FlagsIndicator = "-"
 		self.__CommandData = None
-		self.__CommandName = self.__Parameters[0] if self.__Parameters else None
+		self.__CommandName = None
 		self.__EnableHelp = False
 		self.__HelpCallback = print
 
@@ -1026,6 +1026,8 @@ class Terminalyzer:
 		self.__PositionsLocks = dict()
 
 		self.__HelpTranslationObject = HelpTranslation()
+
+		self.set_source(self.__Parameters)
 
 	def enable_help(self, status: bool = True):
 		"""
@@ -1051,12 +1053,8 @@ class Terminalyzer:
 		for CurrentCommand in commands: self.__CheckCommand(CurrentCommand)
 
 		if self.__EnableHelp and self.__CommandData and self.__CommandData.name == "help":
-			
-			if self.__CommandData.arguments:
-				self.__CreateCommandHelp(commands, self.__CommandData.arguments[0])
-
-			else:
-				self.__CreateHelpList(commands)
+			if self.__CommandData.arguments: self.__CreateCommandHelp(commands, self.__CommandData.arguments[0])
+			else: self.__CreateHelpList(commands)
 		
 		return self.__CommandData
 
@@ -1067,6 +1065,7 @@ class Terminalyzer:
 		"""
 
 		self.__Parameters = parameters
+		self.__CommandName = self.__Parameters[0] if self.__Parameters else None
 
 	def set_flags_indicator(self, indicator: str):
 		"""
