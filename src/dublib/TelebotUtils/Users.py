@@ -1,4 +1,4 @@
-from ..Methods.Filesystem import NormalizePath, ReadJSON, WriteJSON
+from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
 from ..Exceptions.TelebotUtils import *
 
 from telebot.types import User
@@ -322,19 +322,23 @@ class UsersManager:
 		return Users
 
 	#==========================================================================================#
-	# >>>>> МЕТОДЫ <<<<< #
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
 	def __LoadUsers(self):
 		"""Загружает данные пользователей."""
 
-		Files = os.listdir(self.__StorageDirectory)
+		Files = ListDir(self.__StorageDirectory)
 		Files = list(filter(lambda List: List.endswith(".json"), Files))
 
 		for File in Files:
 			Buffer = ReadJSON(self.__StorageDirectory + f"/{File}")
 			UserID = int(File.replace(".json", ""))
 			self.__Users[UserID] = UserData(self.__StorageDirectory, UserID, Buffer)
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
 
 	def __init__(self, directory: str):
 		"""
