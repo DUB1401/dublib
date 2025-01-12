@@ -1018,12 +1018,12 @@ class Terminalyzer:
 		self.__FlagsIndicator = "-"
 		self.__CommandData = None
 		self.__CommandName = None
-		self.__EnableHelp = False
-		self.__HelpCallback = print
-
 		self.__Command: Command = None
 		self.__ParametersLocks = None
 		self.__PositionsLocks = dict()
+
+		self.__EnableHelp = False
+		self.__HelpCallback = print
 
 		self.__HelpTranslationObject = HelpTranslation()
 
@@ -1042,6 +1042,9 @@ class Terminalyzer:
 		Выполняет проверку соответствия списку команд.
 			commands – описательные структуры комманд или их JSON-конфигурация.
 		"""
+
+		self.__CommandData = None
+		self.__Command = None
 
 		if type(commands) == Command: commands = [commands]
 
