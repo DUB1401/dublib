@@ -18,7 +18,7 @@ class UserData:
 	#==========================================================================================#
 
 	@property
-	def expected_type(self) -> int:
+	def expected_type(self) -> str | None:
 		"""Тип ожидаемого значения."""
 
 		return self.__Data["expected_type"]
@@ -201,7 +201,7 @@ class UserData:
 			key – ключ свойства.
 		"""
 
-		IsExists = True
+		IsExists = False
 		if key in self.__Data["data"].keys() or key in self.__Data["temp"].keys(): IsExists = True
 
 		return IsExists
@@ -240,7 +240,7 @@ class UserData:
 		self.__Data["is_chat_forbidden"] = status
 		self.__SaveData()
 
-	def set_expected_type(self, type_name: str):
+	def set_expected_type(self, type_name: str | None):
 		"""
 		Задаёт ожидаемый от пользователя тип данных.
 			type_name – название типа.
