@@ -68,6 +68,10 @@ class Background:
 class Colorize:
 	"""Набор быстрых цветов."""
 
+	#==========================================================================================#
+	# >>>>> БАЗОВЫЕ ЦВЕТА <<<<< #
+	#==========================================================================================#
+
 	@property
 	def black(self) -> str:
 		"""Чёрный."""
@@ -99,7 +103,7 @@ class Colorize:
 		return self.__Styler.stylize(text_color = Colors.Blue)
 	
 	@property
-	def purple(self) -> str:
+	def magenta(self) -> str:
 		"""Фиолетовый."""
 
 		return self.__Styler.stylize(text_color = Colors.Purple)
@@ -116,6 +120,62 @@ class Colorize:
 
 		return self.__Styler.stylize(text_color = Colors.White)
 	
+	#==========================================================================================#
+	# >>>>> СВЕТЛЫЕ ОТТЕНКИ <<<<< #
+	#==========================================================================================#
+
+	@property
+	def gray(self) -> str:
+		"""Серый."""
+
+		return self.__Styler.stylize(text_color = Colors.Gray)
+	
+	@property
+	def bright_red(self) -> str:
+		"""Светло-красный."""
+
+		return self.__Styler.stylize(text_color = Colors.BrightRed)
+	
+	@property
+	def bright_green(self) -> str:
+		"""Светло-зелёный."""
+
+		return self.__Styler.stylize(text_color = Colors.BrightGreen)
+	
+	@property
+	def bright_yellow(self) -> str:
+		"""Светло-жёлтый."""
+
+		return self.__Styler.stylize(text_color = Colors.BrightYellow)
+	
+	@property
+	def bright_blue(self) -> str:
+		"""Светло-синий."""
+
+		return self.__Styler.stylize(text_color = Colors.BrightBlue)
+	
+	@property
+	def bright_purple(self) -> str:
+		"""Светло-фиолетовый."""
+
+		return self.__Styler.stylize(text_color = Colors.BrightMagenta)
+	
+	@property
+	def bright_cyan(self) -> str:
+		"""Светло-бирюзовый."""
+
+		return self.__Styler.stylize(text_color = Colors.BrightCyan)
+	
+	@property
+	def bright_white(self) -> str:
+		"""Светло-белый."""
+
+		return self.__Styler.stylize(text_color = Colors.BrightWhite)
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
 	def __init__(self, styler: "TextStyler"):
 		"""
 		Набор быстрых цветов.
@@ -306,8 +366,14 @@ class TextStyler:
 		StyleMarkers = "\033["
 
 		for Decoration in decorations: StyleMarkers += Decoration.value + ";"
-		if text_color != None: StyleMarkers += "3" + text_color.value + ";"
-		if background_color != None: StyleMarkers += "4" + background_color.value + ";"
+		if text_color: StyleMarkers += text_color.value + ";"
+
+		if background_color:
+			BackgroundCode = background_color.value
+			if BackgroundCode.startswith("3"): BackgroundCode = "4" + BackgroundCode[1:]
+			elif BackgroundCode.startswith("9"): BackgroundCode = "10" + BackgroundCode[1:]
+			StyleMarkers += BackgroundCode + ";"
+
 		StyleMarkers = StyleMarkers.rstrip(';') + "m"
 
 		text = StyleMarkers + text
