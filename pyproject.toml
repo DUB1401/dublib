@@ -3,7 +3,7 @@ requires = ["setuptools", "cython"]
 
 [project]
 name = "dublib"
-version = "0.15.3"
+version = "0.16.0"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}
@@ -18,7 +18,9 @@ dependencies = [
 	"httpx",
 	"httpx[http2]",
 	"prettytable",
-	"requests"
+	"requests",
+	"gnureadline; sys_platform == \"linux\"",
+	"pyreadline3; sys_platform == \"win32\""
 ]
 classifiers = [
 	"Development Status :: 4 - Beta",
