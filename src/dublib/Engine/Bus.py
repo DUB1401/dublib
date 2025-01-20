@@ -27,19 +27,19 @@ class ExecutionMessage:
 	def text(self) -> str:
 		"""Текст сообщения."""
 
-		return self.__Text
+		return self._Text
 
 	@property
 	def type(self) -> MessagesTypes | None:
 		"""Тип сообщения."""
 
-		return self.__Type
+		return self._Type
 	
 	@property
 	def origin(self) -> str | None:
 		"""Строка идентификации источника сообщения."""
 
-		return self.__Origin
+		return self._Origin
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -55,17 +55,17 @@ class ExecutionMessage:
 
 		#---> Генерация динамичкских атрибутов.
 		#==========================================================================================#
-		self.__Text = text
-		self.__Type = type
-		self.__Origin = origin
+		self._Text = text
+		self._Type = type
+		self._Origin = origin
 
 	def __str__(self) -> str:
 		"""Возвращает строковое представление форматированного сообщения."""
 
 		Origin = ""
 		Type = ""
-		if self.__Origin: Origin = f"{self.__Origin}:"
-		if self.__Type: Type = f"[{Origin}{self.__Type.name.upper()}] "
+		if self._Origin: Origin = f"{self._Origin}:"
+		if self._Type: Type = f"[{Origin}{self._Type.name.upper()}] "
 		ColorsDict = {
 			MessagesTypes.Info: Colors.White,
 			MessagesTypes.Error: Colors.Red,
@@ -73,7 +73,7 @@ class ExecutionMessage:
 			MessagesTypes.Critical: Colors.Red,
 			None: Colors.White
 		}
-		Message = TextStyler(f"{Type}{self.__Text}", text_color = ColorsDict[self.__Type]).text
+		Message = TextStyler(f"{Type}{self._Text}", text_color = ColorsDict[self._Type]).text
 
 		return Message
 
@@ -83,7 +83,7 @@ class ExecutionMessage:
 			origin – строка идентификации источника сообщения.
 		"""
 
-		return origin == self.__Origin
+		return origin == self._Origin
 
 	def print(self):
 		"""Выводит в консоль сообщение."""
@@ -105,25 +105,37 @@ class ExecutionStatus:
 	def code(self) -> int | None:
 		"""Код выполнения."""
 
-		return self.__Code
+		return self._Code
 
 	@property
 	def data(self) -> dict:
 		"""Копия словаря дополнительных данных."""
 
-		return self.__Data.copy()
+		return self._Data.copy()
+
+	@property
+	def has_errors(self) -> bool:
+		"""Состояние: имеются ли ошибки."""
+
+		return self._HasErrors
+	
+	@property
+	def has_warnings(self) -> bool:
+		"""Состояние: имеются ли предупреждения."""
+
+		return self._HasWarnings
 
 	@property
 	def messages(self) -> tuple[ExecutionMessage]:
 		"""Сообщение."""
 
-		return tuple(self.__Messages)
+		return tuple(self._Messages)
 	
 	@property
 	def value(self) -> Any:
 		"""Вложенное возвращаемое значение."""
 
-		return self.__Value
+		return self._Value
 
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ УСТАНОВКИ ЗНАЧЕНИЙ СВОЙСТВ <<<<< #
@@ -133,13 +145,22 @@ class ExecutionStatus:
 	def code(self, new_code: int):
 		"""Код выполнения."""
 
-		self.__Code = int(new_code)
+		self._Code = int(new_code)
 	
 	@value.setter
 	def value(self, new_value: Any) -> Any:
 		"""Вложенное возвращаемое значение."""
 
-		self.__Value = new_value
+		self._Value = new_value
+
+	#==========================================================================================#
+	# >>>>> ПЕРЕОПРЕДЕЛЯЕМЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def _PostInitMethod(self):
+		"""Метод, срабатывающий после инициализации объекта."""
+
+		pass
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -150,15 +171,20 @@ class ExecutionStatus:
 
 		#---> Генерация динамичкских атрибутов.
 		#==========================================================================================#
-		self.__Code = None
-		self.__Messages: list[ExecutionMessage] = list()
-		self.__Value = None
-		self.__Data = dict()
+		self._Code = None
+		self._Messages: list[ExecutionMessage] = list()
+		self._Value = None
+		self._Data = dict()
+
+		self._HasErrors = False
+		self._HasWarnings = False
+
+		self._PostInitMethod()
 
 	def __bool__(self) -> bool:
 		"""Приводит вложенное значение к логическому типу."""
 
-		return bool(self.__Value)
+		return bool(self._Value)
 
 	def __getitem__(self, key: Any) -> Any:
 		"""
@@ -166,8 +192,19 @@ class ExecutionStatus:
 			key – ключ.
 		"""
 
-		return self.__Data[key]
+		return self._Data[key]
 	
+	def __iadd__(self, status: "ExecutionStatus") -> "ExecutionStatus":
+		"""
+		Выполняет слияние другого статуса с текущим объектом, объединяя списки сообщений и перезаписывая данные. 
+			status – статус для слиянитя.
+		"""
+
+		if isinstance(status, ExecutionStatus): self.merge(status)
+		else: raise TypeError("can only concatenate ExecutionStatus")
+
+		return self
+
 	def __setitem__(self, key: Any, value: Any):
 		"""
 		Задаёт значение в словаре дополнительных данных.
@@ -175,21 +212,21 @@ class ExecutionStatus:
 			value – значение.
 		"""
 
-		self.__Data[key] = value
+		self._Data[key] = value
 
 	def __str__(self) -> str:
 		"""Возвращает текстовое представление статуса."""
 
 		Status = str()
-		Status += TextStyler("Code:").decorate.bold + " " + str(self.__Code) + "\n"
-		Status += TextStyler("Value:").decorate.bold + " " + str(self.__Value) + "\n"
+		Status += TextStyler("Code:").decorate.bold + " " + str(self._Code) + "\n"
+		Status += TextStyler("Value:").decorate.bold + " " + str(self._Value) + "\n"
 
-		if self.__Data: Status += TextStyler("Data:").decorate.bold + "\n"
-		for Key in self.__Data: Status += "    " + str(Key) + ": " + str(self.__Data[Key]) + "\n"
+		if self._Data: Status += TextStyler("Data:").decorate.bold + "\n"
+		for Key in self._Data: Status += "    " + str(Key) + ": " + str(self._Data[Key]) + "\n"
 
-		if self.__Messages: Status += TextStyler("Messages:").decorate.bold + "\n"
+		if self._Messages: Status += TextStyler("Messages:").decorate.bold + "\n"
 
-		for Message in self.__Messages: Status += "    " + str(Message) + "\n"
+		for Message in self._Messages: Status += "    " + str(Message) + "\n"
 
 		return Status.rstrip()
 
@@ -199,7 +236,7 @@ class ExecutionStatus:
 			key – ключ.
 		"""
 
-		return key in self.__Data.keys()
+		return key in self._Data.keys()
 
 	def merge(self, status: "ExecutionStatus", overwrite: bool = True):
 		"""
@@ -209,13 +246,13 @@ class ExecutionStatus:
 		"""
 
 		if overwrite:
-			self.__Code = status.code
-			self.__Value = status.value
+			self._Code = status.code
+			self._Value = status.value
 
 		for Key in status.data.keys():
-			if Key in self.__Data and overwrite or Key not in self.__Data: self.__Data[Key] = status.data[Key]
+			if Key in self._Data and overwrite or Key not in self._Data: self._Data[Key] = status.data[Key]
 		
-		self.__Messages += status.messages
+		self._Messages += status.messages
 
 	def set_code(self, code: int | None):
 		"""
@@ -223,7 +260,7 @@ class ExecutionStatus:
 			code – код выполнения.
 		"""
 
-		self.__Code = code
+		self._Code = code
 
 	def set_value(self, value: Any, force: bool = False):
 		"""
@@ -232,7 +269,7 @@ class ExecutionStatus:
 			force – указывает, что нужно перезаписать существующее значение.
 		"""
 
-		self.__Value = value
+		self._Value = value
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ РАБОТЫ С СООБЩЕНИЯМИ <<<<< #
@@ -244,7 +281,7 @@ class ExecutionStatus:
 			indent – количество пробелов перед выводом сообщения.
 		"""
 		
-		for Message in self.__Messages:
+		for Message in self._Messages:
 			if indent: print(" " * int(indent), end = "")
 			Message.print()
 
@@ -256,6 +293,7 @@ class ExecutionStatus:
 		"""
 
 		self.push_message(text, MessagesTypes.Critical, origin)
+		self._HasErrors = True
 
 	def push_error(self, text: str, origin: str | None = None):
 		"""
@@ -265,6 +303,7 @@ class ExecutionStatus:
 		"""
 
 		self.push_message(text, MessagesTypes.Error, origin)
+		self._HasErrors = True
 
 	def push_info(self, text: str, origin: str | None = None):
 		"""
@@ -283,7 +322,7 @@ class ExecutionStatus:
 			origin – строка идентификации источника сообщения.
 		"""
 
-		self.__Messages.append(ExecutionMessage(text, type, origin))
+		self._Messages.append(ExecutionMessage(text, type, origin))
 
 	def push_warning(self, text: str, origin: str | None = None):
 		"""
@@ -293,3 +332,4 @@ class ExecutionStatus:
 		"""
 
 		self.push_message(text, MessagesTypes.Warning, origin)
+		self._HasWarnings = True
