@@ -106,7 +106,7 @@ class Colorize:
 	def magenta(self) -> str:
 		"""Фиолетовый."""
 
-		return self.__Styler.stylize(text_color = Colors.Purple)
+		return self.__Styler.stylize(text_color = Colors.Magenta)
 	
 	@property
 	def cyan(self) -> str:
@@ -155,7 +155,7 @@ class Colorize:
 		return self.__Styler.stylize(text_color = Colors.BrightBlue)
 	
 	@property
-	def bright_purple(self) -> str:
+	def bright_magenta(self) -> str:
 		"""Светло-фиолетовый."""
 
 		return self.__Styler.stylize(text_color = Colors.BrightMagenta)

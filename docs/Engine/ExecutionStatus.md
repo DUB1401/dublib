@@ -1,39 +1,34 @@
 # ExecutionStatus
-**ExecutionStatus** – это подмодуль для организации общения между методами и функциями по принципу возвращаемого значения. Отчёты о предупреждении и ошибках наследуются от отчёта о выполнении, потому имеют одинаковую структуру и отличаются лишь типом, который может быть использован при выводе через `CLI.Templates`.
+**ExecutionStatus** – это подмодуль для организации общения между методами и функциями по принципу возвращаемого значения. Он представляет собой удобную структуру данных, которая может содержать целочисленный код, значение, последовательность сообщений и дополнительные данные типа ключ-значение. 
 
-### Классы
-* `StatussesTypes` – содержит типы отчётов.
-* `ExecutionStatus` – отчёт о выполнении;
-* `ExecutionWarning` – отчёт о предупреждении выполнения;
-* `ExecutionError` – отчёт об ошибке;
-* `ExecutionCritical` – отчёт о критической ошибке.
+Статус также поддерживыает слияние через метод `merge()`, что позволяет создавать конвейеры общения.
 
 ## Пример
 ```Python
-from dublib.CLI.Templates import PrintExecutionStatus
-from dublib.Engine.ExecutionStatus import *
+from dublib.Engine.Bus import ExecutionStatus
 
 # Функция для деления двух значений.
 def some_function(first_value: int, second_value: int) -> ExecutionStatus:
 	# Результат выполнения.
-	Status = None
+	Status = ExecutionStatus()
 
 	try:
 		# Деление.
 		Result = first_value / second_value
 		# Составление отчёта о выполнении.
-		Status = ExecutionStatus(0, value = Result)
+		Status.value = Result
 
 	except ZeroDivisionError:
 		# Формирование отчёта об ошибке с описанием в виде названия исключения.
-		Status = ExecutionError(-1, ZeroDivisionError.__name__)
+		Status.push_error(ZeroDivisionError.__name__)
 
 	return Status
 
 # Выполнение деления.
 Result = some_function(10, 0)
-# Если выполнение успешно, вывести результат, иначе вывести отчёт об ошибке.
-if Result.code == 0: print(Result.value)
-else: PrintExecutionStatus(Result)
+# Если значение в статусе проходит проверку на истинность, вывести результат.
+if Result: print(Result.value)
+# Иначе вывести все сообщения.
+else: Result.print_messages()
 
 ```
