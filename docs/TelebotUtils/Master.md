@@ -19,6 +19,7 @@ def Command(Message: types.Message):
 	# Авторизация пользователя.
 	User = Users.auth(Message.from_user)
 	# Проверка: состоит ли пользователь в указанном чате.
+	# Для проверки бот также должен являться участником чата!
 	IsSubscribed = MasterBot.check_user_subscriptions(User, -123456789)
 	# Если пользователь не подписан, отправить ему сообщение.
 	if not IsSubscribed: Bot.send_message(User.id, "Станьте участником чата -123456789!")
@@ -26,5 +27,5 @@ def Command(Message: types.Message):
 # Пример использование декоратора TeleMaster.
 while True: 
 	@TeleMaster.ignore_frecuency_errors
-	Bot.send_message(User.id, "Слишком частое сообщение!")
+	Bot.send_message(User.id, "Слишком частые сообщения!")
 ```

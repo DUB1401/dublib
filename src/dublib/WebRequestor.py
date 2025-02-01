@@ -19,7 +19,7 @@ import json
 
 # Инициализация модуля ведения логов.
 Logger = logging.getLogger(__name__)
-Logger.addHandler(logging.NullHandler())
+Logger.addHandler(logging.StreamHandler().setFormatter(logging.Formatter("[%(name)s] %(levelname)s: %(message)s")))
 Logger.setLevel(logging.INFO)
 
 #==========================================================================================#

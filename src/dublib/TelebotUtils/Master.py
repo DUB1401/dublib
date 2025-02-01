@@ -4,6 +4,21 @@ from telebot import apihelper, TeleBot, types
 from typing import Callable
 from time import sleep
 
+import logging
+
+#==========================================================================================#
+# >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
+#==========================================================================================#
+
+# Инициализация модуля ведения логов.
+Logger = logging.getLogger(__name__)
+Logger.addHandler(logging.StreamHandler().setFormatter(logging.Formatter("[%(name)s] %(levelname)s: %(message)s")))
+Logger.setLevel(logging.INFO)
+
+#==========================================================================================#
+# >>>>> ДОПОЛНИТЕЛЬНЫЕ КОНФИГУРАЦИИ БИБЛИОТЕК ЗАПРОСОВ <<<<< #
+#==========================================================================================#
+
 class TeleMaster:
 	"""Набор дополнительного функционала для бота Telegram."""
 
@@ -33,9 +48,9 @@ class TeleMaster:
 		#==========================================================================================#
 		self.__Bot = bot
 
-	def check_user_subscriptions(self, user: UserData, chats: int | list[int]) -> bool:
+	def check_user_subscriptions(self, user: UserData, chats: int | list[int]) -> bool | None:
 		"""
-		Проверяет, состоит ли пользователь в указанных чатах.
+		Проверяет, состоит ли пользователь в указанных чатах. Бот должен состоять во всех проверяемых чатах.
 			user – проверяемый пользователь;\n
 			chats – список ID чатов.
 		"""
@@ -49,12 +64,12 @@ class TeleMaster:
 			
 			try:
 				Response = self.__Bot.get_chat_member(ChatID, user.id)
-				if Response.status in ["administrator", "creator", "member", "restricted"]: Subscriptions += 1
+				if Response.status in ("administrator", "creator", "member", "restricted"): Subscriptions += 1
 				
-			except: pass
+			except Exception as ExceptionData:
+				if str(ExceptionData).endswith("chat not found"): Logger.error(f"Chat {ChatID} not found. May be bot not a member.")
 		
 		if Subscriptions == len(chats): IsSubscripted = True
-		self.__Bot.send_message()
 		
 		return IsSubscripted
 	
