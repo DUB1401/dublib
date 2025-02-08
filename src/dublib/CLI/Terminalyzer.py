@@ -247,7 +247,8 @@ class Position:
 			return Count
 
 		if self.__IsImportant:
-			if self.keys: return 2
+			
+			if self.keys and not self.__Arguments and not self.__Flags: return 2
 			elif self.__Arguments or self.__Flags: return 1
 			else: return 0
 
