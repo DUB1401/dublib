@@ -3,7 +3,7 @@ requires = ["setuptools", "cython"]
 
 [project]
 name = "dublib"
-version = "0.16.2"
+version = "0.16.3"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}
@@ -14,7 +14,7 @@ requires-python = ">=3.10"
 dependencies = [
 	"curl_cffi>=0.7.0",
 	"dateparser",
-	"fake_useragent",
+	"fake_useragent>=2.0.3",
 	"httpx",
 	"httpx[http2]",
 	"prettytable",

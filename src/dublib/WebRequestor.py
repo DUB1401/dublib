@@ -3,7 +3,7 @@ from .Exceptions.WebRequestor import *
 from curl_cffi import requests as curl_cffi_requests
 from curl_cffi import CurlHttpVersion
 from fake_useragent import UserAgent
-from typing import Any
+from typing import Any, Iterable
 from time import sleep
 
 import requests
@@ -398,9 +398,9 @@ class WebConfig:
 		self.__EnableRedirecting = status
 
 	def generate_user_agent(self,
-		os: list[str] | str = ["windows", "macos", "linux"],
-		browsers: list[str] | str = ["chrome", "edge", "firefox", "safari"],
-		platforms: list[str] | str = ["pc", "mobile", "tablet"]
+		os: Iterable[str] = ("Windows", "Linux", "Ubuntu", "Chrome OS", "Mac OS X", "Android", "iOS"),
+		browsers: Iterable[str] = ("Google", "Chrome", "Firefox", "Edge", "Opera"," Safari", "Android", "Yandex Browser", "Samsung Internet", "Opera Mobile", "Mobile Safari", "Firefox Mobile", "Firefox iOS", "Chrome Mobile", "Chrome Mobile iOS", "Mobile Safari UI/WKWebView", "Edge Mobile", "DuckDuckGo Mobile", "MiuiBrowser", "Whale", "Twitter", "Facebook", "Amazon Silk"),
+		platforms: Iterable[str] = ("desktop", "mobile", "tablet")
 	):
 		"""
 		Генерирует случайное значение User-Agent при помощи библиотеки fake_useragent.
