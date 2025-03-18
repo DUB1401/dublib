@@ -227,9 +227,11 @@ class UserData:
 			key – ключ свойства.
 		"""
 
-		if key in self.__Data["data"].keys():
-			del self.__Data["data"][key]
-			self.__SaveData()
+		if key in self.__Data["data"].keys(): del self.__Data["data"][key]
+		elif key in self.__Data["temp"].keys(): del self.__Data["temp"][key]
+		else: KeyError(key)
+
+		self.__SaveData()
 
 	def set_chat_forbidden(self, status: bool):
 		"""
@@ -348,7 +350,7 @@ class UsersManager:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		self.__Users = dict()
+		self.__Users: dict[int, UserData] = dict()
 		self.__StorageDirectory = NormalizePath(directory)
 
 		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
@@ -414,3 +416,47 @@ class UsersManager:
 			Users = Buffer
 
 		return Users
+	
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ МАССОВОГО РЕДАКТИРОВАНИЯ ПОЛЬЗОВАТЕЛЕЙ <<<<< #
+	#==========================================================================================#
+
+	def clear_temp_properties(self):
+		"""Очищает временные свойства всех пользователей."""
+
+		for User in self.__Users.values(): User.clear_temp_properties()
+
+	def remove_permissions(self, permissions: list[str] | str):
+		"""
+		Удаляет разрешения у всех пользователей.
+			permissions – разрешения.
+		"""
+
+		for User in self.__Users.values(): User.remove_permissions(permissions)
+
+	def remove_property(self, key: str):
+		"""
+		Удаляет свойство для всех пользователей.
+			key – ключ свойства.
+		"""
+
+		for User in self.__Users.values(): User.set_property(key)
+
+	def set_property(self, key: str, value: Any, force: bool = True):
+		"""
+		Задаёт значение свойства для всех пользователей.
+			key – ключ свойства;\n
+			value – значение;\n
+			force – указывает, необходимо ли перезаписывать значение уже существующего ключа.
+		"""
+
+		for User in self.__Users.values(): User.set_property(key, value, force)
+
+	def set_temp_property(self, key: str, value: Any):
+		"""
+		Задаёт значение временного свойства для всех пользователей.
+			key – ключ свойства;\n
+			value – значение.
+		"""
+
+		for User in self.__Users.values(): User.set_temp_property(key, value)
