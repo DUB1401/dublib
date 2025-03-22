@@ -24,6 +24,12 @@ class UserData:
 		return self.__Data["expected_type"]
 
 	@property
+	def flags(self) -> tuple[str]:
+		"""Набор активированных флагов."""
+
+		return tuple(self.__Data["flags"])
+
+	@property
 	def id(self) -> int:
 		"""ID пользователя."""
 
@@ -50,10 +56,10 @@ class UserData:
 		return self.__Data["language"]
 
 	@property
-	def permissions(self) -> list:
+	def permissions(self) -> tuple[str]:
 		"""Список прав доступа пользователя."""
 
-		return self.__Data["permissions"]
+		return tuple(self.__Data["permissions"])
 
 	@property
 	def username(self) -> str:
@@ -65,10 +71,53 @@ class UserData:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
+	def __AddFlags(self, flags: list[str] | str, key: str):
+		"""
+		Добавляет флаги по указанному ключу словаря данных пользователя.
+			flags – набор флагов;\n
+			key – ключ для помещения флагов.
+		"""
+
+		if type(flags) == str: flags = (flags,)
+		IsChanged = False
+
+		for Flag in flags:
+
+			if Flag not in self.__Data[key]:
+				self.__Data[key].append(Flag)
+				IsChanged = True
+
+		if IsChanged: self.__Data[key] = sorted(self.__Data[key])
+		self.__SaveData()
+
+	def __ReadData(self) -> dict:
+		"""Считывает данные из файла пользователя и дополняет отсутствующие поля."""
+
+		Data = ReadJSON(self.__Path)
+
+		for Key in self.__Data.keys():
+			if Key not in Data.keys(): Data[Key] = self.__Data[Key]
+
+		return Data
+
+	def __RemoveFlags(self, flags: list[str] | str, key: str):
+		"""
+		Убирает флаги по указанному ключу словаря данных пользователя.
+			flags – набор флагов;\n
+			key – ключ для помещения флагов.
+		"""
+
+		if type(flags) == str: flags = (flags,)
+
+		for Flag in flags:
+			if Flag in self.__Data[key]: self.__Data[key].remove(Flag)
+
+		self.__SaveData()
+
 	def __SaveData(self):
 		"""Записывает данные в локальный файл."""
 
-		WriteJSON(self.__StorageDirectory + f"/{self.__ID}.json", self.__Data)
+		WriteJSON(self.__Path, self.__Data)
 
 	def __SetProperty(self, property_type: str, key: str, value: Any):
 		"""
@@ -95,8 +144,8 @@ class UserData:
 
 		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		self.__ID = user_id
 		self.__StorageDirectory = storage_dir.replace("\\", "/").rstrip("/")
+		self.__ID = user_id
 		self.__Data = {
 			"username": None,
 			"language": None,
@@ -104,22 +153,26 @@ class UserData:
 			"is_premium": None,
 			"expected_type": None,
 			"permissions": [],
+			"flags": [],
 			"data": {},
 			"temp": {}
 		}
+
 		self.__Objects = dict()
+		self.__Path = self.__StorageDirectory + f"/{user_id}.json"
 
-		if type(data) == dict:
-			self.__Data = data
+		if type(data) == dict: self.__Data = data
+		elif type(data) == User: self.update(data)
+		elif os.path.exists(self.__Path): self.__Data = self.__ReadData()
+		else: self.__SaveData()
 
-		elif type(data) == User:
-			self.update(data)
+	def add_flags(self, flags: list[str] | str):
+		"""
+		Устанавливает флаги для пользователя.
+			flags – флаги.
+		"""
 
-		elif os.path.exists(self.__StorageDirectory + f"/{user_id}.json"):
-			self.__Data = ReadJSON(self.__StorageDirectory + f"/{user_id}.json")
-
-		else:
-			WriteJSON(self.__StorageDirectory + f"/{user_id}.json", self.__Data)
+		self.__AddFlags(flags, "flags")
 
 	def add_permissions(self, permissions: list[str] | str):
 		"""
@@ -127,17 +180,20 @@ class UserData:
 			permissions – разрешения.
 		"""
 
-		if type(permissions) == str: permissions = [permissions]
-		IsChanged = False
+		self.__AddFlags(permissions, "permissions")
 
-		for Permission in permissions:
+	def check_flags(self, flags: list[str] | str) -> bool:
+		"""
+		Возвращает статус активации флагов.
+			flags – флаги.
+		"""
 
-			if Permission not in self.__Data["permissions"]:
-				self.__Data["permissions"].append(Permission)
-				IsChanged = True
+		if type(flags) == str: flags = (flags,)
 
-		if IsChanged: self.__Data["permissions"] = sorted(self.__Data["permissions"])
-		self.__SaveData()
+		for Flag in flags:
+			if Flag not in self.__Data["flags"]: return False
+
+		return True
 
 	def clear_temp_properties(self):
 		"""Очищает временные свойства пользователя."""
@@ -206,20 +262,21 @@ class UserData:
 
 		return IsExists
 
+	def remove_flags(self, flags: list[str] | str):
+		"""
+		Удаляет флаги.
+			flags – флаги.
+		"""
+
+		self.__RemoveFlags(flags, "flags")
+
 	def remove_permissions(self, permissions: list[str] | str):
 		"""
 		Удаляет разрешения.
 			permissions – разрешения.
 		"""
 
-		if type(permissions) == str: permissions = [permissions]
-
-		for Permission in permissions:
-
-			if Permission in self.__Data["permissions"]:
-				self.__Data["permissions"].remove(Permission)
-
-		self.__SaveData()
+		self.__RemoveFlags(permissions, "permissions")
 
 	def remove_property(self, key: str):
 		"""
@@ -362,11 +419,9 @@ class UsersManager:
 			user – структура описания пользователя Telegram.
 		"""
 		
+		if type(user) != User: raise ValueError("User object expected, not " + str(type(user)) + ".")
 		CurrentUser = None
-
-		if user.id not in self.__Users.keys():
-			self.__Users[user.id] = UserData(self.__StorageDirectory, user.id, user)
-
+		if user.id not in self.__Users.keys():self.__Users[user.id] = UserData(self.__StorageDirectory, user.id, user)
 		self.__Users[user.id].update(user)
 		CurrentUser = self.__Users[user.id]
 
