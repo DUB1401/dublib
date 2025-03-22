@@ -1,13 +1,20 @@
 from ..Methods.Filesystem import NormalizePath, ReadJSON, WriteJSON
 
 from telebot import TeleBot, types
+from dataclasses import dataclass
 
-import enum
 import os
 
 #==========================================================================================#
 # >>>>> ВСПОМОГАТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
 #==========================================================================================#
+
+@dataclass
+class Cache:
+	"""Данные кэша."""
+
+	file_id: int
+	message_id: int
 
 class CachedFile:
 	"""Данные кэшированного файла."""
@@ -20,34 +27,40 @@ class CachedFile:
 	def chat_id(self) -> int:
 		"""Идентификатор чата с файлом."""
 
-		return self.__ChatID
+		return self._ChatID
 	
 	@property
-	def id(self) -> str:
+	def data(self) -> dict:
+		"""Словарь дополнительных данных."""
+
+		return self._Data
+
+	@property
+	def file_id(self) -> str:
 		"""Идентификатор файла на сервере Telegram."""
 
-		return self.__FileID
+		return self._FileID
+
+	@property
+	def identificator(self) -> str:
+		"""Идентификатор файла или путь к нему."""
+
+		return self._Identificator
 
 	@property
 	def message_id(self) -> int | None:
 		"""Идентификатор сообщения с файлом."""
 
-		return self.__MessageID
-
-	@property
-	def path(self) -> str:
-		"""Путь к файлу или его виртуальный идентификатор."""
-
-		return self.__Path
+		return self._MessageID
 	
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, path: str, chat_id: int, file_id: str, message_id: int | None = None):
+	def __init__(self, identificator: str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None):
 		"""
 		Данные кэшированного файла.
-			path – путь к файлу или его виртуальный идентификатор;\n
+			identificator – путь к файлу или его виртуальный идентификатор;\n
 			chat_id – идентификатор чата с файлом;\n
 			file_id – идентификатор файла на сервере Telegram;\n
 			message_id – идентификатор сообщения с файлом.
@@ -55,27 +68,43 @@ class CachedFile:
 
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
-		self.__Path = path
-		self.__ChatID = chat_id
-		self.__FileID = file_id
-		self.__MessageID = message_id
+		self._Identificator = identificator
+		self._ChatID = chat_id
+		self._FileID = file_id
+		self._MessageID = message_id
+		self._Data = data or dict()
 
 	def __str__(self) -> str:
 		"""Преобразует данные в строку."""
 
 		return str(self.to_dict())
+	
+	def to_dict(self) -> dict:
+		"""Генерирует словарь данных кэшированного файла."""
+
+		return {"identificator": self._Identificator, "chat_id": self._ChatID, "file_id": self._FileID, "message_id": self._MessageID, "data": self._Data}
+
+class RealCachedFile(CachedFile):
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def path(self) -> str:
+		"""Путь к файлу или его виртуальный идентификатор."""
+
+		return self._Identificator
+	
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
 
 	def to_dict(self) -> dict:
 		"""Генерирует словарь данных кэшированного файла."""
 
-		return {"path": self.__Path, "chat_id": self.__ChatID, "file_id": self.__FileID, "message_id": self.__MessageID}
-
-class StorageTypes(enum.Enum):
-	"""Типы локальных хранилищ данных кэша."""
-
-	SQLite = "sqlite3"
-	JSON = "json"
-
+		return {"path": self._Identificator, "chat_id": self._ChatID, "file_id": self._FileID, "message_id": self._MessageID, "data": self._Data}
+	
 #==========================================================================================#
 # >>>>> ОСНОВНОЙ КЛАСС <<<<< #
 #==========================================================================================#
@@ -87,162 +116,24 @@ class TeleCache:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __GetStoragePath(self, storage: str | None) -> str:
-		"""
-		Возвращает валидный путь к базе данных.
-			storage – установленный путь.
-		"""
+	def __Read(self):
+		"""Считывает данные или инициализирует новое хранилище."""
 
-		if not storage:
-			Filetype = "db" if self.__Type == StorageTypes.SQLite else "json"
-			storage = f"TeleCache.{Filetype}"
+		try: JSON = ReadJSON(self.__StoragePath)
+		except FileNotFoundError: return
 
-		else:
-			storage = NormalizePath(storage)
+		for Cache in JSON["real"]:
+			Path = Cache["path"]
+			self.__RealData[Path] = CachedFile(Path, Cache["chat_id"], Cache["file_id"], Cache["message_id"])
 
-		return storage
+		for Cache in JSON["virtual"]:
+			ID = Cache["identificator"]
+			self.__VirtualData[ID] = RealCachedFile(ID, Cache["chat_id"], Cache["file_id"], Cache["message_id"])
 
-	def __Read(self) -> dict:
-		"""Инициализирует базу данных."""
-
-		CacheData = dict()
-
-		if self.__Type == StorageTypes.JSON:
-
-			try:
-				JSON = ReadJSON(self.__Storage)
-
-				for Cache in JSON["cache"]:
-					Path = Cache["path"]
-					CacheData[Path] = CachedFile(Path, Cache["chat_id"], Cache["file_id"], Cache["message_id"])
-
-			except FileNotFoundError: pass
-
-		elif self.__Type == StorageTypes.SQLite: pass
-
-		return CacheData	
-
-	#==========================================================================================#
-	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
-	#==========================================================================================#
-
-	def __init__(self, storage: str | None = None, type: StorageTypes = StorageTypes.JSON):
-		"""
-		Менеджер кэша загружаемых в Telegram файлов.
-			storage – путь к файлу базы данных;\n
-			type – тип базы данных.
-		"""
-
-		if type == StorageTypes.SQLite: raise Exception("SQLite cache not supported yet.")
-
-		#---> Генерация динамических свойств.
-		#==========================================================================================#
-		self.__Type = type
-		self.__Storage = self.__GetStoragePath(storage)
-
-		self.__Bot = None
-		self.__ChatID = None
-
-		self.__Data = self.__Read()
-
-	def __getitem__(self, path: str) -> str:
-		"""
-		Возвращает ID кэшированного файла.
-			path – путь к файлу.
-		"""
-
-		return self.get_cached_file(path, upload = False, autosave = False).id
-	
-	def clear(self, autosave: bool = True):
-		"""
-		Удаляет данные кэшированных файлов, пути к которым более не являются валидными. Не рекомендуется к вызову при использовании виртуальных идентификаторов!
-			autosave – включает автосохранение базы данных.
-		"""
-
-		for Path in list(self.__Data.keys()):
-			if not os.path.exists(Path): del self.__Data[Path]
-
-		if autosave: self.save()
-
-	def drop(self, autosave: bool = True):
-		"""
-		Удаляет данные всех кэшированных файлов.
-			autosave – включает автосохранение базы данных.
-		"""
-
-		self.__Data = {"cache": []}
-		if autosave: self.save()
-
-	def get_cached_file(self, path: str, upload: bool = True, type: types.InputMedia | None = None, autosave: bool = True) -> CachedFile:
-		"""
-		Возвращает данные кэшированного файла. Если кэш не обнаружен, выполняет автоматическое кэширование.
-			path – путь к файлу или его виртуальный идентификатор;\n
-			upload – указывает, нужно ли кэшировать новый файл;\n
-			type – тип файла при автозагрузке (по умолчанию документ);\n
-			autosave – включает автосохранение базы данных.
-		"""
-
-		path = NormalizePath(path)
-		if not type: type = types.InputMediaDocument
-		if path not in self.__Data.keys() and upload: self.__Data[path] = self.upload_file(path, type, autosave = False)
-		if autosave: self.save()
-
-		return self.__Data[path]
-
-	def register_file(self, path: str, chat_id: int, file_id: str, message_id: int | None = None, autosave: bool = True):
-		"""
-		Регистрирует существующий кэшированный файл в базе данных.
-			path – путь к файлу или его виртуальный идентификатор;\n
-			chat_id – идентификатор чата с файлом;\n
-			file_id – идентификатор файла на сервере Telegram;\n
-			message_id – идентификатор сообщения с файлом;\n
-			autosave – включает автосохранение базы данных.
-		"""
-		
-		File = CachedFile(path, chat_id, file_id, message_id)	
-		self.__Data[path] = File
-		if autosave: self.save()
-		
-		return File
-
-	def remove_cache(self, path: str, autosave: bool = True):
-		"""
-		Удаляет данные кэшированного файла.
-			path – путь к файлу или его виртуальный идентификатор;\n
-			autosave – включает автосохранение базы данных.
-		"""
-
-		path = NormalizePath(path)
-		del self.__Data[path]
-		if autosave: self.save()
-
-	def save(self):
-		"""Сохраняет данные кэша."""
-
-		if self.__Type == StorageTypes.JSON:
-			Buffer = {
-				"cache": []
-			}
-			for Cache in self.__Data.values(): Buffer["cache"].append(Cache.to_dict())
-			WriteJSON(self.__Storage, Buffer)
-
-		elif self.__Type == StorageTypes.SQLite: pass
-
-	def set_options(self, bot: TeleBot | str, chat_id: int):
-		"""
-		Задаёт бота и идентификатор чата для кэширования.
-			bot – бот Telegram или его токен;\n
-			chat_id – идентификатор чата, в который будут загружаться кэшируемые файлы.
-		"""
-
-		if type(bot) == str: self.__Bot = TeleBot(bot)
-		else: self.__Bot = bot
-		self.__ChatID = chat_id
-
-	def upload_file(self, path: str, type: types.InputMedia | None = None, autosave: bool = True) -> CachedFile:
+	def __UploadFile(self, path: str, type: types.InputMedia | None = None) -> Cache:
 		"""
 		Кэширует файл.
-			path – путь к файлу или его виртуальный идентификатор;\n
+			path – путь к файлу;\n
 			type – тип файла (по умолчанию документ);\n
 			autosave – включает автосохранение базы данных.
 		"""
@@ -276,7 +167,188 @@ class TeleCache:
 				Message = self.__Bot.send_video(chat_id = self.__ChatID, video = types.InputFile(path))
 				FileID = Message.video.file_id
 
-		self.register_file(path, self.__ChatID, FileID, Message.id, autosave = False)
-		if autosave: self.save()
+		return Cache(FileID, Message.id)
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __init__(self, storage_path: str | None = None):
+		"""
+		Менеджер кэша загружаемых в Telegram файлов.
+			storage_path – путь к файлу базы данных.
+		"""
+
+		#---> Генерация динамических свойств.
+		#==========================================================================================#
+		self.__StoragePath = storage_path or ".telecache.json"
+
+		self.__Bot = None
+		self.__ChatID = None
+
+		self.__RealData: dict[str, RealCachedFile] = dict()
+		self.__VirtualData: dict[str, CachedFile] = dict()
+
+		self.__Read()
+
+	def drop(self):
+		"""Удаляет данные всех кэшированных файлов."""
+
+		self.__RealData = dict()
+		self.__VirtualData = dict()
+		self.save()
+
+	def save(self):
+		"""Сохраняет данные кэша."""
+
+		Buffer = {
+			"real": [Cache.to_dict() for Cache in self.__RealData.values()],
+			"virtual": [Cache.to_dict() for Cache in self.__VirtualData.values()]
+		}
+
+		WriteJSON(self.__StoragePath, Buffer)
+
+	def set_options(self, bot: TeleBot | str, chat_id: int):
+		"""
+		Задаёт бота и идентификатор чата для кэширования.
+			bot – бот Telegram или его токен;\n
+			chat_id – идентификатор чата, в который будут загружаться кэшируемые файлы.
+		"""
+
+		if type(bot) == str: self.__Bot = TeleBot(bot)
+		else: self.__Bot = bot
+		self.__ChatID = chat_id
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ РАБОТЫ С РЕАЛЬНЫМИ ФАЙЛАМИ <<<<< #
+	#==========================================================================================#
+
+	def cache_real_file(self, path: str, type: types.InputMedia | None = None, data: dict | None = None) -> RealCachedFile:
+		"""
+		Кэширует реальный файл.
+			path – путь к файлу;\n
+			type – тип файла при автозагрузке (по умолчанию документ);\n
+			data – словарь дополнительных данных.
+		"""
+
+		path = NormalizePath(path)
+		if not type: type = types.InputMediaDocument
+
+		if path not in self.__RealData.keys():
+			Cache = self.__UploadFile(path, type)
+			self.register_real_file(path, self.__ChatID, Cache.file_id, Cache.message_id, data)
+
+		return self.__RealData[path]
+
+	def clear_real_cache(self):
+		"""Удаляет данные кэшированных файлов, пути к которым более не являются валидными."""
+
+		for Path in list(self.__RealData.keys()):
+			if not os.path.exists(Path): del self.__RealData[Path]
+
+		self.save()
+
+	def drop_real_cache(self):
+		"""Удаляет данные всех реальных кэшированных файлов."""
+
+		self.__RealData = dict()
+		self.save()
+
+	def get_real_cached_file(self, path: str, autoupload_type: types.InputMedia | None = None) -> RealCachedFile:
+		"""
+		Возвращает данные реального кэшированного файла.
+			path – путь к файлу;\n
+			autoupload_type – если файл отсутствует в кэше и указан тип, то он будет автоматически кэширован в соответствии с ним.
+		"""
+
+		path = NormalizePath(path)
+		if autoupload_type: self.cache_real_file(path, autoupload_type)
+
+		return self.__RealData[path]
+	
+	def register_real_file(self, path: str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None) -> RealCachedFile:
+		"""
+		Регистрирует кэш реального файла.
+			path – путь к файлу;\n
+			chat_id – идентификатор чата с файлом;\n
+			file_id – идентификатор файла на сервере Telegram;\n
+			message_id – идентификатор сообщения с файлом;\n
+			data – словарь дополнительных данных.
+		"""
 		
-		return self.get_cached_file(path, upload = False, autosave = False)
+		File = RealCachedFile(path, chat_id, file_id, message_id, data)	
+		self.__RealData[path] = File
+		self.save()
+		
+		return File
+
+	def remove_real_cache(self, path: str):
+		"""
+		Удаляет данные реального кэшированного файла.
+			path – путь к файлу.
+		"""
+
+		path = NormalizePath(path)
+		del self.__RealData[path]
+		self.save()
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ РАБОТЫ С ВИРТУАЛЬНЫМИ ФАЙЛАМИ <<<<< #
+	#==========================================================================================#
+
+	def cache_virtual_file(self, path: str, identificator: str, type: types.InputMedia | None = None, data: dict | None = None) -> RealCachedFile:
+		"""
+		Кэширует реальный файл.
+			path – путь к файлу;\n
+			identificator – виртуальный идентификатор файла;\n
+			type – тип файла при автозагрузке (по умолчанию документ);\n
+			data – словарь дополнительных данных.
+		"""
+
+		path = NormalizePath(path)
+		if not type: type = types.InputMediaDocument
+
+		if path not in self.__VirtualData.keys():
+			Cache = self.__UploadFile(path, type)
+			self.register_virtual_file(identificator, self.__ChatID, Cache.file_id, Cache.message_id, data)
+
+		return self.__VirtualData[identificator]
+
+	def drop_virtual_cache(self):
+		"""Удаляет данные всех виртуальных кэшированных файлов."""
+
+		self.__VirtualData = dict()
+		self.save()
+
+	def get_virtual_cached_file(self, identificator: str) -> CachedFile:
+		"""
+		Возвращает данные виртуального кэшированного файла.
+			identificator – виртуальный идентификатор файла.
+		"""
+
+		return self.__VirtualData[identificator]
+	
+	def register_virtual_file(self, identificator: str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None) -> CachedFile:
+		"""
+		Регистрирует кэш виртуального файла.
+			identificator – виртуальный идентификатор файла;\n
+			chat_id – идентификатор чата с файлом;\n
+			file_id – идентификатор файла на сервере Telegram;\n
+			message_id – идентификатор сообщения с файлом;\n
+			data – словарь дополнительных данных.
+		"""
+		
+		File = CachedFile(identificator, chat_id, file_id, message_id, data)	
+		self.__VirtualData[identificator] = File
+		self.save()
+		
+		return File
+
+	def remove_virtual_cache(self, identificator: str):
+		"""
+		Удаляет данные виртуального кэшированного файла.
+			identificator – виртуальный идентификатор файла.
+		"""
+
+		del self.__VirtualData[identificator]
+		self.save()
