@@ -124,11 +124,11 @@ class TeleCache:
 
 		for Cache in JSON["real"]:
 			Path = Cache["path"]
-			self.__RealData[Path] = CachedFile(Path, Cache["chat_id"], Cache["file_id"], Cache["message_id"])
+			self.__RealData[Path] = RealCachedFile(Path, Cache["chat_id"], Cache["file_id"], Cache["message_id"])
 
 		for Cache in JSON["virtual"]:
 			ID = Cache["identificator"]
-			self.__VirtualData[ID] = RealCachedFile(ID, Cache["chat_id"], Cache["file_id"], Cache["message_id"])
+			self.__VirtualData[ID] = CachedFile(ID, Cache["chat_id"], Cache["file_id"], Cache["message_id"])
 
 	def __UploadFile(self, path: str, type: types.InputMedia | None = None) -> Cache:
 		"""
