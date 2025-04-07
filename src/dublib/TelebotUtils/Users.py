@@ -1,9 +1,11 @@
 from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
 from ..Exceptions.TelebotUtils import *
 
+from datetime import datetime, timedelta
 from telebot.types import User
 from typing import Any
 
+import dateparser
 import os
 
 #==========================================================================================#
@@ -16,6 +18,12 @@ class UserData:
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА <<<<< #
 	#==========================================================================================#
+
+	@property
+	def last_activity(self) -> datetime | None:
+		"""Дата и время последней активности пользователя."""
+
+		return self.__Data["last_activity"]
 
 	@property
 	def expected_type(self) -> str | None:
@@ -98,6 +106,8 @@ class UserData:
 		for Key in self.__Data.keys():
 			if Key not in Data.keys(): Data[Key] = self.__Data[Key]
 
+		if Data["last_activity"]: Data["last_activity"] = dateparser.parse(Data["last_activity"])
+
 		return Data
 
 	def __RemoveFlags(self, flags: list[str] | str, key: str):
@@ -117,7 +127,9 @@ class UserData:
 	def __SaveData(self):
 		"""Записывает данные в локальный файл."""
 
-		WriteJSON(self.__Path, self.__Data)
+		Data = self.__Data.copy()
+		Data["last_activity"] = str(Data["last_activity"])
+		WriteJSON(self.__Path, Data)
 
 	def __SetProperty(self, property_type: str, key: str, value: Any):
 		"""
@@ -138,8 +150,7 @@ class UserData:
 		"""
 		Объектное представление данных пользователя.
 			storage_dir – путь к директории хранения данных;\n
-			user_id – ID пользователя;\n
-			data – словарь с описанием данных пользователя для инициализации (если не передан, данные будут загружены из файла).
+			user_id – ID пользователя.
 		"""
 
 		#---> Генерация динамических атрибутов.
@@ -153,6 +164,7 @@ class UserData:
 			"is_premium": None,
 			"expected_type": None,
 			"permissions": [],
+			"last_activity": None,
 			"flags": [],
 			"data": {},
 			"temp": {}
@@ -161,9 +173,7 @@ class UserData:
 		self.__Objects = dict()
 		self.__Path = self.__StorageDirectory + f"/{user_id}.json"
 
-		if type(data) == dict: self.__Data = data
-		elif type(data) == User: self.update(data)
-		elif os.path.exists(self.__Path): self.__Data = self.__ReadData()
+		if os.path.exists(self.__Path): self.__Data = self.__ReadData()
 		else: self.__SaveData()
 
 	def add_flags(self, flags: list[str] | str):
@@ -353,6 +363,12 @@ class UserData:
 
 		else: raise IncorrectUserToUpdate()
 
+	def update_acitivity(self) -> datetime:
+		"""Обновляет дату последней активности пользователя."""
+
+		self.__Data["last_activity"] = datetime.now()
+		self.__SaveData()
+
 class UsersManager:
 	"""Менеджер пользователей."""
 
@@ -391,9 +407,8 @@ class UsersManager:
 		Files = list(filter(lambda List: List.endswith(".json"), Files))
 
 		for File in Files:
-			Buffer = ReadJSON(self.__StorageDirectory + f"/{File}")
 			UserID = int(File.replace(".json", ""))
-			self.__Users[UserID] = UserData(self.__StorageDirectory, UserID, Buffer)
+			self.__Users[UserID] = UserData(self.__StorageDirectory, UserID)
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -413,10 +428,11 @@ class UsersManager:
 		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
 		self.__LoadUsers()
 
-	def auth(self, user: User) -> UserData:
+	def auth(self, user: User, update_activity: bool = True) -> UserData:
 		"""
 		Выполняет идентификацию и обновление данных существующего пользователя или создаёт локальный файл для нового.
-			user – структура описания пользователя Telegram.
+			user – структура описания пользователя Telegram;\n
+			update_activity – указывает, нужно ли обновлять активность пользователя.
 		"""
 		
 		if type(user) != User: raise ValueError("User object expected, not " + str(type(user)) + ".")
@@ -425,6 +441,7 @@ class UsersManager:
 		self.__Users[user.id].update(user)
 		CurrentUser = self.__Users[user.id]
 		if CurrentUser.is_chat_forbidden: CurrentUser.set_chat_forbidden(False)
+		if update_activity: CurrentUser.update_acitivity()
 
 		return CurrentUser
 
@@ -437,6 +454,18 @@ class UsersManager:
 		user_id = int(user_id)
 		self.__Users[user_id].delete()
 		del self.__Users[user_id]
+
+	def get_active_users(self, hours: int = 24) -> tuple[UserData]:
+		"""
+		Возвращает последовательность пользователей, для которых обнавлялась активность за последние N часов.
+			hours – количество часов.
+		"""
+
+		Now = datetime.now()
+		Delta = timedelta(hours = hours)
+		Users = [UserObject for UserObject in self.__Users.values() if UserObject.last_activity and Now - UserObject.last_activity <= Delta]
+
+		return tuple(Users)
 
 	def get_user(self, user_id: int | str) -> UserData:
 		"""
