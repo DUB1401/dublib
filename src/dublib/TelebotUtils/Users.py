@@ -2,11 +2,11 @@ from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
 from ..Exceptions.TelebotUtils import *
 
 from datetime import datetime, timedelta
-from telebot.types import User
 from typing import Any
-
-import dateparser
 import os
+
+from telebot.types import User
+import dateparser
 
 #==========================================================================================#
 # >>>>> УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ <<<<< #
@@ -261,6 +261,14 @@ class UserData:
 
 		return IsOwned
 	
+	def has_object(self, key: str) -> bool:
+		"""
+		Проверяет, прикреплён ли к пользователю объект с таким ключом.
+			key – ключ объекта.
+		"""
+
+		return key in self.__Objects.keys()
+
 	def has_property(self, key: str) -> bool:
 		"""
 		Проверяет, имеет ли пользователь свойство с таким ключом.
@@ -271,6 +279,14 @@ class UserData:
 		if key in self.__Data["data"].keys() or key in self.__Data["temp"].keys(): IsExists = True
 
 		return IsExists
+
+	def remove_object(self, key: str):
+		"""
+		Удаляет привязанный к пользователю объект.
+			key – ключ объекта.
+		"""
+
+		del self.__Objects[key]
 
 	def remove_flags(self, flags: list[str] | str):
 		"""
@@ -428,6 +444,22 @@ class UsersManager:
 		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
 		self.__LoadUsers()
 
+		#---> Генерация динамических атрибутов.
+		#==========================================================================================#
+		self.__Users: dict[int, UserData] = dict()
+		self.__StorageDirectory = NormalizePath(directory)
+
+		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
+		self.__LoadUsers()
+
+	def __getitem__(self, user_id: int) -> UserData:
+		"""
+		Возвращает объект данных пользователя.
+			user_id – ID пользователя.
+		"""
+
+		return self.get_user(user_id)
+
 	def auth(self, user: User, update_activity: bool = True) -> UserData:
 		"""
 		Выполняет идентификацию и обновление данных существующего пользователя или создаёт локальный файл для нового.
@@ -506,10 +538,26 @@ class UsersManager:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ МАССОВОГО РЕДАКТИРОВАНИЯ ПОЛЬЗОВАТЕЛЕЙ <<<<< #
 	#==========================================================================================#
 
+	def add_flags(self, flags: list[str] | str):
+		"""
+		Добавляет флаги для всех пользователей.
+			flags – флаги.
+		"""
+
+		for User in self.__Users.values(): User.add_flags(flags)
+
 	def clear_temp_properties(self):
 		"""Очищает временные свойства всех пользователей."""
 
 		for User in self.__Users.values(): User.clear_temp_properties()
+
+	def remove_flags(self, flags: list[str] | str):
+		"""
+		Удаляет флаги у всех пользователей.
+			flags – флаги.
+		"""
+
+		for User in self.__Users.values(): User.remove_flags(flags)
 
 	def remove_permissions(self, permissions: list[str] | str):
 		"""
@@ -536,12 +584,3 @@ class UsersManager:
 		"""
 
 		for User in self.__Users.values(): User.set_property(key, value, force)
-
-	def set_temp_property(self, key: str, value: Any):
-		"""
-		Задаёт значение временного свойства для всех пользователей.
-			key – ключ свойства;\n
-			value – значение.
-		"""
-
-		for User in self.__Users.values(): User.set_temp_property(key, value)

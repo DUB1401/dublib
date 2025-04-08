@@ -1,9 +1,9 @@
 from ..Methods.Filesystem import NormalizePath, ReadJSON, WriteJSON
 
-from telebot import TeleBot, types
 from dataclasses import dataclass
-
 import os
+
+from telebot import TeleBot, types
 
 #==========================================================================================#
 # >>>>> ВСПОМОГАТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
