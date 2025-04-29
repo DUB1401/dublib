@@ -1,7 +1,6 @@
 from ..CLI.TextStyler import TextStyler
 
 from typing import Callable
-
 import warnings
 
 def deprecated(message: str | None = None) -> Callable:

@@ -1,17 +1,17 @@
 from .Exceptions.WebRequestor import *
 
+from typing import Any, Iterable
+from time import sleep
+import logging
+import random
+import enum
+import json
+
 from curl_cffi import requests as curl_cffi_requests
 from curl_cffi import CurlHttpVersion
 from fake_useragent import UserAgent
-from typing import Any, Iterable
-from time import sleep
-
 import requests
-import logging
-import random
 import httpx
-import enum
-import json
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
@@ -780,14 +780,13 @@ class WebRequestor:
 	# >>>>> ЗАПРОСЫ <<<<< #
 	#==========================================================================================#	
 	
-	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, retries: int | None = None) -> WebResponse:
+	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> WebResponse:
 		"""
 		Отправляет GET запрос.
 			url – адрес запроса;\n
 			params – словарь параметров запроса;\n
 			headers – словарь заголовков;\n
-			cookies – словарь куков;\n
-			retries – количество попыток повтора при неудачном выполнении.
+			cookies – словарь куков.
 		"""
 
 		tries = 1 + self.__Config.retries
@@ -819,7 +818,7 @@ class WebRequestor:
 		
 		return Response
 	
-	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None, retries: int | None = None) -> WebResponse:
+	def post(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> WebResponse:
 		"""
 		Отправляет POST запрос.
 			url – адрес запроса;\n
@@ -827,8 +826,7 @@ class WebRequestor:
 			headers – словарь заголовков;\n
 			cookies – словарь куков;\n
 			data – отправляемые данные;\n
-			json – сериализованное тело запроса;\n
-			tries – количество попыток повтора при неудачном выполнении.
+			json – сериализованное тело запроса.
 		"""
 
 		tries = 1 + self.__Config.retries

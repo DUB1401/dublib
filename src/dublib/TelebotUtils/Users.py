@@ -96,19 +96,7 @@ class UserData:
 				IsChanged = True
 
 		if IsChanged: self.__Data[key] = sorted(self.__Data[key])
-		self.__SaveData()
-
-	def __ReadData(self) -> dict:
-		"""Считывает данные из файла пользователя и дополняет отсутствующие поля."""
-
-		Data = ReadJSON(self.__Path)
-
-		for Key in self.__Data.keys():
-			if Key not in Data.keys(): Data[Key] = self.__Data[Key]
-
-		if Data["last_activity"]: Data["last_activity"] = dateparser.parse(Data["last_activity"])
-
-		return Data
+		self.save()
 
 	def __RemoveFlags(self, flags: list[str] | str, key: str):
 		"""
@@ -122,14 +110,7 @@ class UserData:
 		for Flag in flags:
 			if Flag in self.__Data[key]: self.__Data[key].remove(Flag)
 
-		self.__SaveData()
-
-	def __SaveData(self):
-		"""Записывает данные в локальный файл."""
-
-		Data = self.__Data.copy()
-		Data["last_activity"] = str(Data["last_activity"])
-		WriteJSON(self.__Path, Data)
+		self.save()
 
 	def __SetProperty(self, property_type: str, key: str, value: Any):
 		"""
@@ -140,7 +121,7 @@ class UserData:
 		"""
 
 		self.__Data[property_type][key] = value
-		self.__SaveData()
+		self.save()
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -173,8 +154,8 @@ class UserData:
 		self.__Objects = dict()
 		self.__Path = self.__StorageDirectory + f"/{user_id}.json"
 
-		if os.path.exists(self.__Path): self.__Data = self.__ReadData()
-		else: self.__SaveData()
+		if not os.path.exists(self.__Path): self.save()
+		else: self.refresh()
 
 	def add_flags(self, flags: list[str] | str):
 		"""
@@ -209,7 +190,7 @@ class UserData:
 		"""Очищает временные свойства пользователя."""
 
 		self.__Data["temp"] = dict()
-		self.__SaveData()		
+		self.save()		
 
 	def delete(self):
 		"""Удаляет локальный файл пользователя."""
@@ -280,6 +261,18 @@ class UserData:
 
 		return IsExists
 
+	def refresh(self):
+		"""Считывает данные из файла пользователя и дополняет отсутствующие поля."""
+
+		Data = ReadJSON(self.__Path)
+
+		for Key in self.__Data.keys():
+			if Key not in Data.keys(): Data[Key] = self.__Data[Key]
+
+		if Data["last_activity"]: Data["last_activity"] = dateparser.parse(Data["last_activity"])
+
+		self.__Data = Data
+
 	def remove_object(self, key: str):
 		"""
 		Удаляет привязанный к пользователю объект.
@@ -314,7 +307,14 @@ class UserData:
 		elif key in self.__Data["temp"].keys(): del self.__Data["temp"][key]
 		else: KeyError(key)
 
-		self.__SaveData()
+		self.save()
+
+	def save(self):
+		"""Записывает данные пользователя в локальный файл."""
+
+		Data = self.__Data.copy()
+		Data["last_activity"] = str(Data["last_activity"])
+		WriteJSON(self.__Path, Data)
 
 	def set_chat_forbidden(self, status: bool):
 		"""
@@ -323,7 +323,7 @@ class UserData:
 		"""
 
 		self.__Data["is_chat_forbidden"] = status
-		self.__SaveData()
+		self.save()
 
 	def set_expected_type(self, type_name: str | None):
 		"""
@@ -332,7 +332,7 @@ class UserData:
 		"""
 
 		self.__Data["expected_type"] = type_name
-		self.__SaveData()
+		self.save()
 
 	def set_object(self, key: str, object: Any):
 		"""
@@ -365,7 +365,7 @@ class UserData:
 
 	def update(self, user: User, is_chat_forbidden: bool | None = None):
 		"""
-		Обновляет данные пользователя из параметров, содержащихся в сообщении.
+		Обновляет данные пользователя (язык, Premium подписка, ник, запрещён ли чат) из его структуры.
 			user – объект представления пользователя;\n
 			is_chat_forbidden – указывает, заблокировал ли пользователь бота.
 		"""
@@ -375,7 +375,7 @@ class UserData:
 			self.__Data["is_premium"] = bool(user.is_premium)
 			self.__Data["language"] = user.language_code
 			self.__Data["username"] = user.username
-			self.__SaveData()
+			self.save()
 
 		else: raise IncorrectUserToUpdate()
 
@@ -383,7 +383,7 @@ class UserData:
 		"""Обновляет дату последней активности пользователя."""
 
 		self.__Data["last_activity"] = datetime.now()
-		self.__SaveData()
+		self.save()
 
 class UsersManager:
 	"""Менеджер пользователей."""
@@ -393,7 +393,13 @@ class UsersManager:
 	#==========================================================================================#
 
 	@property
-	def premium_users(self) -> list[UserData]:
+	def active_users(self) -> tuple[UserData]:
+		"""Последовательность активных за последние 24 часа пользователей."""
+
+		return self.get_active_users()
+
+	@property
+	def premium_users(self) -> tuple[UserData]:
 		"""Список пользователей с Premium подпиской."""
 
 		PremiumUsers = list()
@@ -401,16 +407,16 @@ class UsersManager:
 		for UserID in self.__Users:
 			if self.__Users[UserID].is_premium: PremiumUsers.append(self.__Users[UserID])
 
-		return PremiumUsers
+		return tuple(PremiumUsers)
 
 	@property
-	def users(self) -> list[UserData]:
+	def users(self) -> tuple[UserData]:
 		"""Список пользователей."""
 
 		Users = list()
 		for UserID in self.__Users.keys(): Users.append(self.__Users[UserID])
 
-		return Users
+		return tuple(Users)
 
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
@@ -534,6 +540,14 @@ class UsersManager:
 
 		return Users
 	
+	def is_user_exists(self, user_id: int) -> bool:
+		"""
+		Проверяет наличие пользователя с переданным идентификатором в базе данных.
+			user_id – ID пользователя.
+		"""
+
+		return user_id in self.__Users.keys()
+
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ МАССОВОГО РЕДАКТИРОВАНИЯ ПОЛЬЗОВАТЕЛЕЙ <<<<< #
 	#==========================================================================================#
