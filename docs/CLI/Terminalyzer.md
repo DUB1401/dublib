@@ -12,6 +12,8 @@
 
 Для группировки взаимоисключающих параметров предоставляются позиции – именованные контейнеры, к которым можно применять описания. Аргументы, флаги и ключи, добавленные на одну позицию, не могут быть объявлены в параметрах одновременно.
 
+Параметры можно прикреплять к самой команде, не создавая дополнительных позиций, так как внутри команды используется базовая неименованная позиция, отображающаяся в помощи специальным образом. Базовая позиция может быть только одна.
+
 ## Преобразование типов
 Для включения преобразования строкового типа данных в иной необходимо при генерации аргумента или ключа задать ему тип параметра из следующего списка:
 * **All** – любое значение;
@@ -24,13 +26,13 @@
 
 ## Пример использования
 ```Python
-from dublib.CLI.Terminalyzer import Command, ParametersTypes, Terminalyzer
+from dublib.CLI.Terminalyzer import Command, HelperLabelsIndexes, ParametersTypes, Terminalyzer
 
 # Список описаний обрабатываемых команд.
 CommandsList = list()
 
-# Создание объекта команды с названием method и неким описанием.
-Com = Command("method", description = "Some method.")
+# Создание объекта команды с названием method, неким описанием и отнесение её к категории.
+Com = Command("method", description = "Some method.", category = "Example")
 # Создание обязательной позиции.
 ComPos = Com.create_position(important = True, name = "FILENAME", description = "Some position.")
 # Добавление на позицию аргумента с типом валидного пути.
@@ -38,7 +40,7 @@ ComPos.add_argument(ParametersTypes.ValidPath)
 # Добавление на позицию флага.
 ComPos.add_flag("f")
 # Добавление в команду ключа с типом даты.
-Com.add_key("key", ParametersTypes.Date)
+Com.base.add_key("key", ParametersTypes.Date)
 # Добавление описания команды в список.
 CommandsList.append(Com)
 
@@ -48,9 +50,11 @@ Analyzer = Terminalyzer()
 Analyzer.set_flags_indicator("-")
 Analyzer.set_keys_indicator("--")
 # Включение модуля генерации помощи.
-Analyzer.enable_help(True)
+Analyzer.helper.enable()
+# Включение сортировки команд в алфавитном порядке.
+Analyzer.helper.enable_sorting()
 # Удаление стандартного уведомления о важности параметров.
-Analyzer.help_translation.important_note = ""
+Analyzer.helper.labels[HelperLabelsIndexes.IMPORTANT_NOTE] = ""
 # Проверка команд.
 ParsedCommandData = Analyzer.check_commands(CommandsList)
 # Вывод спаршенных данных.
