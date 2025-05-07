@@ -886,9 +886,10 @@ class Helper:
 			else: CommandsCategories[CurrentCommand.category] = [CurrentCommand]
 
 		# Помещение команд без категории в конец.
-		NoneCategory = CommandsCategories[None]
-		del CommandsCategories[None]
-		CommandsCategories[None] = NoneCategory
+		if len(CommandsCategories.keys()) > 1:
+			NoneCategory = CommandsCategories[None]
+			del CommandsCategories[None]
+			CommandsCategories[None] = NoneCategory
 
 		#---> Генерация таблицы.
 		#==========================================================================================#
@@ -905,7 +906,7 @@ class Helper:
 				HelpTable["Descriptions"].append(CurrentCommand.description or "")
 
 			TableObject = PrettyTable()
-			TableObject.title = TextStyler(Category or self.__Labels[HelpLabelsIndexes.CATEGORY_OTHER]).decorate.bold
+			if len(CommandsCategories.keys()) > 1: TableObject.title = TextStyler(Category or self.__Labels[HelpLabelsIndexes.CATEGORY_OTHER]).decorate.bold
 			TableObject.set_style(PLAIN_COLUMNS)
 
 			for ColumnName in HelpTable.keys():
@@ -913,7 +914,9 @@ class Helper:
 				TableObject.add_column(Buffer, HelpTable[ColumnName])
 
 			TableObject.align = "l"
-			TableString += TableObject.get_string(header = False).lstrip() + "\n\n"
+			TableString += TableObject.get_string(header = False)
+			if len(CommandsCategories.keys()) > 1: TableString = TableString.lstrip()
+			TableString += "\n\n"
 
 		self.__Callback(TableString.rstrip())
 
