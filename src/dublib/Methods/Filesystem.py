@@ -1,3 +1,6 @@
+from .Data import ToIterable
+
+from typing import Iterable
 import shutil
 import json
 import sys
@@ -15,14 +18,18 @@ def ListDir(path: str | None = None) -> list[str]:
 
 	return [Entry.name for Entry in os.scandir(path)]
 
-def MakeRootDirectories(directories: list[str]):
+def MakeRootDirectories(directories: Iterable[str] | str):
 	"""
-	Создаёт каталоги в текущей корневой директории скрипта.
-		directories – список названий каталогов.
+	Создаёт наборы каталогов в текущей корневой директории скрипта.
+
+	:param directories: Последовательность названий директорий или название конкретной директории.
+	:type directories: Iterable[str]
 	"""
+
+	directories = ToIterable(directories)
 	
 	for Name in directories:
-		if os.path.exists(Name) == False: os.makedirs(Name)
+		if not os.path.exists(Name): os.makedirs(Name)
 
 def NormalizePath(path: str, unix_separator: bool | None = None, separator_at_end: bool = False):
 	"""

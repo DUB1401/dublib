@@ -137,12 +137,18 @@ def StripAlpha(text: str) -> str:
 	except:
 		text = ""
 
-def ToIterable(value: Any, iterable_type = list, exclude: tuple = (bytes, str)) -> Iterable:
+def ToIterable(value: Any, iterable_type: type[Iterable] = tuple, exclude: tuple[Iterable] = (bytes, str)) -> Iterable:
 	"""
 	Преобразует значение в итерируемый тип.
-		value – обрабатываемое значение;\n
-		iterable_type – тип итогового итерируемого объекта;\n
-		exclude – типы-исключения, условно считающиеся не итерируемыми.
+
+	:param value: Обрабатываемое значение.
+	:type value: Any
+	:param iterable_type: Целевой тип итерируемого контейнера. По умолчанию `tuple`.
+	:type iterable_type: type[Iterable], optional
+	:param exclude: Типы-исключения, условно считающиеся неитерируемыми. По умолчанию `bytes`, `str`.
+	:type exclude: tuple[Iterable], optional
+	:return: Приведённое к итерируемому типу значению.
+	:rtype: Iterable
 	"""
 
 	if isinstance(value, Iterable) and not isinstance(value, exclude): return value

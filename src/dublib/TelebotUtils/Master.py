@@ -1,6 +1,7 @@
+from ..Methods.Data import ToIterable
 from .Users import UserData
 
-from typing import Callable
+from typing import Callable, Iterable
 from time import sleep
 import logging
 
@@ -39,7 +40,9 @@ class TeleMaster:
 	def __init__(self, bot: str | TeleBot):
 		"""
 		Набор дополнительного функционала для бота Telegram.
-			bot – бот Telegram или его токен.
+		
+		:param bot: Бот Telegram. Вместо объекта бота можно передать токен, на основе которого будет инициализирован новый объект.
+		:type bot: str | TeleBot
 		"""
 
 		if type(bot) == str: bot = TeleBot(bot)
@@ -48,14 +51,14 @@ class TeleMaster:
 		#==========================================================================================#
 		self.__Bot = bot
 
-	def check_user_subscriptions(self, user: UserData, chats: int | list[int]) -> bool | None:
+	def check_user_subscriptions(self, user: UserData, chats: int | Iterable[int]) -> bool | None:
 		"""
 		Проверяет, состоит ли пользователь в указанных чатах. Бот должен состоять во всех проверяемых чатах.
 			user – проверяемый пользователь;\n
 			chats – список ID чатов.
 		"""
 
-		if type(chats) == int: chats = [chats]
+		chats = ToIterable(chats)
 
 		IsSubscripted = False
 		Subscriptions = 0
@@ -73,6 +76,34 @@ class TeleMaster:
 		
 		return IsSubscripted
 	
+	def safely_delete_messages(self, chat_id: int, messages: int | Iterable[int], complex: bool = False) -> Exception | None:
+		"""
+		Безопасно удаляет сообщения без выброса исключений.
+
+		:param chat_id: ID чата.
+		:type chat_id: int
+		:param messages: Последовательность ID сообщений или ID конкретного сообщения.
+		:type messages: int | Iterable[int]
+		:param complex: При включении сообщения будут удалены одним запросом. По умолчанию `False`.
+		:type complex: bool, optional
+		:return: Выброшенное во время работы исключение в случае наличия такового.
+		:rtype: Exception | None
+		"""
+
+		messages: tuple[int] = ToIterable(messages)
+		ExceptionObject: Exception | None = None
+
+		if complex:
+			try: self.__Bot.delete_messages(chat_id, messages)
+			except Exception as ExceptionData: ExceptionObject = ExceptionData
+
+		else:
+			for MessageID in messages:
+				try: self.__Bot.delete_message(chat_id, MessageID)
+				except Exception as ExceptionData: ExceptionObject = ExceptionData
+
+		return ExceptionObject
+
 	#==========================================================================================#
 	# >>>>> ДЕКОРАТОРЫ <<<<< #
 	#==========================================================================================#
