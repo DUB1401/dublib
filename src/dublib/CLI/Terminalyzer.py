@@ -761,7 +761,7 @@ class Helper:
 		"""
 
 		MSG_Indent = indent or "  "
-		MSG_Name = TextStyler(self.__FlagsIndicator + flag.name).decorate.bold
+		MSG_Name = TextStyler(self.__Terminalyzer.flags_indicator + flag.name).decorate.bold
 		MSG_Description = f": {flag.description}" if flag.description else ""
 		Description = f"\n{MSG_Indent}    • [flag] {MSG_Name}{MSG_Description}"
 
@@ -775,7 +775,7 @@ class Helper:
 		"""
 
 		MSG_Indent = indent or "  "
-		MSG_Name = TextStyler(self.__KeysIndicator + key.name).decorate.bold
+		MSG_Name = TextStyler(self.__Terminalyzer.keys_indicator + key.name).decorate.bold
 		MSG_Type = f" <{key.type.value}>"
 		MSG_Description = f": {key.description}" if key.description else ""
 		Description = f"\n{MSG_Indent}    • [key{MSG_Type}] {MSG_Name}{MSG_Description}"
@@ -827,11 +827,16 @@ class Helper:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self):
-		"""Модуль помощи."""
+	def __init__(self, terminalyzer: "Terminalyzer"):
+		"""
+		Модуль помощи.
 
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
+		:param terminalyzer: Обработчик консольных параметров.
+		:type terminalyzer: Terminalyzer
+		"""
+
+		self.__Terminalyzer = terminalyzer
+
 		self.__Labels = HelpLabels()
 		self.__Callback = print
 		self.__Category = None
@@ -1253,7 +1258,7 @@ class Terminalyzer:
 
 		self.__HelpCallback = print
 
-		self.__Helper = Helper()
+		self.__Helper = Helper(self)
 
 		self.set_source(self.__Parameters)
 
