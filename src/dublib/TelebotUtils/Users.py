@@ -587,7 +587,7 @@ class UsersManager:
 			key – ключ свойства.
 		"""
 
-		for User in self.__Users.values(): User.set_property(key)
+		for User in self.__Users.values(): User.remove_property(key)
 
 	def set_property(self, key: str, value: Any, force: bool = True):
 		"""
