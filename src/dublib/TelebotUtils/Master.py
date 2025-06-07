@@ -128,3 +128,5 @@ class TeleMaster:
 					else: raise ExceptionData
 
 			return Message
+		
+		return new_function

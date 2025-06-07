@@ -269,8 +269,9 @@ class UserData:
 		for Key in self.__Data.keys():
 			if Key not in Data.keys(): Data[Key] = self.__Data[Key]
 
-		if Data["last_activity"]: Data["last_activity"] = dateparser.parse(Data["last_activity"])
-
+		if Data["last_activity"]: Data["last_activity"] = dateparser.parse(Data["last_activity"]).replace(tzinfo = None)
+		else: self.update_acitivity()
+		
 		self.__Data = Data
 
 	def remove_object(self, key: str):
