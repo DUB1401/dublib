@@ -149,7 +149,9 @@ class TeleCache:
 
 			case types.InputMediaAnimation:
 				Message = self.__Bot.send_animation(chat_id = self.__ChatID, animation = types.InputFile(path))
-				FileID = Message.animation.file_id
+				if Message.animation: FileID = Message.animation.file_id
+				# Некоторые анимации отображаются верно, но распознаются как документы.
+				else: FileID = Message.document.file_id
 
 			case types.InputMediaAudio:
 				Message = self.__Bot.send_audio(chat_id = self.__ChatID, audio = types.InputFile(path))
