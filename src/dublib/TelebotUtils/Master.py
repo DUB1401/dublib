@@ -112,21 +112,17 @@ class TeleMaster:
 		"""Игнорирует ошибки частоты запросов, автоматически выжидая необходимый интервал."""
 
 		def new_function(*args, **kwargs) -> types.Message:
-			Message = None
-
-			while not Message:
+			Value = None
 				
-				try: 
-					Message = function(*args, **kwargs)
+			try: Value = function(*args, **kwargs)
+			except apihelper.ApiTelegramException as ExceptionData:
 
-				except apihelper.ApiTelegramException as ExceptionData:
+				if "Error code: 429. Description: Too Many Requests" in str(ExceptionData):
+					Seconds = float(str(ExceptionData).split(" ")[-1])
+					sleep(Seconds)
 
-					if "Error code: 429. Description: Too Many Requests" in str(ExceptionData):
-						Seconds = float(str(ExceptionData).split(" ")[-1])
-						sleep(Seconds)
+				else: raise ExceptionData
 
-					else: raise ExceptionData
-
-			return Message
+			else: return Value
 		
 		return new_function
