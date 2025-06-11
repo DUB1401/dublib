@@ -88,13 +88,20 @@ class _curl_cffi_config:
 	def select_http_version(self, version: CurlHttpVersion):
 		"""
 		Указывает используемую версию протокола HTTP.
-			version – версия.
+		
+  		:param version: Версия протокола HTTP.
+    		:type version: CurlHttpVersion
 		"""
 
 		self.__HttpVersion = version
 
 	def select_fingerprint(self, fingerprint: str | None):
-		"""Выбирает используемый отпечаток браузера."""
+		"""
+  		Выбирает используемый отпечаток браузера.
+
+    		:param fingerprint: Строковый идентификатор отпечатка браузера или `None` для удаления. Список идентификаторов можно получить на [странице](https://github.com/lexiforest/curl_cffi?tab=readme-ov-file#supported-impersonate-browsers) библиотеки.
+    		:type fingerprint: str | None
+   		"""
 
 		self.__Fingerprint = fingerprint
 
@@ -339,7 +346,7 @@ class WebConfig:
 
 	@property
 	def delay(self) -> float:
-		"""# Интервал времени между повторами запросов."""
+		"""Интервал времени между повторами запросов."""
 
 		return self.__Delay
 
@@ -347,13 +354,10 @@ class WebConfig:
 	def headers(self) -> dict | None:
 		"""Словарь заголвоков, приоритетно применяемых ко всем запросам, или `None` при отсутствии заголовков."""
 
-		Headers = self.__Headers
+		Headers = self.__Headers.copy()
+		if self.__UserAgent: Headers["User-Agent"] = self.__UserAgent
 
-		if self.__UserAgent:
-			if not Headers: Headers = dict()
-			Headers["User-Agent"] = self.__UserAgent
-
-		return Headers
+		return Headers or None
 
 	@property
 	def lib(self) -> WebLibs:
@@ -377,7 +381,7 @@ class WebConfig:
 	def good_codes(self) -> tuple[int | None]:
 		"""Список кодов, означающих успешное выполнение запроса."""
 
-		return self.__GoodStatusses
+		return self.__GoodCodes
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -391,9 +395,9 @@ class WebConfig:
 		self.__EnableRedirecting = True
 		self.__EnableLogging = True
 		self.__UserAgent = None
-		self.__Headers = None
+		self.__Headers = dict()
 		self.__Retries = 0
-		self.__GoodStatusses = (200, 404)
+		self.__GoodCodes = (200, 404)
 		self.__Delay = 0.25
 		self.__VerifySSL = True
 
@@ -446,7 +450,6 @@ class WebConfig:
 		"""
 
 		if name.lower() == "user-agent": raise UserAgentRedefining()
-		if self.__Headers == None: self.__Headers = dict()
 		self.__Headers[name] = value
 
 	def generate_user_agent(
