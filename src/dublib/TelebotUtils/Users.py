@@ -2,6 +2,7 @@ from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
 from ..Exceptions.TelebotUtils import *
 
 from datetime import datetime, timedelta
+from os import PathLike
 from typing import Any
 import os
 
@@ -44,12 +45,10 @@ class UserData:
 		return self.__ID
 
 	@property
-	def is_chat_forbidden(self) -> bool | None:
+	def is_chat_forbidden(self) -> bool:
 		"""Состояние: запретил ли пользователь бота."""
 		
-		if "is_chat_forbidden" in self.__Data.keys(): return self.__Data["is_chat_forbidden"]
-
-		return None
+		return self.__Data["is_chat_forbidden"]
 
 	@property
 	def is_premium(self) -> bool:
@@ -127,21 +126,22 @@ class UserData:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, storage_dir: str, user_id: int, data: dict | None = None):
+	def __init__(self, storage_dir: PathLike, user_id: int):
 		"""
-		Объектное представление данных пользователя.
-			storage_dir – путь к директории хранения данных;\n
-			user_id – ID пользователя.
+		Данные пользователя.
+
+		:param storage_dir: Путь к каталогу хранения файлов пользователей.
+		:type storage_dir: PathLike
+		:param user_id: ID пользователя.
+		:type user_id: int
 		"""
 
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
-		self.__StorageDirectory = storage_dir.replace("\\", "/").rstrip("/")
+		self.__StorageDirectory = NormalizePath(storage_dir)
 		self.__ID = user_id
 		self.__Data = {
 			"username": None,
 			"language": None,
-			"is_chat_forbidden": None,
+			"is_chat_forbidden": False,
 			"is_premium": None,
 			"expected_type": None,
 			"permissions": [],
