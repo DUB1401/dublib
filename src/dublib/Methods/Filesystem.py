@@ -1,19 +1,25 @@
 from .Data import ToIterable
 
 from typing import Iterable
+from pathlib import Path
+from os import PathLike
 import shutil
 import json
-import sys
 import os
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ФАЙЛАМИ И ДИРЕКТОРИЯМИ <<<<< #
 #==========================================================================================#
 
-def ListDir(path: str | None = None) -> list[str]:
+def ListDir(path: PathLike | None = None) -> list[str]:
 	"""
-	Основана на os.scandir(), более быстром и подробном варианте os.listdir(). Возвращает список названий каталогов и имён файлов по указанному пути.
+	Основана на `os.scandir()`, более быстром и подробном варианте `os.listdir()`.
 		path – путь для сканирования.
+
+	:param path: Путь для сканирования. Если передать `None`, будет возвращёт список элементов в текущем каталоге.
+	:type path: PathLike | None
+	:return: Список названий каталогов и имён файлов по указанному пути
+	:rtype: list[str]
 	"""
 
 	return [Entry.name for Entry in os.scandir(path)]
@@ -31,32 +37,53 @@ def MakeRootDirectories(directories: Iterable[str] | str):
 	for Name in directories:
 		if not os.path.exists(Name): os.makedirs(Name)
 
-def NormalizePath(path: str, unix_separator: bool | None = None, separator_at_end: bool = False):
+def NormalizePath(path: PathLike, strip: bool = True) -> PathLike:
 	"""
-	Нормализует путь к файлу по заданным параметрам, которые по умолчанию определяет автоматически.
-		path – путь к файлу или каталогу;\n
-		use_unix_separator – указывает, следует ли использовать Unix-разделитель или стиль Windows;\n
-		separator_at_end – указывает, что в конце пути обязан находиться разделитель.
+	Приводит путь к POSIX-стандарту.
+
+	:param path: Обрабатываемый путь.
+	:type path: PathLike
+	:param strip: Указывает, следует ли удалить наклонную черту из конца пути при наличии.
+	:type strip: bool
+	:return: Путь в POSIX-стандарте.
+	:rtype: PathLike
 	"""
-
-	if unix_separator == None:
-		if sys.platform == "win32": unix_separator = False
-		else: unix_separator = True
-
-	if unix_separator and "\\" in path: path = path.replace("\\", "/")
-	elif not unix_separator and "/" in path: path = path.replace("/", "\\")
-
-	UsedSeparator = "/" if unix_separator else "\\"
-
-	if separator_at_end and not path.endswith(UsedSeparator): path += UsedSeparator
-	elif not separator_at_end and path.endswith(UsedSeparator): path = path.rstrip(UsedSeparator)
+	
+	path: str = Path(path).as_posix()
+	if strip: path = path.rstrip("/")
 
 	return path
 
-def ReadJSON(path: str) -> dict:
+def RemoveDirectoryContent(path: PathLike):
 	"""
-	Считывает файл JSON и конвертирует его в словарь.
-		path – путь к файлу.
+	Удлаляет содержимое каталога.
+
+	:param path: Путь к каталогу.
+	:type path: PathLike
+	"""
+
+	FolderContent = ListDir(path)
+
+	for Item in FolderContent:
+		ItemPath = f"{path}/{Item}"
+
+		if os.path.isdir(ItemPath): shutil.rmtree(ItemPath)
+		else: os.remove(ItemPath)
+
+#==========================================================================================#
+# >>>>> ФУНКЦИИ РАБОТЫ С JSON <<<<< #
+#==========================================================================================#
+
+def ReadJSON(path: PathLike) -> dict:
+	"""
+	Считывает файл JSON и десириализует его в словарь.
+
+	:param path: Путь к файлу.
+	:type path: PathLike
+	:return: Словарное представление данных JSON.
+	:rtype: dict
+	:raises json.JSONDecodeError: Выбрасывается при невозможности десериализовать файл.
+	:raises FileNotFoundError: Выбрасывается при отсутствии файла.
 	"""
 
 	JSON = dict()
@@ -64,52 +91,57 @@ def ReadJSON(path: str) -> dict:
 
 	return JSON
 
-def ReadTextFile(path: str, split: str | None = None) -> str | list[str]:
+def WriteJSON(path: PathLike, data: dict):
 	"""
-	Считывает содержимое текстового файла.
-		path – путь к файлу;\n
-		split – указывает, по вхождению какой подстроки следует разбить содержимое файла.
+	Записывает отформатированный файл JSON.
+
+	:param path: Путь к файлу.
+	:type path: PathLike
+	:param data: Словарь для сериализации в JSON.
+	:type data: dict
+	:raise TypeError: Выбрасывается при невозможности сериализации данных в JSON.
+	"""
+
+	with open(path, "w", encoding = "utf-8") as FileWriter: json.dump(data, FileWriter, ensure_ascii = False, indent = "\t", separators = (",", ": "))
+
+#==========================================================================================#
+# >>>>> ФУНКЦИИ РАБОТЫ С ТЕКСТОВЫМИ ФАЙЛАМИ <<<<< #
+#==========================================================================================#
+
+def ReadTextFile(path: PathLike, split: bool = False, strip: bool = False) -> str | tuple[str]:
+	"""
+	Считывает текстовый файл.
+
+	:param path: Путь к файлу.
+	:type path: PathLike
+	:param split: Если активировано, файл будет разбит на набор строк по символу новой строки.
+	:type split: bool
+	:param strip: Если активировано, к каждой возвращаемой строке будет применён метод `strip()`.
+	:type strip: bool
+	:return: Содержимое текстового файла в виде строки или набора строк.
+	:rtype: str | tuple[str]
+	:raises FileNotFoundError: Выбрасывается при отсутствии файла.
 	"""
 
 	Text = None
 	with open(path, encoding = "utf-8") as FileReader: Text = FileReader.read()
 	if split: Text = Text.split(split)
 
+	if strip:
+		if type(Text) == str: Text = Text.strip()
+		else: Text = tuple(Value.strip() for Value in Text)
+
 	return Text
 
-def RemoveDirectoryContent(path: str):
-	"""
-	Удаляет всё содержимое каталога.
-		path – путь к каталогу.
-	"""
-
-	FolderContent = os.listdir(path)
-
-	for Item in FolderContent:
-
-		if os.path.isdir(path + "/" + Item):
-			shutil.rmtree(path + "/" + Item)
-
-		else:
-			os.remove(path + "/" + Item)
-
-def WriteJSON(path: str, dictionary: dict):
-	"""
-	Записывает стандартизированный JSON файл. Для отступов используются символы табуляции.
-		path – путь к файлу;\n
-		dictionary – словарь, конвертируемый в формат JSON.
-	"""
-
-	with open(path, "w", encoding = "utf-8") as FileWriter: json.dump(dictionary, FileWriter, ensure_ascii = False, indent = "\t", separators = (",", ": "))
-
-def WriteTextFile(path: str, text: str | list[str], join: str | None = None):
+def WriteTextFile(path: PathLike, text: str | Iterable[str]):
 	"""
 	Записывает текстовый файл.
-		path – путь к файлу;\n
-		text – текст для записи;\n
-		join – если в качестве текста передан список строк, можно указать специальную строку, через которую будут объеденены все остальные.
+
+	:param path: Путь к файлу.
+	:type path: PathLike
+	:param text: Строка или последовательность строк, которые должны быть объединены через символ новой строки.
+	:type text: str | Iterable[str]
 	"""
 
-	if not join: join = ""
-	if type(text) == list: text = join.join(text)
+	if type(text) != str: text = "\n".join(text)
 	with open(path, "w", encoding = "utf-8") as FileWrite: FileWrite.write(text)
