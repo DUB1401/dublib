@@ -187,15 +187,15 @@ class Proxy:
 		Данные прокси-сервера.
 
 		:param protocol: Тип протокола подключения.
-		:type protocol: Protocols | None, optional
+		:type protocol: Protocols | None
 		:param host: IP адрес или домен хоста.
-		:type host: str | None, optional
+		:type host: str | None
 		:param port: Номер порта.
-		:type port: int | str | None, optional
+		:type port: int | str | None
 		:param login: Логин.
-		:type login: str | None, optional
+		:type login: str | None
 		:param password: Пароль.
-		:type password: str | None, optional
+		:type password: str | None
 		"""
 
 		self.__Protocol = protocol
@@ -203,12 +203,10 @@ class Proxy:
 		self.__Port = port
 		self.__Login = login
 		self.__Password = password
-
-		self.__CachedProxyString = None
 	
 	def parse(self, proxy: str) -> "Proxy":
 		"""
-		Парсит данные прокси из строки и сохраняет строку во внутреннем кэше объекта.
+		Парсит данные прокси из строки.
 
 		:param proxy: Строка с данными прокси вида `protocol://username:password@host:port`.
 		:type proxy: str
@@ -233,27 +231,24 @@ class Proxy:
 		self.__Login = Login
 		self.__Password = Password
 
-		self.__CachedProxyString = proxy
-
 		return self
 
 	def set_protocol(self, protocol: Protocols):
 		"""
-		Задаёт новый протокол для прокси. Сбрасывает кэш.
+		Задаёт новый протокол для прокси.
 
 		:param protocol: Тип протокола.
 		:type protocol: Protocols
 		"""
 
 		self.__Protocol = protocol
-		self.__CachedProxyString = None
 
 	def to_dict(self, force_http: bool = True) -> dict[str, str]:
 		"""
 		Строит словарь для подключения прокси к **requests**-подобным библиотекам.
 
 		:param force_http: Большинство прокси неверно работают при использовании протокола HTTPS. При включённом состоянии для HTTPS-соединения **requests** будет использоваться `http://{proxy}` соединение.
-		:type force_http: bool, optional
+		:type force_http: bool
 		:return: Словарь данных прокси для подключения к **requests**-подобным библиотекам.
 		:rtype: dict[str, str]
 		"""
@@ -268,25 +263,18 @@ class Proxy:
 
 		return ProxyDict
 
-	def to_string(self, force_http: bool = True, no_cache: bool = False) -> str:
+	def to_string(self, force_http: bool = True) -> str:
 		"""
 		Возвращает данные прокси в виде строки.
 
 		:param force_http: Большинство прокси неверно работают при использовании протокола HTTPS. При включённом состоянии для HTTPS-соединения **requests** будет использоваться `http://{proxy}` соединение.
-		:type force_http: bool, optional
-		:param no_cache: Указывает, что необходимо построить строку с данными заново. Не обновляет кэш. Для обновления кэша можно использовать `parse()`.
-		:type no_cache: bool, optional
+		:type force_http: bool
 		:return: Строка с данными прокси вида `protocol://username:password@host:port`
 		:rtype: str
 		"""
 
-		ProxyString = self.__CachedProxyString
-
-		if not self.__CachedProxyString or no_cache:
-			Authorization = f"{self.__Login}:{self.__Password}@" if self.__Login and self.__Password else ""
-			ProxyString = f"{self.__Protocol.value}://{Authorization}{self.__Host}:{self.__Port}"
-
-		if not self.__CachedProxyString: self.__CachedProxyString = ProxyString
+		Authorization = f"{self.__Login}:{self.__Password}@" if self.__Login and self.__Password else ""
+		ProxyString = f"{self.__Protocol.value}://{Authorization}{self.__Host}:{self.__Port}"
 		if force_http and ProxyString.startswith("https"): ProxyString = "http" + ProxyString[5:]
 
 		return ProxyString
@@ -460,11 +448,11 @@ class WebConfig:
 		Генерирует случайное значение заголовка *User-Agent* при помощи библиотеки **fake_useragent**.
 
 		:param os: Операционные системы.
-		:type os: Iterable[str], optional
+		:type os: Iterable[str]
 		:param browsers: Браузеры.
-		:type browsers: Iterable[str], optional
+		:type browsers: Iterable[str]
 		:param platforms: Платформы.
-		:type platforms: Iterable[str], optional
+		:type platforms: Iterable[str]
 		"""
 
 		self.__UserAgent = UserAgent(
@@ -628,7 +616,7 @@ class WebResponse:
 		:param response: Ответ от библиотеки.
 		:type response: requests.Response | httpx.Response | curl_cffi_requests.Response
 		:param parse_json: Указывает, следует ли произвести попытку десериализации данных в JSON.
-		:type parse_json: bool, optional
+		:type parse_json: bool
 		"""
 
 		self.__StatusCode = response.status_code
@@ -663,7 +651,7 @@ class WebResponse:
 		:param text: Строковое представление ответа или `None` при отсутствии такового.
 		:type text: str | None
 		:param parse_json: Указывает, следует ли произвести попытку десериализации строки в JSON.
-		:type parse_json: bool, optional
+		:type parse_json: bool
 		"""
 
 		self.__Text = text
@@ -742,13 +730,13 @@ class WebRequestor:
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
-		:type proxy: Proxy | None, optional
+		:type proxy: Proxy | None
 		:param params: Словарь параметров запроса. По умолчанию `None`.
-		:type params: dict | None, optional
+		:type params: dict | None
 		:param headers: Словарь заголовков. По умолчанию `None`.
-		:type headers: dict | None, optional
+		:type headers: dict | None
 		:param cookies: Словарь cookies. По умолчанию `None`.
-		:type cookies: dict | None, optional
+		:type cookies: dict | None
 		:return: Контейнер ответа от библиотеки **requests**.
 		:rtype: requests.Response
 		"""
@@ -774,17 +762,17 @@ class WebRequestor:
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
-		:type proxy: Proxy | None, optional
+		:type proxy: Proxy | None
 		:param params: Словарь параметров запроса. По умолчанию `None`.
-		:type params: dict | None, optional
+		:type params: dict | None
 		:param headers: Словарь заголовков. По умолчанию `None`.
-		:type headers: dict | None, optional
+		:type headers: dict | None
 		:param cookies: Словарь cookies. По умолчанию `None`.
-		:type cookies: dict | None, optional
+		:type cookies: dict | None
 		:param data: Данные запроса. По умолчанию `None`.
-		:type data: Any, optional
+		:type data: Any
 		:param json: Словарь для сериализации и передачи в качестве JSON. По умолчанию `None`.
-		:type json: dict | None, optional
+		:type json: dict | None
 		:return: Контейнер ответа от библиотеки **requests**.
 		:rtype: requests.Response
 		"""
@@ -816,13 +804,13 @@ class WebRequestor:
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
-		:type proxy: Proxy | None, optional
+		:type proxy: Proxy | None
 		:param params: Словарь параметров запроса. По умолчанию `None`.
-		:type params: dict | None, optional
+		:type params: dict | None
 		:param headers: Словарь заголовков. По умолчанию `None`.
-		:type headers: dict | None, optional
+		:type headers: dict | None
 		:param cookies: Словарь cookies. По умолчанию `None`.
-		:type cookies: dict | None, optional
+		:type cookies: dict | None
 		:return: Контейнер ответа от библиотеки **requests**.
 		:rtype: requests.Response
 		"""
@@ -853,17 +841,17 @@ class WebRequestor:
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
-		:type proxy: Proxy | None, optional
+		:type proxy: Proxy | None
 		:param params: Словарь параметров запроса. По умолчанию `None`.
-		:type params: dict | None, optional
+		:type params: dict | None
 		:param headers: Словарь заголовков. По умолчанию `None`.
-		:type headers: dict | None, optional
+		:type headers: dict | None
 		:param cookies: Словарь cookies. По умолчанию `None`.
-		:type cookies: dict | None, optional
+		:type cookies: dict | None
 		:param data: Данные запроса. По умолчанию `None`.
-		:type data: Any, optional
+		:type data: Any
 		:param json: Словарь для сериализации и передачи в качестве JSON. По умолчанию `None`.
-		:type json: dict | None, optional
+		:type json: dict | None
 		:return: Контейнер ответа от библиотеки **requests**.
 		:rtype: requests.Response
 		"""
@@ -900,13 +888,13 @@ class WebRequestor:
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
-		:type proxy: Proxy | None, optional
+		:type proxy: Proxy | None
 		:param params: Словарь параметров запроса. По умолчанию `None`.
-		:type params: dict | None, optional
+		:type params: dict | None
 		:param headers: Словарь заголовков. По умолчанию `None`.
-		:type headers: dict | None, optional
+		:type headers: dict | None
 		:param cookies: Словарь cookies. По умолчанию `None`.
-		:type cookies: dict | None, optional
+		:type cookies: dict | None
 		:return: Контейнер ответа от библиотеки **requests**.
 		:rtype: requests.Response
 		"""
@@ -933,17 +921,17 @@ class WebRequestor:
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
-		:type proxy: Proxy | None, optional
+		:type proxy: Proxy | None
 		:param params: Словарь параметров запроса. По умолчанию `None`.
-		:type params: dict | None, optional
+		:type params: dict | None
 		:param headers: Словарь заголовков. По умолчанию `None`.
-		:type headers: dict | None, optional
+		:type headers: dict | None
 		:param cookies: Словарь cookies. По умолчанию `None`.
-		:type cookies: dict | None, optional
+		:type cookies: dict | None
 		:param data: Данные запроса. По умолчанию `None`.
-		:type data: Any, optional
+		:type data: Any
 		:param json: Словарь для сериализации и передачи в качестве JSON. По умолчанию `None`.
-		:type json: dict | None, optional
+		:type json: dict | None
 		:return: Контейнер ответа от библиотеки **requests**.
 		:rtype: requests.Response
 		"""
@@ -974,7 +962,7 @@ class WebRequestor:
 		Оператор запросов.
 
 		:param config: Конфигурация библиотеки запросов.
-		:type config: WebConfig | None, optional
+		:type config: WebConfig | None
 		"""
 
 		self.__Proxies: tuple[Proxy] = tuple()
@@ -1078,11 +1066,11 @@ class WebRequestor:
 		:param url: Адрес запроса.
 		:type url: str
 		:param params: Словарь параметров запроса. По умолчанию `None`.
-		:type params: dict | None, optional
+		:type params: dict | None
 		:param headers: Словарь заголовков. По умолчанию `None`.
-		:type headers: dict | None, optional
+		:type headers: dict | None
 		:param cookies: Словарь cookies. По умолчанию `None`.
-		:type cookies: dict | None, optional
+		:type cookies: dict | None
 		:return: Унифицированный контейнер ответа на веб-запросы.
 		:rtype: WebResponse
 		"""
@@ -1096,15 +1084,15 @@ class WebRequestor:
 		:param url: Адрес запроса.
 		:type url: str
 		:param params: Словарь параметров запроса. По умолчанию `None`.
-		:type params: dict | None, optional
+		:type params: dict | None
 		:param headers: Словарь заголовков. По умолчанию `None`.
-		:type headers: dict | None, optional
+		:type headers: dict | None
 		:param cookies: Словарь cookies. По умолчанию `None`.
-		:type cookies: dict | None, optional
+		:type cookies: dict | None
 		:param data: Данные запроса. По умолчанию `None`.
-		:type data: Any, optional
+		:type data: Any
 		:param json: Словарь для сериализации и передачи в качестве JSON. По умолчанию `None`.
-		:type json: dict | None, optional
+		:type json: dict | None
 		:return: Унифицированный контейнер ответа на веб-запросы.
 		:rtype: WebResponse
 		"""

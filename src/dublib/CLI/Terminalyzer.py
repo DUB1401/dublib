@@ -282,13 +282,13 @@ class Position:
 		Позиции команды.
 
 		:param name: Название позиции. По умолчанию `None`.
-		:type name: str | None, optional
+		:type name: str | None
 		:param description: Описание позиции. По умолчанию `None`.
-		:type description: str | None, optional
+		:type description: str | None
 		:param important: Указывает, является ли позиция обязательной. По умолчанию `False`.
-		:type important: bool, optional
+		:type important: bool
 		:param is_base: Указывает, является ли позиция базовой для команды. По умолчанию `False`.
-		:type is_base: bool, optional
+		:type is_base: bool
 		"""
 
 		#---> Генерация динамических атрибутов.
@@ -307,11 +307,11 @@ class Position:
 		Добавляет аргумент на позицию.
 
 		:param type: Тип аргумента. По умолчанию `ParametersTypes.All`.
-		:type type: ParametersTypes, optional
+		:type type: ParametersTypes
 		:param description: Описание аргумента. По умолчанию `None`.
-		:type description: str | None, optional
+		:type description: str | None
 		:param important: Описание аргумента. По умолчанию `None`.
-		:type important: bool, optional
+		:type important: bool
 		"""
 
 		if important: self.__IsImportant = True
@@ -324,9 +324,9 @@ class Position:
 		:param name: Название флага.
 		:type name: str
 		:param description: Описание флага. По умолчанию `None`.
-		:type description: str | None, optional
+		:type description: str | None
 		:param important: Указывает, является ли флаг обязательным. По умолчанию `False`.
-		:type important: bool, optional
+		:type important: bool
 		"""
 
 		if important: self.__IsImportant = True
@@ -339,11 +339,11 @@ class Position:
 		:param name: Название ключа.
 		:type name: str
 		:param type: Тип значения ключа. По умолчанию `ParametersTypes.All`.
-		:type type: ParametersTypes, optional
+		:type type: ParametersTypes
 		:param description: Описание ключа. По умолчанию `None`.
-		:type description: str | None, optional
+		:type description: str | None
 		:param important: Указывает, является ли ключ обязательным. По умолчанию `False`.
-		:type important: bool, optional
+		:type important: bool
 		"""
 
 		if important: self.__IsImportant = True
@@ -437,11 +437,11 @@ class Command:
 		:param name: Название команды.
 		:type name: str
 		:param description: Описание команды. По умолчанию `None`.
-		:type description: str | None, optional
+		:type description: str | None
 		:param category: Название категории, к которой относится команда. По умолчанию `None`.
-		:type category: str | None, optional
+		:type category: str | None
 		:param check_parameters_count: Указывает, необходимо ли проверять количество параметров. По умолчанию `False`.
-		:type check_parameters_count: bool, optional
+		:type check_parameters_count: bool
 		"""
 
 		#---> Генерация динамических атрибутов.
@@ -460,11 +460,11 @@ class Command:
 		Создаёт дополнительную позицию.
 
 		:param name: Название позиции. По умолчанию `None`.
-		:type name: str | None, optional
+		:type name: str | None
 		:param description: Описание позиции. По умолчанию `None`.
-		:type description: str | None, optional
+		:type description: str | None
 		:param important: Указывает, является ли позиция обязательной. По умолчанию `False`.
-		:type important: bool, optional
+		:type important: bool
 		:return: Представление новой позиции.
 		:rtype: Position
 		"""
@@ -605,7 +605,7 @@ class ParsedCommandData:
 		:param key: Название ключа.
 		:type key: str
 		:param exception: Указывает, нужно ли выбросить исключение при отсутствии ключа.
-		:type exception: bool, optional
+		:type exception: bool
 		:raises KeyError: Выбрасывается в случае активации соответствующего параметра и запросе значения отсутствующего ключа.
 		:return: Значение ключа.
 		:rtype: Any
@@ -934,7 +934,7 @@ class Helper:
 		Переключает использование модуля помощи.
 
 		:param status: Статус использования модуля.
-		:type status: bool, optional
+		:type status: bool
 		"""
 
 		self.__IsEnabled = status
@@ -944,7 +944,7 @@ class Helper:
 		Переключает сортировку команд в алфавитном порядке.
 
 		:param status: Состояние сортировки.
-		:type status: bool, optional
+		:type status: bool
 		"""
 
 		self.__IsSortingEnabled = status
@@ -1238,9 +1238,9 @@ class Terminalyzer:
 		Обработчик консольных параметров.
 
 		:param parameters: Cписок параметров. По умолчанию берётся из аргументов запуска скрипта.
-		:type parameters: list[str] | None, optional
+		:type parameters: list[str] | None
 		:param free_mode: Включает свободный режим анализатора, в котором не используются индикаторы ключей и флагов.
-		:type free_mode: bool, optional
+		:type free_mode: bool
 		"""
 
 		#---> Генерация динамических атрибутов.

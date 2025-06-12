@@ -85,7 +85,7 @@ class TeleMaster:
 		:param messages: Последовательность ID сообщений или ID конкретного сообщения.
 		:type messages: int | Iterable[int]
 		:param complex: При включении сообщения будут удалены одним запросом. По умолчанию `False`.
-		:type complex: bool, optional
+		:type complex: bool
 		:return: Выброшенное во время работы исключение в случае наличия такового.
 		:rtype: Exception | None
 		"""

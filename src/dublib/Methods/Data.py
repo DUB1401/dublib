@@ -144,9 +144,9 @@ def ToIterable(value: Any, iterable_type: type[Iterable] = tuple, exclude: tuple
 	:param value: Обрабатываемое значение.
 	:type value: Any
 	:param iterable_type: Целевой тип итерируемого контейнера. По умолчанию `tuple`.
-	:type iterable_type: type[Iterable], optional
+	:type iterable_type: type[Iterable]
 	:param exclude: Типы-исключения, условно считающиеся неитерируемыми. По умолчанию `bytes`, `str`.
-	:type exclude: tuple[Iterable], optional
+	:type exclude: tuple[Iterable]
 	:return: Приведённое к итерируемому типу значению.
 	:rtype: Iterable
 	"""
