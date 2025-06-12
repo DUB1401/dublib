@@ -1,34 +1,46 @@
 # dublib
-**dublib** – это библиотека Python, поставляющая полезные компоненты общего назначения.
+**dublib** – это библиотека Python, поставляющая полезные компоненты общего назначения, а также опциональные инструменты для разработки ботов Telegram.
 
 Данный набор модулей распространяется по Rolling-модели. Это значит, что разработчик не заботится об обратной совместимости с прошлыми релизами, потому рекомендуется привязывать ваш проект строго к определённой версии библиотеки!
 
-Все компоненты поставляют лишь базовую документацию, необходимую для общего понимания принципов работы.
-
-# Поставляемые компоненты
-Библиотека включает следующие модули:
-* [CLI](https://github.com/DUB1401/dublib/blob/main/docs/CLI/README.md)
-* [Engine](https://github.com/DUB1401/dublib/blob/main/docs/Engine/README.md)
-* [Methods](https://github.com/DUB1401/dublib/blob/main/docs/Methods/README.md)
-* [Polyglot](https://github.com/DUB1401/dublib/blob/main/docs/Polyglot.md)
-* [TelebotUtils](https://github.com/DUB1401/dublib/blob/main/docs/TelebotUtils/README.md)
-* [WebRequestor](https://github.com/DUB1401/dublib/blob/main/docs/WebRequestor.md)
-
-# Установка
-Библиотека поддерживает установку из двух типов репозиториев:
+## Установка
+Возможна установка из двух источников:
 * **PyPI** – стабильные выпуски (с возможностью выбора конкретной версии);
 * **GitHub** – канал разработки со всеми последними изменениями и исправлениями.
 
 _**Примечание:**_ Для установки библиотеки из репозитория GitHub на вашем устройстве должна присутствовать система контроля версий Git.
-```
+```Bash
 # Установка из PyPi.
 pip install dublib
 
 # Установка конкретной версии из PyPi.
 pip install dublib=={version}
 
+# Установка дополнительных зависимостей.
+pip install dublib[docs]
+
 # Установка из GitHub.
 pip install git+https://github.com/DUB1401/dublib
+```
+
+## Документация
+В данном проекте используется автоматически генерируемая на основе [Sphinx](https://github.com/sphinx-doc/sphinx) документация. Вы можете собрать её локально на своём устройстве следуя примеру ниже.
+```Bash
+# Требуется версия Python 3.11 или новее.
+python -V
+# Клонирование репозитория.
+git clone https://github.com/DUB1401/dublib
+cd dublib
+# Создание виртуальной среды.
+python3 -m venv .venv
+# Активация вирутальной среды (на Windows используйте venv\Scripts\activate.bat).
+source .venv/bin/activate
+# Установка зависимостей.
+pip install .[docs,telebot]
+# Генерация документации (вместо docs/build можно указать любой каталог).
+sphinx-build -b html docs/source docs/build
+# Откройте главный файл документации в браузере.
+xdg-open docs/build/index.html
 ```
 
 _Copyright © DUB1401. 2023-2025._

@@ -14,7 +14,6 @@ import os
 def ListDir(path: PathLike | None = None) -> list[str]:
 	"""
 	Основана на `os.scandir()`, более быстром и подробном варианте `os.listdir()`.
-		path – путь для сканирования.
 
 	:param path: Путь для сканирования. Если передать `None`, будет возвращёт список элементов в текущем каталоге.
 	:type path: PathLike | None

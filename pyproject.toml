@@ -35,6 +35,10 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+docs = [
+    "Sphinx",
+	"sphinx-rtd-theme"
+]
 telebot = [
     "pyTelegramBotAPI"
 ]
