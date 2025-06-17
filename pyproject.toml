@@ -17,6 +17,7 @@ dependencies = [
 	"fake-useragent>=2.0.3",
 	"httpx",
 	"httpx[http2]",
+	"orjson",
 	"prettytable",
 	"requests",
 	"gnureadline; sys_platform == \"linux\"",

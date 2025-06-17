@@ -7,6 +7,8 @@ import shutil
 import json
 import os
 
+import orjson
+
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ФАЙЛАМИ И ДИРЕКТОРИЯМИ <<<<< #
 #==========================================================================================#
@@ -85,12 +87,9 @@ def ReadJSON(path: PathLike) -> dict:
 	:raises FileNotFoundError: Выбрасывается при отсутствии файла.
 	"""
 
-	JSON = dict()
-	with open(path, encoding = "utf-8") as FileReader: JSON = json.load(FileReader)
+	with open(path, "rb") as FileReader: return orjson.loads(FileReader.read())
 
-	return JSON
-
-def WriteJSON(path: PathLike, data: dict):
+def WriteJSON(path: PathLike, data: dict, auto_format: bool = True):
 	"""
 	Записывает отформатированный файл JSON.
 
@@ -98,10 +97,16 @@ def WriteJSON(path: PathLike, data: dict):
 	:type path: PathLike
 	:param data: Словарь для сериализации в JSON.
 	:type data: dict
+	:param auto_format: При включённом автоматическом форматировании будет использован стандартный `json.dump()` с отступами через табуляцию. В случае отключения используется оптимизированный `orjson.dumps()` без форматирования.
+	:type auto_format: bool
 	:raise TypeError: Выбрасывается при невозможности сериализации данных в JSON.
 	"""
 
-	with open(path, "w", encoding = "utf-8") as FileWriter: json.dump(data, FileWriter, ensure_ascii = False, indent = "\t", separators = (",", ": "))
+	if auto_format: 
+		with open(path, "w", encoding = "utf-8") as FileWriter: json.dump(data, FileWriter, ensure_ascii = False, indent = "\t", separators = (",", ": "))
+
+	else: 
+		with open(path, "wb") as FileWriter: FileWriter.write(orjson.dumps(data))
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ТЕКСТОВЫМИ ФАЙЛАМИ <<<<< #
