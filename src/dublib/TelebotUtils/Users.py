@@ -2,8 +2,8 @@ from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
 from ..Exceptions.TelebotUtils import *
 
 from datetime import datetime, timedelta
+from typing import Any, Iterable
 from os import PathLike
-from typing import Any
 import os
 
 from telebot.types import User
@@ -78,11 +78,14 @@ class UserData:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __AddFlags(self, flags: list[str] | str, key: str):
+	def __AddFlags(self, flags: Iterable[str] | str, key: str):
 		"""
-		Добавляет флаги по указанному ключу словаря данных пользователя.
-			flags – набор флагов;\n
-			key – ключ для помещения флагов.
+		Реализовывает добавление флаговых переключателей в данные пользователя.
+
+		:param flags: Набор флагов или конкретный флаг.
+		:type flags: Iterable[str] | str
+		:param key: Ключ, под который в структуру данных пользователя заносятся флаги.
+		:type key: str
 		"""
 
 		if type(flags) == str: flags = (flags,)
@@ -94,31 +97,44 @@ class UserData:
 				self.__Data[key].append(Flag)
 				IsChanged = True
 
-		if IsChanged: self.__Data[key] = sorted(self.__Data[key])
-		self.save()
+		if IsChanged:
+			self.__Data[key] = sorted(self.__Data[key])
+			self.save()
 
-	def __RemoveFlags(self, flags: list[str] | str, key: str):
+	def __RemoveFlags(self, flags: Iterable[str] | str, key: str):
 		"""
-		Убирает флаги по указанному ключу словаря данных пользователя.
-			flags – набор флагов;\n
-			key – ключ для помещения флагов.
+		Реализовывает удаление флаговых переключателей из данных пользователя.
+
+		:param flags: Набор флагов или конкретный флаг.
+		:type flags: Iterable[str] | str
+		:param key: Ключ, по которому из структуры данных пользователя удаляются флаги.
+		:type key: str
 		"""
 
 		if type(flags) == str: flags = (flags,)
+		IsChanged = False
 
 		for Flag in flags:
-			if Flag in self.__Data[key]: self.__Data[key].remove(Flag)
 
-		self.save()
+			if Flag in self.__Data[key]:
+				self.__Data[key].remove(Flag)
+				IsChanged = True
+
+		if IsChanged: self.save()
 
 	def __SetProperty(self, property_type: str, key: str, value: Any):
 		"""
 		Задаёт свойство пользователя.
-			property_type – ключ раздела хранения свойства;\n
-			key – ключ свойства;\n
-			value – значение.
+
+		:param property_type: Тип свойства: *data* или *temp*.
+		:type property_type: str
+		:param key: Ключ, под который помещаются данные.
+		:type key: str
+		:param value: Помещаемые данные.
+		:type value: Any
 		"""
 
+		if key in self.__Data[property_type].keys() and self.__Data[property_type][key] == value: return
 		self.__Data[property_type][key] = value
 		self.save()
 
@@ -192,11 +208,6 @@ class UserData:
 		self.__Data["temp"] = dict()
 		self.save()		
 
-	def delete(self):
-		"""Удаляет локальный файл пользователя."""
-
-		os.remove(self.__StorageDirectory + f"/{self.__ID}.json")
-
 	def get_object(self, key: str) -> Any:
 		"""
 		Возвращает объект Python из свойств пользователя.
@@ -207,25 +218,17 @@ class UserData:
 
 	def get_property(self, key: str) -> Any:
 		"""
-		Возвращает значение свойства пользователя, в том числе временного.
-			key – ключ свойства.
+		Возвращает значение свойства пользователя. При наличии одинакового ключа в постоянных и временных свойствах, приоритет отдаётся временному.
+
+		:param key: Ключ свойства.
+		:type key: str
+		:raises KeyError: Выбрасывается при отсутствии свойства с указанным ключом.
+		:return: Значение свойства.
+		:rtype: Any
 		"""
 
-		if key in self.__Data["data"].keys(): return self.__Data["data"][key]
 		if key in self.__Data["temp"].keys(): return self.__Data["temp"][key]
-
-		raise KeyError(key)
-	
-	def get_property_type(self, key: str) -> Any:
-		"""
-		Возвращает значение типа свойства пользователя, в том числе временного.
-			key – ключ свойства.
-		"""
-
-		if key in self.__Data["data"].keys(): return type(self.__Data["data"][key])
-		if key in self.__Data["temp"].keys(): return type(self.__Data["temp"][key])
-
-		raise KeyError(key)
+		else: return self.__Data["data"][key]
 
 	def has_permissions(self, permissions: list[str] | str) -> bool:
 		"""
@@ -300,15 +303,23 @@ class UserData:
 
 	def remove_property(self, key: str):
 		"""
-		Удаляет свойство пользователя.
-			key – ключ свойства.
+		Удаляет свойство пользователя. При поиске приоритет отдаётся постоянным свойствам.
+
+		:param key: Ключ свойства.
+		:type key: str
 		"""
 
-		if key in self.__Data["data"].keys(): del self.__Data["data"][key]
-		elif key in self.__Data["temp"].keys(): del self.__Data["temp"][key]
-		else: KeyError(key)
+		IsChanged = False
 
-		self.save()
+		if key in self.__Data["data"].keys():
+			del self.__Data["data"][key]
+			IsChanged = True
+
+		elif key in self.__Data["temp"].keys():
+			del self.__Data["temp"][key]
+			IsChanged = True
+
+		if IsChanged: self.save()
 
 	def save(self):
 		"""Записывает данные пользователя в локальный файл."""
@@ -484,15 +495,17 @@ class UsersManager:
 
 		return CurrentUser
 
-	def delete_user(self, user_id: int | str):
+	def delete_user(self, user_id: int):
 		"""
-		Удаляет пользователя из системы.
-			user_id – ID пользователя.
+		Удаляет данные пользователя.
+
+		:param user_id: ID пользователя.
+		:type user_id: int
+		:raises KeyError: Выбрасывается при отсутствии пользователя с переданным ID.
 		"""
 
-		user_id = int(user_id)
-		self.__Users[user_id].delete()
 		del self.__Users[user_id]
+		os.remove(f"{self.__StorageDirectory}/{user_id}.json")
 
 	def get_active_users(self, hours: int = 24) -> tuple[UserData]:
 		"""

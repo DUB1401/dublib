@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "cython"]
+requires = ["setuptools"]
 
 [project]
 name = "dublib"
@@ -36,12 +36,13 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-docs = [
-    "Sphinx",
-	"sphinx-rtd-theme"
-]
 telebot = [
-    "pyTelegramBotAPI"
+	"pyTelegramBotAPI"
+]
+all = [
+	"pyTelegramBotAPI",
+	"Sphinx",
+	"sphinx-rtd-theme"
 ]
 
 [project.urls]

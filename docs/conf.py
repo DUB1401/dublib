@@ -2,13 +2,11 @@ import tomllib
 import sys
 import os
 
-
-
-work_dir = os.path.abspath("../..")
+work_dir = os.path.abspath("..")
 lib_data = None
 readme_copyright_years = None
 
-sys.path.insert(0, os.path.abspath("../../src"))
+sys.path.insert(0, os.path.abspath("../src"))
 
 with open(f"{work_dir}/pyproject.toml", "rb") as FileReader:
 	lib_data = tomllib.load(FileReader)

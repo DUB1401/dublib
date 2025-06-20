@@ -89,7 +89,7 @@ def ReadJSON(path: PathLike) -> dict:
 
 	with open(path, "rb") as FileReader: return orjson.loads(FileReader.read())
 
-def WriteJSON(path: PathLike, data: dict, auto_format: bool = True):
+def WriteJSON(path: PathLike, data: dict, pretty: bool = True):
 	"""
 	Записывает отформатированный файл JSON.
 
@@ -97,13 +97,13 @@ def WriteJSON(path: PathLike, data: dict, auto_format: bool = True):
 	:type path: PathLike
 	:param data: Словарь для сериализации в JSON.
 	:type data: dict
-	:param auto_format: При включённом автоматическом форматировании будет использован стандартный `json.dump()` с отступами через табуляцию. В случае отключения используется оптимизированный `orjson.dumps()` без форматирования.
-	:type auto_format: bool
+	:param pretty: Включает режим форматирования с использованием символов новых строк и табуляции.
+	:type pretty: bool
 	:raise TypeError: Выбрасывается при невозможности сериализации данных в JSON.
 	"""
 
-	if auto_format: 
-		with open(path, "w", encoding = "utf-8") as FileWriter: json.dump(data, FileWriter, ensure_ascii = False, indent = "\t", separators = (",", ": "))
+	if pretty: 
+		with open(path, "w") as FileWriter: FileWriter.write(json.dumps(data, FileWriter, ensure_ascii = False, indent = "\t", separators = (",", ": ")))
 
 	else: 
 		with open(path, "wb") as FileWriter: FileWriter.write(orjson.dumps(data))
