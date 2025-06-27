@@ -1,20 +1,11 @@
-from ..CLI.TextStyler import Colors, TextStyler
+from ..CLI.Templates.Bus import GenerateMessage, MessagesTypes, PrintMessage
+from ..CLI.TextStyler import TextStyler
 
 from typing import Any
-
-import enum
 
 #==========================================================================================#
 # >>>>> ВСПОМОГАТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
 #==========================================================================================#
-
-class MessagesTypes(enum.Enum):
-	"""Перечисление типов сообщений."""
-
-	Info = "info"
-	Warning = "warning"
-	Error = "error"
-	Critical = "critical"
 
 class ExecutionMessage:
 	"""Сообщение процесса выполнения."""
@@ -45,50 +36,43 @@ class ExecutionMessage:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, text: str, type: MessagesTypes = MessagesTypes.Info, origin: str | None = None):
+	def __init__(self, text: str, type: MessagesTypes | None = None, origin: str | None = None):
 		"""
 		Сообщение процесса выполнения.
-			text – текст сообщения;\n
-			type – тип сообщения;\n
-			origin – строка идентификации источника сообщения.
+
+		:param text: Текст сообщения.
+		:type text: str
+		:param type: Тип сообщения.
+		:type type: MessagesTypes | None
+		:param origin: Источник сообщения.
+		:type origin: str | None
 		"""
 
-		#---> Генерация динамичкских атрибутов.
-		#==========================================================================================#
 		self._Text = text
 		self._Type = type
 		self._Origin = origin
 
 	def __str__(self) -> str:
-		"""Возвращает строковое представление форматированного сообщения."""
+		"""Возвращает строковое представление сообщения."""
 
-		Origin = ""
-		Type = ""
-		if self._Origin: Origin = f"{self._Origin}:"
-		if self._Type: Type = f"[{Origin}{self._Type.name.upper()}] "
-		ColorsDict = {
-			MessagesTypes.Info: Colors.White,
-			MessagesTypes.Error: Colors.Red,
-			MessagesTypes.Warning: Colors.Yellow,
-			MessagesTypes.Critical: Colors.Red,
-			None: Colors.White
-		}
-		Message = TextStyler(f"{Type}{self._Text}", text_color = ColorsDict[self._Type]).text
-
-		return Message
+		return GenerateMessage(self._Text, self._Type, self._Origin)
 
 	def check_origin(self, origin: str | None) -> bool:
 		"""
-		Проверяет, совпадает ли источник сообщения.
-			origin – строка идентификации источника сообщения.
+		Проверяет совпадение источника сообщения.
+
+		:param origin: Идентификатор источника сообщения.
+		:type origin: str | None
+		:return: Возвращает `True`, если переданный источник совпадает с заданным в самом сообщении.
+		:rtype: bool
 		"""
 
 		return origin == self._Origin
 
 	def print(self):
-		"""Выводит в консоль сообщение."""
+		"""Выводит в консоль форматированное сообщение."""
 
-		print(str(self))
+		PrintMessage(self._Text, self._Type, self._Origin)
 
 #==========================================================================================#
 # >>>>> ОСНОВНЫЕ КЛАССЫ <<<<< #
@@ -169,8 +153,6 @@ class ExecutionStatus:
 	def __init__(self):
 		"""Отчёт о выполнении."""
 
-		#---> Генерация динамичкских атрибутов.
-		#==========================================================================================#
 		self._Code = None
 		self._Messages: list[ExecutionMessage] = list()
 		self._Value = None
@@ -182,14 +164,23 @@ class ExecutionStatus:
 		self._PostInitMethod()
 
 	def __bool__(self) -> bool:
-		"""Приводит вложенное значение к логическому типу."""
+		"""
+		Приводит вложенное значение к логическому типу.
+
+		:return: Возвращает `True`, если значение в статусе возможно привести к таковому.
+		:rtype: bool
+		"""
 
 		return bool(self._Value)
 
 	def __getitem__(self, key: Any) -> Any:
 		"""
 		Возвращает значение из словаря дополнительных данных.
-			key – ключ.
+
+		:param key: Ключ к словарю дополнительных данных.
+		:type key: Any
+		:return: Значение из словаря дополнительных данных.
+		:rtype: Any
 		"""
 
 		return self._Data[key]
@@ -197,7 +188,12 @@ class ExecutionStatus:
 	def __iadd__(self, status: "ExecutionStatus") -> "ExecutionStatus":
 		"""
 		Выполняет слияние другого статуса с текущим объектом, объединяя списки сообщений и перезаписывая данные. 
-			status – статус для слиянитя.
+
+		:param status: Статус для слияния.
+		:type status: ExecutionStatus
+		:raises TypeError: Выбрасывается при попытке слияния с объектом другого типа.
+		:return: Результирующий отчёт о выполнении.
+		:rtype: ExecutionStatus
 		"""
 
 		if isinstance(status, ExecutionStatus): self.merge(status)

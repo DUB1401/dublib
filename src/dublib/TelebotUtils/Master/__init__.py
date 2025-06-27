@@ -1,13 +1,13 @@
-from ..Methods.Data import ToIterable
-from .Users import UserData
+from .Decorators import ignore_frecuency_errors
+from ...Methods.Data import ToIterable
+from ..Users import UserData
 
-from typing import Callable, Iterable
-from time import sleep
+from typing import Iterable
 import logging
 
 from urllib3.exceptions import ReadTimeoutError
-from telebot import apihelper, TeleBot, types
 from requests.exceptions import ReadTimeout
+from telebot import TeleBot
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
@@ -120,33 +120,3 @@ class TeleMaster:
 				except Exception as ExceptionData: ExceptionObject = ExceptionData
 
 		return ExceptionObject
-
-	#==========================================================================================#
-	# >>>>> ДЕКОРАТОРЫ <<<<< #
-	#==========================================================================================#
-
-	def ignore_frecuency_errors(function: Callable) -> Callable:
-		"""
-		Декоратор. Игнорирует ошибки частоты запросов, автоматически выжидая необходимый интервал.
-
-		:param function: Функция или метод из библиотеки **pyTelegramBotAPI**.
-		:type function: Callable
-		:return: Декорированная функция или метод.
-		:rtype: Callable
-		"""
-
-		def new_function(*args, **kwargs) -> types.Message:
-			Value = None
-				
-			try: Value = function(*args, **kwargs)
-			except apihelper.ApiTelegramException as ExceptionData:
-
-				if "Error code: 429. Description: Too Many Requests" in str(ExceptionData):
-					Seconds = float(str(ExceptionData).split(" ")[-1])
-					sleep(Seconds)
-
-				else: raise ExceptionData
-
-			else: return Value
-		
-		return new_function

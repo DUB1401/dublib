@@ -1,4 +1,4 @@
-from . import readline
+from .. import readline
 
 #==========================================================================================#
 # >>>>> ШАБЛОНЫ ВВОДА-ВЫВОДА <<<<< #
@@ -7,10 +7,17 @@ from . import readline
 def Confirmation(text: str, question: str | None = None, yes: str | None = None, no: str | None = None) -> bool:
 	"""
 	Запрашивает подтверждение пользователя.
-		text – описание вопроса;\n
-		question – строка, обозначающая сам вопрос в используемом языке;\n
-		yes – строка, обозначающая согласие при вводе в консоль;\n
-		no – строка, обозначающая отсутствие согласия при вводе в консоль.
+
+	:param text: Текст вопроса.
+	:type text: str
+	:param question: Строка, представляющая сам вопрос. По умолчанию `Confirm?`.
+	:type question: str | None
+	:param yes: Строка, обозначающая согласие при вводе в консоль. По умолчанию `Y`.
+	:type yes: str | None
+	:param no: Строка, обозначающая отсутствие согласия при вводе в консоль. По умолчанию `N`.
+	:type no: str | None
+	:return: Состояние согласия пользователя.
+	:rtype: bool
 	"""
 
 	Response = None
