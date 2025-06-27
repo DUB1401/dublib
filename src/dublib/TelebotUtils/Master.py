@@ -5,13 +5,14 @@ from typing import Callable, Iterable
 from time import sleep
 import logging
 
+from urllib3.exceptions import ReadTimeoutError
 from telebot import apihelper, TeleBot, types
+from requests.exceptions import ReadTimeout
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
 #==========================================================================================#
 
-# Инициализация модуля ведения логов.
 Logger = logging.getLogger(__name__)
 Logger.addHandler(logging.StreamHandler().setFormatter(logging.Formatter("[%(name)s] %(levelname)s: %(message)s")))
 Logger.setLevel(logging.INFO)
@@ -45,32 +46,48 @@ class TeleMaster:
 		:type bot: str | TeleBot
 		"""
 
-		if type(bot) == str: bot = TeleBot(bot)
+		self.__Bot = TeleBot(bot) if type(bot) == str else bot
 
-		#---> Генерация динамических свойств.
-		#==========================================================================================#
-		self.__Bot = bot
-
-	def check_user_subscriptions(self, user: UserData, chats: int | Iterable[int]) -> bool | None:
+	def check_user_subscriptions(self, user: UserData, chats: int | Iterable[int], max_tries: int = 3) -> bool:
 		"""
-		Проверяет, состоит ли пользователь в указанных чатах. Бот должен состоять во всех проверяемых чатах.
-			user – проверяемый пользователь;\n
-			chats – список ID чатов.
+		Проверяет, состоит ли пользователь в указанных чатах. Бот должен иметь доступ ко всем проверяемым чатам.
+		
+		Также содержит в себе механизм повторов при превышении времени ожидания ответа от сервера.
+
+		:param user: Данные проверяемого пользователя.
+		:type user: UserData
+		:param chats: ID чата или набор ID чатов, для которых производится проверка.
+		:type chats: int | Iterable[int]
+		:param max_tries: Количество попыток запросов. Повторные запросы отправляются только в случае превышения времени ожидания ответа. Не может быть меньше 1.
+		:type max_tries: int
+		:return: Возвращает `True`, если пользователь состоит во всех указанных чатах.
+		:raise ValueError: Выбрасывается, если количество попыток запросов меньше 1.
+		:raise urllib3.exceptions.ReadTimeoutError: Выбрасывается в случае превышения времени ожидания ответа от сервера.
+		:raise requests.exceptions.ReadTimeout: Выбрасывается в случае превышения времени ожидания ответа от сервера.
+		:rtype: bool
 		"""
 
 		chats = ToIterable(chats)
+		if max_tries < 1: raise ValueError("Max tries can't be less than 1.")
 
 		IsSubscripted = False
 		Subscriptions = 0
 			
 		for ChatID in chats:
-			
-			try:
-				Response = self.__Bot.get_chat_member(ChatID, user.id)
-				if Response.status in ("administrator", "creator", "member", "restricted"): Subscriptions += 1
-				
-			except Exception as ExceptionData:
-				if str(ExceptionData).endswith("chat not found"): Logger.error(f"Chat {ChatID} not found. May be bot not a member.")
+			Try = 1
+
+			while Try <= max_tries:
+				Try += 1
+
+				try:
+					Response = self.__Bot.get_chat_member(ChatID, user.id)
+					if Response.status in ("administrator", "creator", "member", "restricted"): Subscriptions += 1
+					
+				except (ReadTimeoutError, ReadTimeout) as ExceptionData:
+					if Try == max_tries: raise ExceptionData
+
+				except Exception as ExceptionData:
+					if str(ExceptionData).endswith("chat not found"): Logger.error(f"Chat {ChatID} not found. May be bot not a member.")
 		
 		if Subscriptions == len(chats): IsSubscripted = True
 		
@@ -109,7 +126,14 @@ class TeleMaster:
 	#==========================================================================================#
 
 	def ignore_frecuency_errors(function: Callable) -> Callable:
-		"""Игнорирует ошибки частоты запросов, автоматически выжидая необходимый интервал."""
+		"""
+		Декоратор. Игнорирует ошибки частоты запросов, автоматически выжидая необходимый интервал.
+
+		:param function: Функция или метод из библиотеки **pyTelegramBotAPI**.
+		:type function: Callable
+		:return: Декорированная функция или метод.
+		:rtype: Callable
+		"""
 
 		def new_function(*args, **kwargs) -> types.Message:
 			Value = None
