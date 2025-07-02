@@ -1,4 +1,4 @@
-from ..TextStyler import Colors, TextStyler
+from ..TextStyler import Escapes, TextStyler
 from .. import readline
 
 import enum
@@ -53,14 +53,14 @@ def PrintMessage(text: str, type: MessagesTypes | None = None, origin: str | Non
 	"""
 
 	ColorsDict = {
-		MessagesTypes.Info: Colors.White,
-		MessagesTypes.Error: Colors.Red,
-		MessagesTypes.Warning: Colors.Yellow,
-		MessagesTypes.Critical: Colors.Red,
-		None: Colors.White
+		MessagesTypes.Info: Escapes.Colors.White,
+		MessagesTypes.Error: Escapes.Colors.Red,
+		MessagesTypes.Warning: Escapes.Colors.Yellow,
+		MessagesTypes.Critical: Escapes.Colors.Red,
+		None: Escapes.Drops.DEFAULT_COLOR
 	}
 
-	print(TextStyler(GenerateMessage(text, type, origin), text_color = ColorsDict[type]).text)
+	print(TextStyler(text_color = ColorsDict[type]).get_styled_text(GenerateMessage(text, type, origin)))
 
 #==========================================================================================#
 # >>>>> ШАБЛОНЫ ТИПОВ СООБЩЕНИЙ <<<<< #
