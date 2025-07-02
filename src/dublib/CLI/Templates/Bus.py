@@ -78,7 +78,7 @@ def PrintInfo(text: str, origin: str | None = None):
 
 	PrintMessage(text, type = MessagesTypes.Info, origin = origin)
 
-def PrintInfo(text: str, origin: str | None = None):
+def PrintWarning(text: str, origin: str | None = None):
 	"""
 	Выводит в консоль стилизованное предупреждение.
 

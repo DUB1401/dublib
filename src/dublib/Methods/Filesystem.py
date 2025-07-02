@@ -102,11 +102,13 @@ def WriteJSON(path: PathLike, data: dict, pretty: bool = True):
 	:raise TypeError: Выбрасывается при невозможности сериализации данных в JSON.
 	"""
 
-	if pretty: 
-		with open(path, "w") as FileWriter: FileWriter.write(json.dumps(data, FileWriter, ensure_ascii = False, indent = "\t", separators = (",", ": ")))
+	if pretty:
+		Content: str = json.dumps(data, ensure_ascii = False, indent = "\t", separators = (",", ": "))
+		with open(path, "w") as FileWriter: FileWriter.write(Content)
 
-	else: 
-		with open(path, "wb") as FileWriter: FileWriter.write(orjson.dumps(data))
+	else:
+		Content: bytes = orjson.dumps(data)
+		with open(path, "wb") as FileWriter: FileWriter.write(Content)
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ТЕКСТОВЫМИ ФАЙЛАМИ <<<<< #
