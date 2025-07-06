@@ -59,16 +59,12 @@ def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwri
 		mergeable_dictionary – словарь, из котрого идёт копирование;\n
 		overwrite – указывает, нужно ли перезаписывать значения конфликтующих ключей базового словаря.
 	"""
-
-	for Key in mergeable_dictionary.keys():
-
-		if overwrite == False and Key not in base_dictionary.keys():
-			base_dictionary[Key] = mergeable_dictionary[Key]
-
-		elif overwrite == True:
-			base_dictionary[Key] = mergeable_dictionary[Key]
-
+ 
+	for key, value in mergeable_dictionary.items():
+		if overwrite or key not in base_dictionary:
+			base_dictionary[key] = value
 	return base_dictionary
+    
 
 def MultipleReplace(string: str, values: list[str], new_value: str) -> str:
 	"""
