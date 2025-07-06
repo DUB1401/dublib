@@ -487,7 +487,7 @@ class UsersManager:
 		
 		if type(user) != User: raise ValueError("User object expected, not " + str(type(user)) + ".")
 		CurrentUser = None
-		if user.id not in self.__Users.keys():self.__Users[user.id] = UserData(self.__StorageDirectory, user.id, user)
+		if user.id not in self.__Users.keys():self.__Users[user.id] = UserData(self.__StorageDirectory, user.id)
 		self.__Users[user.id].update(user)
 		CurrentUser = self.__Users[user.id]
 		if CurrentUser.is_chat_forbidden: CurrentUser.set_chat_forbidden(False)
