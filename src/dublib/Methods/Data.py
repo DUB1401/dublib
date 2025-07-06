@@ -20,15 +20,7 @@ def IsNotAlpha(text: str) -> bool:
 	Проверяет, состоит ли строка целиком из небуквенных символов.
 	"""
 
-	Result = True
-
-	for Character in text:
-
-		if Character.isalpha():
-			Result = False
-			break
-
-	return Result
+	return not any(char.isalpha() for char in text)
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ ОБРАБОТКИ ДАННЫХ <<<<< #
