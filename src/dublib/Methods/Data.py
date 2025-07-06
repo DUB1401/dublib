@@ -11,11 +11,9 @@ def CheckForCyrillic(text: str) -> bool:
 	Проверяет, имеются ли кирилические символы в строке.
 		text – проверяемая строка.
 	"""
+	alphabet = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
+	return any(char in alphabet for char in text.lower())
 
-	Alphabet = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
-	IsTextContainsCyrillicCharacters = not Alphabet.isdisjoint(text.lower())
-
-	return IsTextContainsCyrillicCharacters
 
 def IsNotAlpha(text: str) -> bool:
 	"""
