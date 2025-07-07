@@ -124,7 +124,11 @@ def StripAlpha(text: str) -> str:
   
 	return text[start:end]
 
-def ToIterable(value: Any, iterable_type: type[Iterable] = tuple, exclude: tuple[Iterable] = (bytes, str)) -> Iterable:
+def ToIterable(
+    value: Any, 
+    iterable_type: type[Iterable] = tuple, 
+    exclude: tuple[type, ...] = (bytes, str)
+    ) -> Iterable:
 	"""
 	Преобразует значение в итерируемый тип.
 
@@ -138,10 +142,10 @@ def ToIterable(value: Any, iterable_type: type[Iterable] = tuple, exclude: tuple
 	:rtype: Iterable
 	"""
 
-	if isinstance(value, Iterable) and not isinstance(value, exclude): return value
-	else: value = iterable_type([value])
-
-	return value
+	if isinstance(value, Iterable) and not isinstance(value, exclude): 
+		return value
+	
+	return iterable_type([value])
 
 def Zerotify(value: Any) -> Any:
 	"""
