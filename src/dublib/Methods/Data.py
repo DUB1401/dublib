@@ -11,16 +11,17 @@ def CheckForCyrillic(text: str) -> bool:
 	Проверяет, имеются ли кирилические символы в строке.
 		text – проверяемая строка.
 	"""
-	alphabet = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
-	return any(char in alphabet for char in text.lower())
-
+	
+	Alphabet = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
+	
+	return any(Char in Alphabet for Char in text.lower())
 
 def IsNotAlpha(text: str) -> bool:
 	"""
 	Проверяет, состоит ли строка целиком из небуквенных символов.
 	"""
 
-	return not any(char.isalpha() for char in text)
+	return not any(Char.isalpha() for Char in text)
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ ОБРАБОТКИ ДАННЫХ <<<<< #
@@ -63,8 +64,8 @@ def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwri
 	for key, value in mergeable_dictionary.items():
 		if overwrite or key not in base_dictionary:
 			base_dictionary[key] = value
+			
 	return base_dictionary
-    
 
 def MultipleReplace(string: str, values: list[str], new_value: str) -> str:
 	"""
@@ -116,19 +117,13 @@ def StripAlpha(text: str) -> str:
 		text – обрабатываемая строка.
 	"""
 
-	start, end = 0, len(text)
-	while start < end and not text[start].isalpha():
-		start += 1
-	while end > start and not text[end - 1].isalpha():
-		end -= 1
+	Start, End = 0, len(text)
+	while Start < End and not text[Start].isalpha(): Start += 1
+	while End > Start and not text[End - 1].isalpha(): End -= 1
   
-	return text[start:end]
+	return text[Start:End]
 
-def ToIterable(
-    value: Any, 
-    iterable_type: type[Iterable] = tuple, 
-    exclude: tuple[type, ...] = (bytes, str)
-    ) -> Iterable:
+def ToIterable(value: Any, iterable_type: type[Iterable] = tuple, exclude: tuple[Iterable] = (bytes, str)) -> Iterable:
 	"""
 	Преобразует значение в итерируемый тип.
 
@@ -142,8 +137,7 @@ def ToIterable(
 	:rtype: Iterable
 	"""
 
-	if isinstance(value, Iterable) and not isinstance(value, exclude): 
-		return value
+	if isinstance(value, Iterable) and not isinstance(value, exclude): return value
 	
 	return iterable_type([value])
 
