@@ -153,6 +153,4 @@ def Zerotify(value: Any) -> Any:
 		value – обрабатываемое значение.
 	"""
 
-	if bool(value) == False: value = None
-
-	return value
+	return None if not value else value
