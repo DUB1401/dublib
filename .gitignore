@@ -1,5 +1,7 @@
-# Python cache.
+# Python cache and virtual enviroment.
 __pycache__
+.venv
 # Local building data.
 src/dublib.egg-info
+.pytest_cache
 build

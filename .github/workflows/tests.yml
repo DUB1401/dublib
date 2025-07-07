@@ -1,12 +1,13 @@
 name: Run Tests
 
 on:
+  workflow_dispatch:
   push:
     paths:
-      - "src/dublib/Methods/Data"
+      - "src/dublib/Methods/Data.py"
   pull_request:
     paths:
-      - "src/dublib/Methods/Data"
+      - "src/dublib/Methods/Data.py"
 
 jobs:
   test:
