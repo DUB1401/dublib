@@ -116,12 +116,13 @@ def StripAlpha(text: str) -> str:
 		text – обрабатываемая строка.
 	"""
 
-	try:
-		while not text[0].isalpha(): text.pop(0)
-		while not text[-1].isalpha(): text.pop()
-
-	except:
-		text = ""
+	start, end = 0, len(text)
+	while start < end and not text[start].isalpha():
+		start += 1
+	while end > start and not text[end - 1].isalpha():
+		end -= 1
+  
+	return text[start:end]
 
 def ToIterable(value: Any, iterable_type: type[Iterable] = tuple, exclude: tuple[Iterable] = (bytes, str)) -> Iterable:
 	"""
