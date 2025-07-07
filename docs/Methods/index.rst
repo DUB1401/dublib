@@ -1,4 +1,5 @@
 Methods
 =======
 .. toctree::
+	Data
 	Filesystem
