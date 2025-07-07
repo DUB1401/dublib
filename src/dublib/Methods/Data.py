@@ -11,26 +11,17 @@ def CheckForCyrillic(text: str) -> bool:
 	Проверяет, имеются ли кирилические символы в строке.
 		text – проверяемая строка.
 	"""
-
+	
 	Alphabet = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
-	IsTextContainsCyrillicCharacters = not Alphabet.isdisjoint(text.lower())
-
-	return IsTextContainsCyrillicCharacters
+	
+	return any(Char in Alphabet for Char in text.lower())
 
 def IsNotAlpha(text: str) -> bool:
 	"""
 	Проверяет, состоит ли строка целиком из небуквенных символов.
 	"""
 
-	Result = True
-
-	for Character in text:
-
-		if Character.isalpha():
-			Result = False
-			break
-
-	return Result
+	return not any(Char.isalpha() for Char in text)
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ ОБРАБОТКИ ДАННЫХ <<<<< #
@@ -69,15 +60,11 @@ def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwri
 		mergeable_dictionary – словарь, из котрого идёт копирование;\n
 		overwrite – указывает, нужно ли перезаписывать значения конфликтующих ключей базового словаря.
 	"""
-
-	for Key in mergeable_dictionary.keys():
-
-		if overwrite == False and Key not in base_dictionary.keys():
-			base_dictionary[Key] = mergeable_dictionary[Key]
-
-		elif overwrite == True:
-			base_dictionary[Key] = mergeable_dictionary[Key]
-
+ 
+	for key, value in mergeable_dictionary.items():
+		if overwrite or key not in base_dictionary:
+			base_dictionary[key] = value
+			
 	return base_dictionary
 
 def MultipleReplace(string: str, values: list[str], new_value: str) -> str:
@@ -130,12 +117,11 @@ def StripAlpha(text: str) -> str:
 		text – обрабатываемая строка.
 	"""
 
-	try:
-		while not text[0].isalpha(): text.pop(0)
-		while not text[-1].isalpha(): text.pop()
-
-	except:
-		text = ""
+	Start, End = 0, len(text)
+	while Start < End and not text[Start].isalpha(): Start += 1
+	while End > Start and not text[End - 1].isalpha(): End -= 1
+  
+	return text[Start:End]
 
 def ToIterable(value: Any, iterable_type: type[Iterable] = tuple, exclude: tuple[Iterable] = (bytes, str)) -> Iterable:
 	"""
@@ -152,9 +138,8 @@ def ToIterable(value: Any, iterable_type: type[Iterable] = tuple, exclude: tuple
 	"""
 
 	if isinstance(value, Iterable) and not isinstance(value, exclude): return value
-	else: value = iterable_type([value])
-
-	return value
+	
+	return iterable_type([value])
 
 def Zerotify(value: Any) -> Any:
 	"""
@@ -162,6 +147,4 @@ def Zerotify(value: Any) -> Any:
 		value – обрабатываемое значение.
 	"""
 
-	if bool(value) == False: value = None
-
-	return value
+	return None if not value else value
