@@ -321,6 +321,12 @@ class UserData:
 
 		if IsChanged: self.save()
 
+	def reset_expected_type(self):
+		"""Сбрасывает ожидаемый тип к значению `None`."""
+
+		self.__Data["expected_type"] = None
+		self.save()
+
 	def save(self):
 		"""Записывает данные пользователя в локальный файл."""
 
