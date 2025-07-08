@@ -5,9 +5,11 @@ on:
   push:
     paths:
       - "src/dublib/Methods/Data.py"
+      - "src/dublib/Polyglot/**"
   pull_request:
     paths:
       - "src/dublib/Methods/Data.py"
+      - "src/dublib/Polyglot/**"
 
 jobs:
   test:
