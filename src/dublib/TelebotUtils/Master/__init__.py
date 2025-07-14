@@ -1,5 +1,6 @@
 from .Decorators import ignore_frecuency_errors
 from ...Methods.Data import ToIterable
+from ...Core import LOGS_HANDLER
 from ..Users import UserData
 
 from typing import Iterable
@@ -13,9 +14,9 @@ from telebot import TeleBot
 # >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
 #==========================================================================================#
 
-Logger = logging.getLogger(__name__)
-Logger.addHandler(logging.StreamHandler().setFormatter(logging.Formatter("[%(name)s] %(levelname)s: %(message)s")))
-Logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.addHandler(LOGS_HANDLER)
+LOGGER.setLevel(logging.INFO)
 
 #==========================================================================================#
 # >>>>> ДОПОЛНИТЕЛЬНЫЕ КОНФИГУРАЦИИ БИБЛИОТЕК ЗАПРОСОВ <<<<< #
@@ -87,7 +88,7 @@ class TeleMaster:
 					if Try == max_tries: raise ExceptionData
 
 				except Exception as ExceptionData:
-					if str(ExceptionData).endswith("chat not found"): Logger.error(f"Chat {ChatID} not found. May be bot not a member.")
+					if str(ExceptionData).endswith("chat not found"): LOGGER.error(f"Chat {ChatID} not found. May be bot not a member.")
 		
 		if Subscriptions == len(chats): IsSubscripted = True
 		

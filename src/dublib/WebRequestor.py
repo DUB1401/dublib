@@ -1,5 +1,6 @@
 from .Exceptions.WebRequestor import *
 from .Methods.Data import ToIterable
+from .Core import LOGS_HANDLER
 
 from typing import Any, Iterable
 from time import sleep
@@ -18,9 +19,9 @@ import httpx
 # >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
 #==========================================================================================#
 
-Logger = logging.getLogger(__name__)
-Logger.addHandler(logging.StreamHandler().setFormatter(logging.Formatter("[%(name)s] %(levelname)s: %(message)s")))
-Logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.addHandler(LOGS_HANDLER)
+LOGGER.setLevel(logging.INFO)
 
 #==========================================================================================#
 # >>>>> ПЕРЕЧИСЛЕНИЯ <<<<< #
@@ -1025,7 +1026,7 @@ class WebRequestor:
 		tries = 1 + self.__Config.retries
 		Response = WebResponse()
 		Try = 0
-		LibName = self.__Config.lib.value.upper()
+		LibName = self.__Config.lib.value
 		
 		while Try < tries and Response.status_code not in self.__Config.good_codes:
 			if Try > 0: sleep(self.__Config.delay)
@@ -1051,7 +1052,7 @@ class WebRequestor:
 
 			except Exception as ExceptionData:
 				Response.push_exception(ExceptionData)
-				if self.__Config.logging: Logger.error(f"[{LibName}-{request_type.name}] {ExceptionData}")
+				if self.__Config.logging: LOGGER.error(f"[{LibName}-{request_type.name}] {ExceptionData}")
 		
 		return Response
 
