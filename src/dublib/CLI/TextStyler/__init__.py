@@ -1,5 +1,4 @@
-from .Codes import BackgroundsColorsCodes, ColorsCodes, DecorationsCodes, DropsCodes
-from .Escapes import Decorations, Drops
+from . import Codes, Escapes
 
 from types import MappingProxyType
 from typing import Iterable
@@ -9,10 +8,10 @@ from typing import Iterable
 #==========================================================================================#
 
 _SupportedTags = MappingProxyType({
-	"b": (Decorations.Bold, Drops.DISABLE_BOLD),
-	"i": (Decorations.Italic, Drops.DISABLE_ITALIC),
-	"u": (Decorations.Underlined, Drops.DISABLE_UNDERLINED),
-	"s": (Decorations.Throughline, Drops.DISABLE_THROUGHLINED)
+	"b": (Escapes.Decorations.Bold, Escapes.Drops.DISABLE_BOLD),
+	"i": (Escapes.Decorations.Italic, Escapes.Drops.DISABLE_ITALIC),
+	"u": (Escapes.Decorations.Underlined, Escapes.Drops.DISABLE_UNDERLINED),
+	"s": (Escapes.Decorations.Throughline, Escapes.Drops.DISABLE_THROUGHLINED)
 })
 
 def GetStyledTextFromHTML(text: str) -> str:
@@ -45,19 +44,19 @@ class TextStyler:
 	#==========================================================================================#
 
 	@property
-	def decorations(self) -> tuple[DecorationsCodes] | None:
+	def decorations(self) -> tuple[Codes.Decorations] | None:
 		"""Набор кодов декораций."""
 
 		return self.__Decorations
 	
 	@property
-	def text_color(self) -> ColorsCodes | None:
+	def text_color(self) -> Codes.Colors | None:
 		"""Код цвета текста."""
 
 		return self.__TextColor
 	
 	@property
-	def background_color(self) -> BackgroundsColorsCodes | None:
+	def background_color(self) -> Codes.BackgroundsColors | None:
 		"""Код цвета фона."""
 
 		return self.__BackgroundColor
@@ -74,20 +73,20 @@ class TextStyler:
 
 	def __init__(
 			self,
-			decorations: DecorationsCodes | Iterable[DecorationsCodes] | None = None,
-			text_color: ColorsCodes | None = None,
-			background_color: BackgroundsColorsCodes | None = None,
+			decorations: Codes.Decorations | Iterable[Codes.Decorations] | None = None,
+			text_color: Codes.Colors | None = None,
+			background_color: Codes.BackgroundsColors | None = None,
 			autoreset: bool = True
 		):
 		"""
 		Стилизатор текста.
 
 		:param decorations: Код декорации или набор кодов декораций.
-		:type decorations: DecorationsCodes | Iterable[DecorationsCodes] | None
+		:type decorations: Codes.Decorations | Iterable[Codes.Decorations] | None
 		:param text_color: Код цвета текста.
-		:type text_color: ColorsCodes | None
+		:type text_color: Codes.Colors | None
 		:param background_color: Код цвета фона.
-		:type background_color: BackgroundsColorsCodes | None
+		:type background_color: Codes.BackgroundsColors | None
 		:param autoreset: Указывает, нужно ли добавить последовательность сброса стилей в конец строки.
 		:type autoreset: bool
 		"""
@@ -97,12 +96,12 @@ class TextStyler:
 		self.__BackgroundColor = background_color
 		self.__Autoreset = autoreset
 
-	def build_ansi_escape(self, codes: Iterable[BackgroundsColorsCodes | ColorsCodes | DecorationsCodes | DropsCodes]) -> str:
+	def build_ansi_escape(self, codes: Iterable[Codes.BackgroundsColors | Codes.Colors | Codes.Decorations | Codes.Drops]) -> str:
 		"""
 		Строит управляющую последовательность из кодов.
 
 		:param codes: Код ANSI или набор кодов из предоставляемых перечислений.
-		:type codes: Enum | Iterable[Enum]
+		:type codes: Iterable[Codes.BackgroundsColors | Codes.Colors | Codes.Decorations | Codes.Drops]
 		:return: Управляющая последовательность.
 		:rtype: str
 		"""
@@ -128,7 +127,7 @@ class TextStyler:
 		if self.__BackgroundColor: Codes.append(self.__BackgroundColor)
 		
 		text = self.build_ansi_escape(Codes) + text
-		if self.__Autoreset: text += Drops.RESET
+		if self.__Autoreset: text += Escapes.Drops.RESET
 
 		return text
 	
@@ -136,32 +135,32 @@ class TextStyler:
 	# >>>>> МЕТОДЫ УСТАНОВКИ СТИЛЕЙ <<<<< #
 	#==========================================================================================#
 
-	def set_decorations(self, decorations: DecorationsCodes | Iterable[DecorationsCodes] | None):
+	def set_decorations(self, decorations: Codes.Decorations | Iterable[Codes.Decorations] | None):
 		"""
 		Задаёт декорации.
 
 		:param decorations: Код декорации или набор кодов декораций.
-		:type decorations: DecorationsCodes | Iterable[DecorationsCodes] | None
+		:type decorations: Codes.Decorations | Iterable[Codes.Decorations] | None
 		"""
 
 		self.__Decorations = tuple(decorations) if decorations else None
 
-	def set_text_color(self, text_color: ColorsCodes | None):
+	def set_text_color(self, text_color: Codes.Colors | None):
 		"""
 		Задаёт цвет текста.
 
 		:param text_color: Код цвета текста.
-		:type text_color: ColorsCodes | None
+		:type text_color: Codes.Colors | None
 		"""
 
 		self.__TextColor = text_color
 
-	def set_background_color(self, background_color: BackgroundsColorsCodes | None):
+	def set_background_color(self, background_color: Codes.BackgroundsColors | None):
 		"""
 		Задаёт цвет фона.
 
 		:param background_color: Код цвета фона.
-		:type background_color: BackgroundsColorsCodes | None
+		:type background_color: Codes.BackgroundsColors | None
 		"""
 
 		self.__BackgroundColor = background_color

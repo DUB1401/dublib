@@ -1,6 +1,6 @@
 import enum
 
-class DropsCodes(enum.Enum):
+class Drops(enum.Enum):
 	"""Перечисление сбрасывающих кодов ANSI."""
 
 	RESET = 0
@@ -15,7 +15,7 @@ class DropsCodes(enum.Enum):
 	DISABLE_THROUGHLINED = 29
 	DISABLE_UPPERLINED = 29
 
-class ColorsCodes(enum.Enum):
+class Colors(enum.Enum):
 	"""Перечисление кодов цветов ANSI."""
 
 	Black = 30
@@ -35,7 +35,7 @@ class ColorsCodes(enum.Enum):
 	BrightCyan = 96
 	BrightWhite = 97
 
-class BackgroundsColorsCodes(enum.Enum):
+class BackgroundsColors(enum.Enum):
 	"""Перечисление кодов цветов фона ANSI."""
 
 	Black = 40
@@ -55,7 +55,7 @@ class BackgroundsColorsCodes(enum.Enum):
 	BrightCyan = 106
 	BrightWhite = 107
 
-class DecorationsCodes(enum.Enum):
+class Decorations(enum.Enum):
 	"""Перечисление кодов декораций ANSI."""
 
 	Bold = 1
