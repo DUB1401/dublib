@@ -1,4 +1,4 @@
-from .TextStyler import TextStyler
+from .TextStyler.FastStyler import FastStyler
 from ..Exceptions.CLI import *
 
 from typing import Any, Callable, Iterable
@@ -761,7 +761,7 @@ class Helper:
 		"""
 
 		MSG_Indent = indent or "  "
-		MSG_Name = TextStyler(self.__Terminalyzer.flags_indicator + flag.name).decorate.bold
+		MSG_Name = FastStyler(self.__Terminalyzer.flags_indicator + flag.name).decorate.bold
 		MSG_Description = f": {flag.description}" if flag.description else ""
 		Description = f"\n{MSG_Indent}    • [flag] {MSG_Name}{MSG_Description}"
 
@@ -775,7 +775,7 @@ class Helper:
 		"""
 
 		MSG_Indent = indent or "  "
-		MSG_Name = TextStyler(self.__Terminalyzer.keys_indicator + key.name).decorate.bold
+		MSG_Name = FastStyler(self.__Terminalyzer.keys_indicator + key.name).decorate.bold
 		MSG_Type = f" <{key.type.value}>"
 		MSG_Description = f": {key.description}" if key.description else ""
 		Description = f"\n{MSG_Indent}    • [key{MSG_Type}] {MSG_Name}{MSG_Description}"
@@ -799,7 +799,7 @@ class Helper:
 			PositionName = f"{Indent}Other parameters:"
 			Description = ""
 
-		Help += TextStyler(f"\n{PositionName}").decorate.bold + Description
+		Help += FastStyler(f"\n{PositionName}").decorate.bold + Description
 		
 		for CurrentArgument in position.arguments: Help += self.__BuildArgumentDescription(CurrentArgument, Indent)
 		for CurrentFlag in position.flags: Help += self.__BuildFlagDescription(CurrentFlag, Indent)
@@ -860,9 +860,9 @@ class Helper:
 			if CurrentCommand.name == command_name: CommandForHelp = CurrentCommand
 
 		if CommandForHelp:
-			Help = TextStyler(CommandForHelp.name).decorate.bold
+			Help = FastStyler(CommandForHelp.name).decorate.bold
 			Help += self.__GenerateCommandMap(CommandForHelp)
-			if CommandForHelp.description: Help += "\n" + TextStyler(CommandForHelp.description).decorate.italic
+			if CommandForHelp.description: Help += "\n" + FastStyler(CommandForHelp.description).decorate.italic
 			for Position in CommandForHelp.positions: Help += self.__BuildPositionDescription(Position)
 			# Проверка на наличие обязательной позиции и соответствующего пояснения.
 			if "*" in Help.split("\n")[0] and self.__Labels[HelpLabelsIndexes.IMPORTANT_NOTE]: Help += "\n" + self.__Labels[HelpLabelsIndexes.IMPORTANT_NOTE] or ""
@@ -911,11 +911,11 @@ class Helper:
 				HelpTable["Descriptions"].append(CurrentCommand.description or "")
 
 			TableObject = PrettyTable()
-			if len(CommandsCategories.keys()) > 1: TableObject.title = TextStyler(Category or self.__Labels[HelpLabelsIndexes.CATEGORY_OTHER]).decorate.bold
+			if len(CommandsCategories.keys()) > 1: TableObject.title = FastStyler(Category or self.__Labels[HelpLabelsIndexes.CATEGORY_OTHER]).decorate.bold
 			TableObject.set_style(PLAIN_COLUMNS)
 
 			for ColumnName in HelpTable.keys():
-				Buffer = TextStyler(ColumnName).decorate.bold
+				Buffer = FastStyler(ColumnName).decorate.bold
 				TableObject.add_column(Buffer, HelpTable[ColumnName])
 
 			TableObject.align = "l"

@@ -1,3 +1,4 @@
+from .FastStyler import FastStyler
 from . import Codes, Escapes
 
 from types import MappingProxyType
