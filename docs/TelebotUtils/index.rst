@@ -1,4 +1,5 @@
 TelebotUtils
 ============
 .. toctree::
+	Cache
 	Master

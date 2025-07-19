@@ -3,7 +3,7 @@ requires = ["setuptools"]
 
 [project]
 name = "dublib"
-version = "0.21.1"
+version = "0.22.0"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}
@@ -44,7 +44,8 @@ all = [
 	"pyTelegramBotAPI",
 	"pytest",
 	"Sphinx",
-	"sphinx-rtd-theme"
+	"sphinx-rtd-theme",
+	"tomli; python_version == \"3.10\""
 ]
 
 [project.urls]

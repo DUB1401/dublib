@@ -1,6 +1,8 @@
-import tomllib
 import sys
 import os
+
+try: import tomllib
+except ImportError: import tomli as tomllib
 
 work_dir = os.path.abspath("..")
 lib_data = None
