@@ -1,13 +1,15 @@
 from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
 from ..Exceptions.TelebotUtils import *
+from ..Methods.Data import ToIterable
 
 from datetime import datetime, timedelta
 from typing import Any, Iterable
 from os import PathLike
 import os
 
-from telebot.types import User
 import dateparser
+import telebot
+import orjson
 
 #==========================================================================================#
 # >>>>> УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ <<<<< #
@@ -46,13 +48,13 @@ class UserData:
 
 	@property
 	def is_chat_forbidden(self) -> bool:
-		"""Состояние: запретил ли пользователь бота."""
+		"""Состояние: может ли бот контактировать с пользователем."""
 		
 		return self.__Data["is_chat_forbidden"]
 
 	@property
 	def is_premium(self) -> bool:
-		"""Состояние: есть ли Premium-подписка у пользователя."""
+		"""Состояние: имеет ли пользователь Premium-подписку."""
 
 		return self.__Data["is_premium"]
 
@@ -63,8 +65,14 @@ class UserData:
 		return self.__Data["language"]
 
 	@property
+	def path(self) -> PathLike:
+		"""Путь к файлу пользователя."""
+
+		return self.__Path
+
+	@property
 	def permissions(self) -> tuple[str]:
-		"""Список прав доступа пользователя."""
+		"""Список прав пользователя."""
 
 		return tuple(self.__Data["permissions"])
 
@@ -88,7 +96,7 @@ class UserData:
 		:type key: str
 		"""
 
-		if type(flags) == str: flags = (flags,)
+		flags = ToIterable(flags)
 		IsChanged = False
 
 		for Flag in flags:
@@ -142,17 +150,17 @@ class UserData:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, storage_dir: PathLike, user_id: int):
+	def __init__(self, manager: "UsersManager", user_id: int):
 		"""
 		Данные пользователя.
 
-		:param storage_dir: Путь к каталогу хранения файлов пользователей.
-		:type storage_dir: PathLike
+		:param manager: Менеджер пользователей.
+		:type manager: UsersManager
 		:param user_id: ID пользователя.
 		:type user_id: int
 		"""
 
-		self.__StorageDirectory = NormalizePath(storage_dir)
+		self.__Manager = manager
 		self.__ID = user_id
 		self.__Data = {
 			"username": None,
@@ -168,34 +176,56 @@ class UserData:
 		}
 
 		self.__Objects = dict()
-		self.__Path = self.__StorageDirectory + f"/{user_id}.json"
+		self.__Path = f"{self.__Manager.storage_directory}/{user_id}.json"
 
 		if not os.path.exists(self.__Path): self.save()
 		else: self.refresh()
 
-	def add_flags(self, flags: list[str] | str):
+	def add_flags(self, flags: Iterable[str] | str):
 		"""
-		Устанавливает флаги для пользователя.
-			flags – флаги.
+		Добавляет флаги пользователю.
+
+		:param flags: Один или несколько флагов.
+		:type flags: Iterable[str] | str
 		"""
 
 		self.__AddFlags(flags, "flags")
 
-	def add_permissions(self, permissions: list[str] | str):
+	def add_permissions(self, permissions: Iterable[str] | str):
 		"""
-		Задаёт разрешения.
-			permissions – разрешения.
+		Добавляет права пользователю.
+
+		:param permissions: Одно или несколько прав.
+		:type permissions: Iterable[str] | str
 		"""
 
 		self.__AddFlags(permissions, "permissions")
 
-	def check_flags(self, flags: list[str] | str) -> bool:
+	def attach_object(self, key: str, object: Any, force: bool = True):
 		"""
-		Возвращает статус активации флагов.
-			flags – флаги.
+		Прикрепляет объект к пользователю. При перезапуске объект будет удалён.
+
+		:param key: Ключ объекта.
+		:type key: str
+		:param object: Прикрепляемый объект.
+		:type object: Any
+		:param force: Указывает, нужно ли перезаписывать уже существующий объект.
+		:type force: bool
+		"""
+		
+		if key not in self.__Objects.keys() or force: self.__Objects[key] = object
+
+	def check_flags(self, flags: Iterable[str] | str) -> bool:
+		"""
+		Проверяет, активированы ли для пользователя указанные флаги.
+
+		:param flags: Один или несколько флагов.
+		:type flags: Iterable[str] | str
+		:return: Возвращает `True`, если все флаги активированы.
+		:rtype: bool
 		"""
 
-		if type(flags) == str: flags = (flags,)
+		flags = ToIterable(flags)
 
 		for Flag in flags:
 			if Flag not in self.__Data["flags"]: return False
@@ -210,59 +240,82 @@ class UserData:
 
 	def get_object(self, key: str) -> Any:
 		"""
-		Возвращает объект Python из свойств пользователя.
-			key – ключ объекта.
+		Возвращает объект, прикреплённый к пользователю.
+
+		:param key: Ключ объекта.
+		:type key: str
+		:raise KeyError: Выбрасывается при отсутствии объекта с переданным ключом.
+		:return: Прикреплённый объект.
+		:rtype: Any
 		"""
 
 		return self.__Objects[key]
 
-	def get_property(self, key: str) -> Any:
+	def get_property(self, key: str, copy: bool = True) -> Any:
 		"""
 		Возвращает значение свойства пользователя. При наличии одинакового ключа в постоянных и временных свойствах, приоритет отдаётся временному.
 
 		:param key: Ключ свойства.
 		:type key: str
-		:raises KeyError: Выбрасывается при отсутствии свойства с указанным ключом.
+		:param copy: Указывает, нужно ли создавать копию ссылочных объектов для защиты данных. Не рекомендуется отключать, если свойство будет изменяться.
+		:type copy: bool
+		:raises KeyError: Выбрасывается при отсутствии свойства с переданным ключом.
 		:return: Значение свойства.
 		:rtype: Any
 		"""
 
-		if key in self.__Data["temp"].keys(): return self.__Data["temp"][key]
-		else: return self.__Data["data"][key]
+		Data = None
 
-	def has_permissions(self, permissions: list[str] | str) -> bool:
+		if key in self.__Data["temp"].keys(): Data = self.__Data["temp"][key]
+		else: Data = self.__Data["data"][key]
+
+		# Для изменяемых объектов создание копии через сериализацию (быстрее глубокого копирования).
+		if copy and type(Data) in (dict, list): Data = orjson.loads(orjson.dumps(Data))
+
+		return Data
+
+	def has_permissions(self, permissions: Iterable[str] | str) -> bool:
 		"""
-		Проверяет, имеет ли пользователь все перечисленные разрешения.
-			permissions – разрешения.
+		Проверяет, имеет ли пользователь все указанные права.
+
+		:param permissions: Одно или несколько прав.
+		:type permissions: Iterable[str] | str
+		:return: Возвращает `True`, если пользователь имеет все указанные права.
+		:rtype: bool
 		"""
 
-		if type(permissions) == str: permissions = [permissions]
-		IsOwned = True
+		permissions = ToIterable(permissions)
 
 		for Permission in permissions:
+			if Permission not in self.__Data["permissions"]: return False
 
-			if Permission not in self.__Data["permissions"]: IsOwned = False
-
-		return IsOwned
+		return True
 	
 	def has_object(self, key: str) -> bool:
 		"""
-		Проверяет, прикреплён ли к пользователю объект с таким ключом.
-			key – ключ объекта.
+		Проверяет, прикреплён ли к пользователю объект с переданным ключом.
+
+		:param key: Ключ объекта.
+		:type key: str
+		:return: Возвращает `True`, если объект с таким ключом найден.
+		:rtype: bool
 		"""
 
 		return key in self.__Objects.keys()
 
 	def has_property(self, key: str) -> bool:
 		"""
-		Проверяет, имеет ли пользователь свойство с таким ключом.
-			key – ключ свойства.
+		Проверяет, имеется ли у пользователя свойство с указанным ключом.
+
+		:param key: Ключ свойства.
+		:type key: str
+		:return: Возвращает `True`, если свойство с таким ключом найдено.
+		:rtype: bool
 		"""
 
-		IsExists = False
-		if key in self.__Data["data"].keys() or key in self.__Data["temp"].keys(): IsExists = True
+		if key in self.__Data["data"].keys() or key in self.__Data["temp"].keys(): return True
 
-		return IsExists
+		return False 
 
 	def refresh(self):
 		"""Считывает данные из файла пользователя и дополняет отсутствующие поля."""
@@ -279,31 +332,38 @@ class UserData:
 
 	def remove_object(self, key: str):
 		"""
-		Удаляет привязанный к пользователю объект.
-			key – ключ объекта.
+		Удаляет прикреплённый объект.
+
+		:param key: Ключ объекта.
+		:type key: str
+		:raise KeyError: Выбрасывается, если объект с указанным ключом не найден.
 		"""
 
 		del self.__Objects[key]
 
-	def remove_flags(self, flags: list[str] | str):
+	def remove_flags(self, flags: Iterable[str] | str):
 		"""
 		Удаляет флаги.
-			flags – флаги.
+
+		:param flags: Один или несколько флагов.
+		:type flags: Iterable[str] | str
 		"""
 
 		self.__RemoveFlags(flags, "flags")
 
-	def remove_permissions(self, permissions: list[str] | str):
+	def remove_permissions(self, permissions: Iterable[str] | str):
 		"""
-		Удаляет разрешения.
-			permissions – разрешения.
+		Удаляет права.
+
+		:param permissions: Одно или несколько прав.
+		:type permissions: Iterable[str] | str
 		"""
 
 		self.__RemoveFlags(permissions, "permissions")
 
 	def remove_property(self, key: str):
 		"""
-		Удаляет свойство пользователя. При поиске приоритет отдаётся постоянным свойствам.
+		Удаляет свойство пользователя. При поиске приоритет отдаётся постоянным свойствам, затем поиск осуществляется среди временных.
 
 		:param key: Ключ свойства.
 		:type key: str
@@ -336,8 +396,10 @@ class UserData:
 
 	def set_chat_forbidden(self, status: bool):
 		"""
-		Задаёт ожидаемый от пользователя тип данных.
-			status – состояние.
+		Задаёт состояние: может ли бот контактировать с пользователем.
+
+		:param status: Состояние.
+		:type status: bool
 		"""
 
 		self.__Data["is_chat_forbidden"] = status
@@ -345,47 +407,56 @@ class UserData:
 
 	def set_expected_type(self, type_name: str | None):
 		"""
-		Задаёт ожидаемый от пользователя тип данных.
-			type_name – название типа.
+		Задаёт название ожидаемого типа данных.
+
+		:param type_name: Название ожидаемого от пользователя типа данных.
+		:type type_name: str | None
 		"""
 
 		self.__Data["expected_type"] = type_name
 		self.save()
 
-	def set_object(self, key: str, object: Any):
-		"""
-		Сохраняет объект Python в оперативной памяти и привязывает его к текущему пользователю наподобие свойства.
-			key – ключ объекта;\n
-			object – объект.
-		"""
-		
-		if key not in self.__Objects.keys(): self.__Objects[key] = object
-
 	def set_property(self, key: str, value: Any, force: bool = True):
 		"""
 		Задаёт значение свойства пользователя.
-			key – ключ свойства;\n
-			value – значение;\n
-			force – указывает, необходимо ли перезаписывать значение уже существующего ключа.
+
+		:param key: Ключ свойства.
+		:type key: str
+		:param value: Значение свойства.
+		:type value: Any
+		:param force: Указывает, нужно ли перезаписывать уже существующее свойство.
+		:type force: bool
 		"""
 		
-		if key not in self.__Data["data"].keys(): self.__SetProperty("data", key, value)
-		elif key in self.__Data["data"].keys() and force: self.__SetProperty("data", key, value)
+		if key not in self.__Data["data"].keys() or force: self.__SetProperty("data", key, value)
 
-	def set_temp_property(self, key: str, value: Any):
+	def set_temp_property(self, key: str, value: Any, force: bool = True):
 		"""
-		Задаёт значение временного свойства пользователя.
-			key – ключ свойства;\n
-			value – значение.
+		Задаёт временное значение свойства пользователя.
+
+		Временные значения могут служить для поэтапного ввода данных или непродолжительного хранения информации. Как правило их следует очищать методом `clear_temp_properties()`.
+
+		:param key: Ключ свойства.
+		:type key: str
+		:param value: Значение свойства.
+		:type value: Any
+		:param force: Указывает, нужно ли перезаписывать уже существующее свойство.
+		:type force: bool
 		"""
 		
-		self.__SetProperty("temp", key, value)
+		if key not in self.__Data["temp"].keys() or force: self.__SetProperty("temp", key, value)
 
-	def update(self, user: User, is_chat_forbidden: bool | None = None):
+	def update(self, user: telebot.types.User, is_chat_forbidden: bool | None = None):
 		"""
-		Обновляет данные пользователя (язык, Premium подписка, ник, запрещён ли чат) из его структуры.
+		Обновляет данные пользователя (язык, наличие подписки, ник) из его структуры Telegram.
 			user – объект представления пользователя;\n
 			is_chat_forbidden – указывает, заблокировал ли пользователь бота.
+
+		:param user: Структура данных пользователя Telegram.
+		:type user: telebot.types.User
+		:param is_chat_forbidden: Состояние: может ли бот контактировать с пользователем. Если указать `None`, обновление состояния не произойдёт.
+		:type is_chat_forbidden: bool | None
+		:raises IncorrectUserToUpdate: Выбрасывается при передаче несоответствующей по ID структуры.
 		"""
 
 		if user.id == self.__ID:
@@ -398,7 +469,12 @@ class UserData:
 		else: raise IncorrectUserToUpdate()
 
 	def update_acitivity(self) -> datetime:
-		"""Обновляет дату последней активности пользователя."""
+		"""
+		Обновляет дату и время последней активности пользователя.
+
+		:return: Дата и время последней активности пользователя.
+		:rtype: datetime
+		"""
 
 		self.__Data["last_activity"] = datetime.now()
 		self.save()
@@ -418,7 +494,7 @@ class UsersManager:
 
 	@property
 	def premium_users(self) -> tuple[UserData]:
-		"""Список пользователей с Premium подпиской."""
+		"""Последовательность пользователей с Premium-подпиской."""
 
 		PremiumUsers = list()
 
@@ -428,13 +504,16 @@ class UsersManager:
 		return tuple(PremiumUsers)
 
 	@property
+	def storage_directory(self) -> PathLike:
+		"""Путь к каталогу файлов пользователей."""
+
+		return self.__StorageDirectory
+
+	@property
 	def users(self) -> tuple[UserData]:
-		"""Список пользователей."""
+		"""Последовательность всех пользователей."""
 
-		Users = list()
-		for UserID in self.__Users.keys(): Users.append(self.__Users[UserID])
-
-		return tuple(Users)
+		return tuple(self.__Users.values())
 
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
@@ -448,52 +527,56 @@ class UsersManager:
 
 		for File in Files:
 			UserID = int(File.replace(".json", ""))
-			self.__Users[UserID] = UserData(self.__StorageDirectory, UserID)
+			self.__Users[UserID] = UserData(self, UserID)
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, directory: str):
+	def __init__(self, storage_directory: PathLike):
 		"""
 		Менеджер пользователей.
-			dir – путь к директории хранения данных.
+
+		:param storage_directory: Путь к каталог файлов пользователей. Директория создаётся автоматически.
+		:type storage_directory: PathLike
 		"""
 
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
-		self.__Users: dict[int, UserData] = dict()
-		self.__StorageDirectory = NormalizePath(directory)
+		self.__StorageDirectory = NormalizePath(storage_directory)
 
-		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
-		self.__LoadUsers()
-
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
 		self.__Users: dict[int, UserData] = dict()
-		self.__StorageDirectory = NormalizePath(directory)
 
 		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
 		self.__LoadUsers()
 
 	def __getitem__(self, user_id: int) -> UserData:
 		"""
-		Возвращает объект данных пользователя.
-			user_id – ID пользователя.
+		Возвращает данные пользователя.
+
+		:param user_id: ID пользователя.
+		:type user_id: int
+		:raise KeyError: Выбрасывается при отсутствии данных для пользователя с указанным ID.
+		:return: Данные пользователя.
+		:rtype: UserData
 		"""
 
 		return self.get_user(user_id)
 
-	def auth(self, user: User, update_activity: bool = True) -> UserData:
+	def auth(self, user: telebot.types.User, update_activity: bool = True) -> UserData:
 		"""
-		Выполняет идентификацию и обновление данных существующего пользователя или создаёт локальный файл для нового.
-			user – структура описания пользователя Telegram;\n
-			update_activity – указывает, нужно ли обновлять активность пользователя.
+		Выполняет авторизацию пользователя в системе.
+
+		:param user: Структуры данных пользователя Telegram.
+		:type user: telebot.types.User
+		:param update_activity: Указывает, нужно ли обновить дату и время последней активности пользователя.
+		:type update_activity: bool
+		:raises ValueError: Выбрасывается при передаче неверного типа структуры данных пользователя.
+		:return: Данные пользователя.
+		:rtype: UserData
 		"""
 		
-		if type(user) != User: raise ValueError("User object expected, not " + str(type(user)) + ".")
-		CurrentUser = None
-		if user.id not in self.__Users.keys():self.__Users[user.id] = UserData(self.__StorageDirectory, user.id)
+		if type(user) != telebot.types.User: raise ValueError(f"telebot.types.User object expected, not {type(user)}.")
+
+		if user.id not in self.__Users.keys():self.__Users[user.id] = UserData(self, user.id)
 		self.__Users[user.id].update(user)
 		CurrentUser = self.__Users[user.id]
 		if CurrentUser.is_chat_forbidden: CurrentUser.set_chat_forbidden(False)
@@ -515,8 +598,12 @@ class UsersManager:
 
 	def get_active_users(self, hours: int = 24) -> tuple[UserData]:
 		"""
-		Возвращает последовательность пользователей, для которых обнавлялась активность за последние N часов.
-			hours – количество часов.
+		Возвращает последовательность пользователей, для которых активных за последние N часов.
+
+		:param hours: Количество часов для проверки активности. По умолчанию 24.
+		:type hours: int
+		:return: Последовательность данных пользователей.
+		:rtype: tuple[UserData]
 		"""
 
 		Now = datetime.now()
@@ -525,22 +612,51 @@ class UsersManager:
 
 		return tuple(Users)
 
-	def get_user(self, user_id: int | str) -> UserData:
+	def get_user(self, user_id: int) -> UserData:
 		"""
-		Возвращает объект данных пользователя.
-			user_id – ID пользователя.
+		Возвращает данные пользователя.
+
+		:param user_id: ID пользователя.
+		:type user_id: int
+		:raise KeyError: Выбрасывается при отсутствии данных для пользователя с указанным ID.
+		:return: Данные пользователя.
+		:rtype: UserData
 		"""
 		
-		return self.__Users[int(user_id)]
+		return self.__Users[user_id]
 
-	def get_users(self, include_permissions: list[str] | str | None = None, exclude_permissions: list[str] | str | None = None) -> list[UserData]:
+	def get_users(
+			self,
+			last_activity: int | None = None,
+			premium: bool | None = None,
+			include_permissions: Iterable[str] | str | None = None,
+			exclude_permissions: Iterable[str] | str | None = None
+		) -> tuple[UserData]:
 		"""
-		Возвращает список пользователей, подходящих под переданные фильтры. По умолчанию возвращает список всех пользователей.
-			include_permissions – разрешения, которыми должен обладать пользователь;\n
-			exclude_permissions – разрешения, которых у пользователя быть не должно.
+		Возвращает последовательность пользователей, удовлетворяющих переданным фильтрам. При передаче `None` фильтр игнорируется.
+
+		:param last_activity: Количество часов для проверки активности.
+		:type last_activity: int | None
+		:param premium: Состояние Premium-подписки пользователя.
+		:type premium: bool | None
+		:param include_permissions: Набор прав или право, которое должно иметься.
+		:type include_permissions: Iterable[str] | str | None
+		:param exclude_permissions: Набор прав или право, которого быть не должно.
+		:type exclude_permissions: Iterable[str] | str | None
+		:return: Последовательность данных пользователей.
+		:rtype: tuple[UserData]
 		"""
 
 		Users = self.users
+		if last_activity: Users = self.get_active_users(last_activity)
+
+		if premium != None:
+			Buffer = list()
+
+			for User in Users: 
+				if User.is_premium == premium: Buffer.append(User)
+
+			Users = Buffer
 
 		if include_permissions:
 			Buffer = list()
@@ -558,12 +674,16 @@ class UsersManager:
 
 			Users = Buffer
 
-		return Users
+		return tuple(Users)
 	
 	def is_user_exists(self, user_id: int) -> bool:
 		"""
-		Проверяет наличие пользователя с переданным идентификатором в базе данных.
-			user_id – ID пользователя.
+		Проверяет, зарегестрирован ли пользователь в системе.
+
+		:param user_id: ID пользователя.
+		:type user_id: int
+		:return: Возвращает `True`, если данные пользователя обнаружены.
+		:rtype: bool
 		"""
 
 		return user_id in self.__Users.keys()
@@ -572,10 +692,12 @@ class UsersManager:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ МАССОВОГО РЕДАКТИРОВАНИЯ ПОЛЬЗОВАТЕЛЕЙ <<<<< #
 	#==========================================================================================#
 
-	def add_flags(self, flags: list[str] | str):
+	def add_flags(self, flags: Iterable[str] | str):
 		"""
 		Добавляет флаги для всех пользователей.
-			flags – флаги.
+
+		:param flags: Один или несколько флагов.
+		:type flags: Iterable[str] | str
 		"""
 
 		for User in self.__Users.values(): User.add_flags(flags)
@@ -585,36 +707,46 @@ class UsersManager:
 
 		for User in self.__Users.values(): User.clear_temp_properties()
 
-	def remove_flags(self, flags: list[str] | str):
+	def remove_flags(self, flags: Iterable[str] | str):
 		"""
 		Удаляет флаги у всех пользователей.
-			flags – флаги.
+
+		:param flags: Один или несколько флагов.
+		:type flags: Iterable[str] | str
 		"""
 
 		for User in self.__Users.values(): User.remove_flags(flags)
 
 	def remove_permissions(self, permissions: list[str] | str):
 		"""
-		Удаляет разрешения у всех пользователей.
-			permissions – разрешения.
+		Удаляет права у всех пользователей.
+
+		:param permissions: Одно или несколько прав.
+		:type permissions: Iterable[str] | str
 		"""
 
 		for User in self.__Users.values(): User.remove_permissions(permissions)
 
 	def remove_property(self, key: str):
 		"""
-		Удаляет свойство для всех пользователей.
-			key – ключ свойства.
+		Удаляет свойство у всех пользователей.
+
+		:param key: Ключ свойства.
+		:type key: str
 		"""
 
 		for User in self.__Users.values(): User.remove_property(key)
 
 	def set_property(self, key: str, value: Any, force: bool = True):
 		"""
-		Задаёт значение свойства для всех пользователей.
-			key – ключ свойства;\n
-			value – значение;\n
-			force – указывает, необходимо ли перезаписывать значение уже существующего ключа.
+		Задаёт свойство для всех пользователей.
+
+		:param key: Ключ свойства.
+		:type key: str
+		:param value: Значение свойства.
+		:type value: Any
+		:param force: Указывает, нужно ли перезаписывать уже существующее свойство.
+		:type force: bool
 		"""
 
 		for User in self.__Users.values(): User.set_property(key, value, force)

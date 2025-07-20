@@ -3,6 +3,8 @@ name: Run Tests
 on:
   workflow_dispatch:
   push:
+    tags-ignore:
+      - "**"
     paths:
       - "src/dublib/Methods/Data.py"
       - "src/dublib/Polyglot/**"
