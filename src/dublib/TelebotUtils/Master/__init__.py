@@ -89,6 +89,8 @@ class TeleMaster:
 
 				except Exception as ExceptionData:
 					if str(ExceptionData).endswith("chat not found"): LOGGER.error(f"Chat {ChatID} not found. May be bot not a member.")
+
+				else: break
 		
 		if Subscriptions == len(chats): IsSubscripted = True
 		
