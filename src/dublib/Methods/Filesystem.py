@@ -8,6 +8,7 @@ import json
 import os
 
 import orjson
+import yaml
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ФАЙЛАМИ И ДИРЕКТОРИЯМИ <<<<< #
@@ -109,6 +110,35 @@ def WriteJSON(path: PathLike, data: dict, pretty: bool = True):
 	else:
 		Content: bytes = orjson.dumps(data)
 		with open(path, "wb") as FileWriter: FileWriter.write(Content)
+
+#==========================================================================================#
+# >>>>> ФУНКЦИИ РАБОТЫ С YAML <<<<< #
+#==========================================================================================#
+
+def ReadYAML(path: PathLike) -> dict:
+	"""
+	Считывает файл YAML и десириализует его в словарь.
+
+	:param path: Путь к файлу.
+	:type path: PathLike
+	:return: Словарное представление данных YAML.
+	:rtype: dict
+	:raises FileNotFoundError: Выбрасывается при отсутствии файла.
+	"""
+
+	with open(path, "r") as FileReader: return yaml.safe_load(FileReader)
+
+def WriteYAML(path: PathLike, data: dict):
+	"""
+	Записывает файл YAML.
+
+	:param path: Путь к файлу.
+	:type path: PathLike
+	:param data: Словарь для сериализации в YAML.
+	:type data: dict
+	"""
+
+	with open(path, "w") as FileWriter: yaml.dump(data, FileWriter, allow_unicode = True, sort_keys = False)
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ТЕКСТОВЫМИ ФАЙЛАМИ <<<<< #
