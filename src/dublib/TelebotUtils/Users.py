@@ -1,5 +1,5 @@
 from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
-from ..Methods.Data import CopyDictionary, ToIterable
+from ..Methods.Data import Copy, ToIterable
 from ..Exceptions.TelebotUtils import *
 
 from datetime import datetime, timedelta
@@ -270,7 +270,7 @@ class UserData:
 		else: Data = self.__Data["data"][key]
 
 		# Для изменяемых объектов создание копии через сериализацию (быстрее глубокого копирования).
-		if copy and type(Data) in (dict, list): Data = CopyDictionary(Data)
+		if copy and type(Data) in (dict, list): Data = Copy(Data)
 
 		return Data
 

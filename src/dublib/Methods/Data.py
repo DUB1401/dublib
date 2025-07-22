@@ -8,6 +8,21 @@ import orjson
 # >>>>> ФУНКЦИИ ПРЕОБРАЗОВАНИЯ ТИПОВ ДАННЫХ <<<<< #
 #==========================================================================================#
 
+def Copy(data: Any) -> Any:
+	"""
+	Выполняет глубокое копирование объекта с автоматическим определением наилучшего метода.
+	
+	Объекты, которые могут быть сериализованы в JSON (`dict`, `list`, `tuple`), копируются с помощью десериализации/сериализации библиотекой **orjson**. В остальных случаях вызывается `copy.deepcopy()`.
+
+	:param data: Копируемый объект.
+	:type data: Any
+	:return: Копия объекта.
+	:rtype: Any
+	"""
+
+	try: return orjson.loads(orjson.dumps(data))
+	except: return copy.deepcopy(data)
+
 def ToIterable(value: Any, iterable_type: Iterable = tuple, exclude: tuple[Iterable] = (bytes, str)) -> Iterable:
 	"""
 	Преобразует значение в итерируемый тип.
@@ -121,21 +136,6 @@ def IsNotAlpha(text: str) -> bool:
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ СО СЛОВАРЯМИ <<<<< #
 #==========================================================================================#
-
-def CopyDictionary(dictionary: dict) -> dict:
-	"""
-	Выполняет глубокое копирование словаря с автоматическим определением наилучшего метода.
-	
-	Словари, которые могут быть сериализованы в JSON, копируются с помощью десериализации/сериализации с помощью **orjson**. В остальных случаях вызывается `copy.deepcopy()`.
-
-	:param dictionary: Копируемый словарь. Всё содержимое должно быть сериализуемым в JSON.
-	:type dictionary: dict
-	:return: Копия словаря.
-	:rtype: dict
-	"""
-
-	try: return orjson.loads(orjson.dumps(dictionary))
-	except: return copy.deepcopy(dictionary)
 
 def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwrite: bool = False) -> dict:
 	"""
