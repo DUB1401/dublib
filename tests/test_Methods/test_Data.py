@@ -1,5 +1,11 @@
 from dublib.Methods import Data
 
+def test_Copy():
+	Dictionary = {"test": [1]}
+	Copy = Data.Copy(Dictionary)
+	assert Copy is not Dictionary
+	assert Copy["test"] is not Dictionary["test"]
+
 def test_ToIterable():
 	assert Data.ToIterable("test") == ("test",)
 	assert Data.ToIterable(["test"]) == ["test"]
