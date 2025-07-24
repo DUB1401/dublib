@@ -3,6 +3,7 @@ from .Data import ToIterable
 from typing import Iterable
 from pathlib import Path
 from os import PathLike
+import random
 import shutil
 import json
 import os
@@ -13,6 +14,23 @@ import yaml
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ФАЙЛАМИ И ДИРЕКТОРИЯМИ <<<<< #
 #==========================================================================================#
+
+def GetRandomFile(directory: PathLike) -> PathLike | None:
+	"""
+	Выбирает случайный файл из каталога.
+
+	:param directory: Путь к каталогу.
+	:type directory: PathLike
+	:raise FileNotFoundError: Выбрасывается, если каталог не существует.
+	:return: Путь к случайному файлу в каталоге по стандарту POSIX или `None`, если каталог пустой.
+	:rtype: PathLike
+	"""
+
+	directory = NormalizePath(directory)
+	Files = ListDir(directory)
+	if not Files: return
+
+	return f"{directory}/" + random.choice(Files)
 
 def ListDir(path: PathLike | None = None) -> list[str]:
 	"""
