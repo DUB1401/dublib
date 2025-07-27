@@ -2,14 +2,13 @@ from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
 from ..Methods.Data import Copy, ToIterable
 from ..Exceptions.TelebotUtils import *
 
+from typing import Any, Iterable, Literal
 from datetime import datetime, timedelta
-from typing import Any, Iterable
 from os import PathLike
 import os
 
 import dateparser
 import telebot
-import orjson
 
 #==========================================================================================#
 # >>>>> УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ <<<<< #
@@ -130,19 +129,20 @@ class UserData:
 
 		if IsChanged: self.save()
 
-	def __SetProperty(self, property_type: str, key: str, value: Any):
+	def __SetProperty(self, property_type: Literal["data", "temp"], key: str, value: Any):
 		"""
 		Задаёт свойство пользователя.
 
-		:param property_type: Тип свойства: *data* или *temp*.
-		:type property_type: str
+		:param property_type: Тип свойства.
+		:type property_type: Literal["data", "temp"]
 		:param key: Ключ, под который помещаются данные.
 		:type key: str
-		:param value: Помещаемые данные.
+		:param value: Сохраняемые данные. Для изменяемых типов создаётся глубокая копия.
 		:type value: Any
 		"""
 
-		if key in self.__Data[property_type].keys() and self.__Data[property_type][key] == value: return
+		if type(value) in (dict, list): value = Copy(value)
+		if key in self.__Data[property_type] and self.__Data[property_type][key] == value: return
 		self.__Data[property_type][key] = value
 		self.save()
 
