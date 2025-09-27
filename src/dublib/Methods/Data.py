@@ -1,4 +1,4 @@
-from typing import Any, Iterable
+from typing import Any, Type, Iterable
 
 import copy
 
@@ -23,16 +23,16 @@ def Copy(data: Any) -> Any:
 	try: return orjson.loads(orjson.dumps(data))
 	except: return copy.deepcopy(data)
 
-def ToIterable(value: Any, iterable_type: Iterable = tuple, exclude: tuple[Iterable] = (bytes, str)) -> Iterable:
+def ToIterable(value: Any, iterable_type: Type[Iterable] = tuple, exclude: tuple[Type[Iterable], ...] = (bytes, str)) -> Iterable:
 	"""
 	Преобразует значение в итерируемый тип.
 
 	:param value: Обрабатываемое значение.
 	:type value: Any
 	:param iterable_type: Целевой тип итерируемого контейнера. По умолчанию `tuple`.
-	:type iterable_type: Iterable
+	:type iterable_type: Type[Iterable]
 	:param exclude: Типы-исключения, условно считающиеся неитерируемыми. По умолчанию `bytes`, `str`.
-	:type exclude: tuple[Iterable]
+	:type exclude: tuple[Type[Iterable], ...]
 	:return: Приведённое к итерируемому типу значению.
 	:rtype: Iterable
 	"""
