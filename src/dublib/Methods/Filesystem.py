@@ -179,7 +179,7 @@ def ReadTextFile(path: PathLike, split: bool = False, strip: bool = False) -> st
 
 	Text = None
 	with open(path, encoding = "utf-8") as FileReader: Text = FileReader.read()
-	if split: Text = Text.split(split)
+	if split: Text = Text.split("\n")
 
 	if strip:
 		if type(Text) == str: Text = Text.strip()
