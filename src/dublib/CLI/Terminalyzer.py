@@ -880,7 +880,7 @@ class Helper:
 
 		#---> Получение данных.
 		#==========================================================================================#
-		CommandsCategories = {
+		CommandsCategories: dict[None | str, list[Command]] = {
 			None: []
 		}
 
@@ -906,7 +906,9 @@ class Helper:
 				"Descriptions": []
 			}
 
-			for CurrentCommand in CommandsCategories[Category]:
+			Commands = sorted(CommandsCategories[Category], key = lambda Element: Element.name)
+
+			for CurrentCommand in Commands:
 				HelpTable["Commands"].append("  " + CurrentCommand.name)
 				HelpTable["Descriptions"].append(CurrentCommand.description or "")
 
@@ -919,8 +921,7 @@ class Helper:
 				TableObject.add_column(Buffer, HelpTable[ColumnName])
 
 			TableObject.align = "l"
-			TableString += TableObject.get_string(header = False)
-			if len(CommandsCategories.keys()) > 1: TableString = TableString.lstrip()
+			TableString += TableObject.get_string(header = False).strip()
 			TableString += "\n\n"
 
 		self.__Callback(TableString.rstrip())
