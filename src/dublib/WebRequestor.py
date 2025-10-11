@@ -564,6 +564,12 @@ class WebResponse:
 		return self.__JSON
 
 	@property
+	def ok(self) -> bool:
+		"""Состояние: можно ли считать запрос успешным."""
+
+		return self.status_code in self.__GoodCodes
+
+	@property
 	def status_code(self) -> int | None:
 		"""Код ответа."""
 
@@ -596,14 +602,21 @@ class WebResponse:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self):
+	def __init__(self, config: WebConfig | None = None):
 		"""Унифицированный контейнер ответа на веб-запросы."""
+
+		self.__GoodCodes = config.good_codes or WebConfig().good_codes
 
 		self.__StatusCode = None
 		self.__Content = None
 		self.__JSON = None
 		self.__Text = None
 		self.__Exceptions = list()
+
+	def __bool__(self) -> bool:
+		"""Интерпретирует ответ в логическое значение: успешен ли запрос."""
+
+		return self.ok
 
 	def __str__(self) -> str:
 		"""Интерпретирует ответ в строку."""
@@ -724,10 +737,12 @@ class WebRequestor:
 	# >>>>> МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ CURL_CFFI <<<<< #
 	#==========================================================================================#
 
-	def __curl_cffi_GET(self, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> curl_cffi_requests.Response:
+	def __curl_cffi_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> curl_cffi_requests.Response:
 		"""
 		Отправляет GET запрос через библиотеку **curl_cffi**.
 
+		:param response: Контейнер ответа.
+		:type response: WebResponse
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
@@ -742,10 +757,9 @@ class WebRequestor:
 		:rtype: requests.Response
 		"""
 
-		Response = WebResponse()
 		headers = self.__MergeHeaders(headers)
 			
-		Response.parse_response(self.__Session.get(
+		response.parse_response(self.__Session.get(
 			url = url,
 			params = params,
 			headers = headers,
@@ -754,12 +768,14 @@ class WebRequestor:
 			verify = self.__Config.verify_ssl
 		))
 
-		return Response
+		return response
 
-	def __curl_cffi_POST(self, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> curl_cffi_requests.Response:
+	def __curl_cffi_POST(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> curl_cffi_requests.Response:
 		"""
 		Отправляет POST запрос через библиотеку **curl_cffi**.
 
+		:param response: Контейнер ответа.
+		:type response: WebResponse
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
@@ -778,10 +794,9 @@ class WebRequestor:
 		:rtype: requests.Response
 		"""
 
-		Response = WebResponse()
 		headers = self.__MergeHeaders(headers)
 
-		Response.parse_response(self.__Session.post(
+		response.parse_response(self.__Session.post(
 			url = url,
 			params = params,
 			headers = headers,
@@ -792,16 +807,18 @@ class WebRequestor:
 			verify = self.__Config.verify_ssl
 		))
 
-		return Response
+		return response
 	
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ HTTPX <<<<< #
 	#==========================================================================================#
 
-	def __httpx_GET(self, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> httpx.Response:
+	def __httpx_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> httpx.Response:
 		"""
 		Отправляет GET запрос через библиотеку **httpx**.
 
+		:param response: Контейнер ответа.
+		:type response: WebResponse
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
@@ -816,7 +833,6 @@ class WebRequestor:
 		:rtype: requests.Response
 		"""
 
-		Response = WebResponse()
 		headers = self.__MergeHeaders(headers)
 		CurrentCookies = self.cookies or dict()
 		cookies = cookies or dict()
@@ -831,14 +847,16 @@ class WebRequestor:
 			verify = self.__Config.verify_ssl
 		)
 
-		Response.parse_response(self.__Session.get(url))
+		response.parse_response(self.__Session.get(url))
 
-		return Response
+		return response
 
-	def __httpx_POST(self, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> httpx.Response:
+	def __httpx_POST(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> httpx.Response:
 		"""
 		Отправляет POST запрос через библиотеку **httpx**.
 
+		:param response: Контейнер ответа.
+		:type response: WebResponse
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
@@ -857,7 +875,6 @@ class WebRequestor:
 		:rtype: requests.Response
 		"""
 
-		Response = WebResponse()
 		headers = self.__MergeHeaders(headers)
 		CurrentCookies = self.cookies or dict()
 		cookies = cookies or dict()
@@ -874,18 +891,20 @@ class WebRequestor:
 			verify = self.__Config.verify_ssl
 		)
 
-		Response.parse_response(self.__Session.post(url, data = data, json = json))
+		response.parse_response(self.__Session.post(url, data = data, json = json))
 
-		return Response
+		return response
 	
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ REQUESTS <<<<< #
 	#==========================================================================================#
 
-	def __requests_GET(self, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> requests.Response:
+	def __requests_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> requests.Response:
 		"""
 		Отправляет GET запрос через библиотеку **requests**.
 
+		:param response: Контейнер ответа.
+		:type response: WebResponse
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
@@ -900,10 +919,9 @@ class WebRequestor:
 		:rtype: requests.Response
 		"""
 		
-		Response = WebResponse()
 		headers = self.__MergeHeaders(headers)
 
-		Response.parse_response(self.__Session.get(
+		response.parse_response(self.__Session.get(
 			url = url,
 			params = params,
 			headers = headers,
@@ -913,12 +931,14 @@ class WebRequestor:
 			verify = self.__Config.verify_ssl
 		))
 
-		return Response
+		return response
 	
-	def __requests_POST(self, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> requests.Response:
+	def __requests_POST(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> requests.Response:
 		"""
 		Отправляет POST запрос через библиотеку **requests**.
 
+		:param response: Контейнер ответа.
+		:type response: WebResponse
 		:param url: Адрес запроса.
 		:type url: str
 		:param proxy: Данные прокси.
@@ -937,10 +957,9 @@ class WebRequestor:
 		:rtype: requests.Response
 		"""
 
-		Response = WebResponse()
 		headers = self.__MergeHeaders(headers)
 
-		Response.parse_response(self.__Session.get(
+		response.parse_response(self.__Session.get(
 			url = url,
 			params = params,
 			headers = headers,
@@ -952,7 +971,7 @@ class WebRequestor:
 			verify = self.__Config.verify_ssl
 		))
 
-		return Response
+		return response
 		
 	#==========================================================================================#
 	# >>>>> ОБЩИЕ МЕТОДЫ <<<<< #
@@ -1024,17 +1043,17 @@ class WebRequestor:
 		"""
 
 		tries = 1 + self.__Config.retries
-		Response = WebResponse()
+		Response = WebResponse(self.__Config)
 		Try = 0
 		LibName = self.__Config.lib.value
 		
-		while Try < tries and Response.status_code not in self.__Config.good_codes:
+		while Try < tries and not Response.ok:
 			if Try > 0: sleep(self.__Config.delay)
 			Try += 1
 			
 			try:
 				CurrentProxy = random.choice(self.__Proxies) if self.__Proxies else None
-				Response: WebResponse = self.__RequestsMethods[request_type][self.__Config.lib](url, CurrentProxy, **kwargs)
+				self.__RequestsMethods[request_type][self.__Config.lib](Response, url, CurrentProxy, **kwargs)
 				
 				#---> Переключение HTTP/HTTPS протоколов прокси при неудачном запросе.
 				#==========================================================================================#
@@ -1047,7 +1066,7 @@ class WebRequestor:
 							case Protocols.HTTP: CurrentProxy.set_protocol(Protocols.HTTPS)
 							case Protocols.HTTPS: CurrentProxy.set_protocol(Protocols.HTTP)
 
-						NewResponse: WebResponse = self.__RequestsMethods[request_type][self.__Config.lib](url, CurrentProxy, **kwargs)
+						NewResponse: WebResponse = self.__RequestsMethods[request_type][self.__Config.lib](NewResponse, url, CurrentProxy, **kwargs)
 						if NewResponse.status_code in self.__Config.good_codes: Response = NewResponse
 
 			except Exception as ExceptionData:
