@@ -22,7 +22,7 @@ dependencies = [
 	"requests",
 	"pyyaml",
 	"pydantic",
-	"gnureadline; sys_platform == \"linux\"",
+	"gnureadline; sys_platform == \"linux\" and pythonversion < \"3.14\"",
 	"pyreadline3; sys_platform == \"win32\""
 ]
 classifiers = [
