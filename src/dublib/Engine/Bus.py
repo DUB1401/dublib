@@ -126,10 +126,10 @@ class ExecutionStatus:
 	#==========================================================================================#
 
 	@code.setter
-	def code(self, new_code: int):
+	def code(self, new_code: int | None):
 		"""Код выполнения."""
 
-		self._Code = int(new_code)
+		self._Code = new_code
 	
 	@value.setter
 	def value(self, new_value: Any) -> Any:
