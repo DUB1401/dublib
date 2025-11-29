@@ -1,3 +1,5 @@
+from ...Methods.Data import ToIterable
+
 from .FastStyler import FastStyler
 from . import Codes, Escapes
 
@@ -92,7 +94,7 @@ class TextStyler:
 		:type autoreset: bool
 		"""
 
-		self.__Decorations = tuple(decorations) if decorations else None
+		self.__Decorations = ToIterable(decorations) if decorations else None
 		self.__TextColor = text_color
 		self.__BackgroundColor = background_color
 		self.__Autoreset = autoreset

@@ -1,5 +1,5 @@
 from ..CLI.Templates.Bus import GenerateMessage, MessagesTypes, PrintMessage
-from ..CLI.TextStyler import TextStyler
+from ..CLI.TextStyler import Codes, TextStyler
 
 from typing import Any
 
@@ -214,15 +214,14 @@ class ExecutionStatus:
 		"""Возвращает текстовое представление статуса."""
 
 		Status = str()
-		Status += TextStyler("Code:").decorate.bold + " " + str(self._Code) + "\n"
-		Status += TextStyler("Value:").decorate.bold + " " + str(self._Value) + "\n"
+		Bolder = TextStyler(Codes.Decorations.Bold)
+		Status += Bolder.get_styled_text("Code:") + f" {self._Code}\n"
+		Status += Bolder.get_styled_text("Value:") + f" {self._Value}\n"
 
-		if self._Data: Status += TextStyler("Data:").decorate.bold + "\n"
-		for Key in self._Data: Status += "    " + str(Key) + ": " + str(self._Data[Key]) + "\n"
-
-		if self._Messages: Status += TextStyler("Messages:").decorate.bold + "\n"
-
-		for Message in self._Messages: Status += "    " + str(Message) + "\n"
+		if self._Data: Status += Bolder.get_styled_text("Data:") + "\n"
+		for Key in self._Data: Status += f"    {Key}: " + str(self._Data[Key]) + "\n"
+		if self._Messages: Status += Bolder.get_styled_text("Messages:") + "\n"
+		for Message in self._Messages: Status += f"    {Message}\n"
 
 		return Status.rstrip()
 
