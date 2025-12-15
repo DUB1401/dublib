@@ -325,11 +325,7 @@ class UserData:
 		for Key in self.__Data.keys():
 			if Key not in Data.keys(): Data[Key] = self.__Data[Key]
 
-		if Data["last_activity"]:
-			Date = dateparser.parse(Data["last_activity"])
-			if Date: Data["last_activity"] = Date.replace(tzinfo = None)
-			
-		else: self.update_acitivity()
+		if Data.get("last_activity"): Data["last_activity"] = dateparser.parse(Data["last_activity"]).replace(tzinfo = None)
 		
 		self.__Data = Data
 
@@ -394,7 +390,7 @@ class UserData:
 		"""Записывает данные пользователя в локальный файл."""
 
 		Data = self.__Data.copy()
-		Data["last_activity"] = str(Data["last_activity"])
+		Data["last_activity"] = str(Data["last_activity"]) if Data["last_activity"] else None
 		WriteJSON(self.__Path, Data)
 
 	def set_chat_forbidden(self, status: bool):
