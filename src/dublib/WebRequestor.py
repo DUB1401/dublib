@@ -605,7 +605,7 @@ class WebResponse:
 	def __init__(self, config: WebConfig | None = None):
 		"""Унифицированный контейнер ответа на веб-запросы."""
 
-		self.__GoodCodes = config.good_codes or WebConfig().good_codes
+		self.__GoodCodes = config.good_codes if config else WebConfig().good_codes
 
 		self.__StatusCode = None
 		self.__Content = None
