@@ -764,7 +764,7 @@ class WebRequestor:
 			params = params,
 			headers = headers,
 			cookies = cookies,
-			proxies = proxy.to_dict(),
+			proxies = proxy.to_dict() if proxy else None,
 			verify = self.__Config.verify_ssl
 		))
 
@@ -803,7 +803,7 @@ class WebRequestor:
 			cookies = cookies,
 			data = data,
 			json = json,
-			proxies = proxy.to_dict(),
+			proxies = proxy.to_dict() if proxy else None,
 			verify = self.__Config.verify_ssl
 		))
 
@@ -841,7 +841,7 @@ class WebRequestor:
 			params = params,
 			headers = headers,
 			cookies = CurrentCookies | cookies,
-			proxy = proxy.to_string(),
+			proxy = proxy.to_string() if proxy else None,
 			http2 = self.__Config.httpx.http2,
 			follow_redirects = self.__Config.redirecting,
 			verify = self.__Config.verify_ssl
@@ -885,7 +885,7 @@ class WebRequestor:
 			cookies = CurrentCookies | cookies,
 			data = data,
 			json = json,
-			proxy = proxy.to_string(),
+			proxy = proxy.to_string() if proxy else None,
 			http2 = self.__Config.httpx.http2,
 			follow_redirects = self.__Config.redirecting,
 			verify = self.__Config.verify_ssl

@@ -3,7 +3,7 @@ requires = ["setuptools"]
 
 [project]
 name = "dublib"
-version = "0.23.7"
+version = "0.23.8"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}
