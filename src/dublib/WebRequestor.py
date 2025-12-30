@@ -1066,7 +1066,8 @@ class WebRequestor:
 							case Protocols.HTTP: CurrentProxy.set_protocol(Protocols.HTTPS)
 							case Protocols.HTTPS: CurrentProxy.set_protocol(Protocols.HTTP)
 
-						NewResponse: WebResponse = self.__RequestsMethods[request_type][self.__Config.lib](NewResponse, url, CurrentProxy, **kwargs)
+						NewResponse = WebResponse(self.__Config)
+						self.__RequestsMethods[request_type][self.__Config.lib](NewResponse, url, CurrentProxy, **kwargs)
 						if NewResponse.status_code in self.__Config.good_codes: Response = NewResponse
 
 			except Exception as ExceptionData:
