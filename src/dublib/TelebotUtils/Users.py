@@ -13,6 +13,7 @@ import hashlib
 import enum
 import os
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from more_itertools import divide
 import dateparser
 import telebot
@@ -24,7 +25,7 @@ import orjson
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(LOGS_HANDLER)
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(logging.INFO)
 
 #==========================================================================================#
 # >>>>> УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ <<<<< #
@@ -100,6 +101,12 @@ class UserData:
 		"""Состояние: подавляется ли сохранение в локальный файл."""
 
 		return self.__SuppressSaving
+
+	@property
+	def objects(self) -> dict[str, Any]:
+		"""Словарь прикреплённых к пользователю объектов."""
+
+		return self.__Objects
 
 	@property
 	def path(self) -> PathLike:
@@ -234,6 +241,26 @@ class UserData:
 
 		if not os.path.exists(self.__Path): self.save()
 		else: self.refresh()
+
+	def __repr__(self) -> str:
+		"""
+		Репрезентует объект в строковое представление.
+
+		:return: Строковое представление.
+		:rtype: str
+		"""
+
+		return self.__str__()
+
+	def __str__(self) -> str:
+		"""
+		Преобразует объект в строковое представление.
+
+		:return: Строковое представление.
+		:rtype: str
+		"""
+
+		return f"User<{self.__ID}, {self.username}>"
 
 	def add_flags(self, flags: Iterable[str] | str):
 		"""
@@ -457,7 +484,7 @@ class UserData:
 
 		
 		if self.__SuppressSaving or self.__DeltaHash == self.__CalculateHash():
-			LOGGER.debug(f"User {self.id} data saving skipped.")
+			LOGGER.debug(f"{self} data saving skipped.")
 			return
 		
 		if self.__Manager.is_saving_queue_enabled and use_queue:
@@ -570,14 +597,8 @@ class UsersManager:
 	#==========================================================================================#
 
 	@property
-	def active_users(self) -> tuple[UserData]:
-		"""Последовательность активных за последние 24 часа пользователей."""
-
-		return self.get_active_users()
-
-	@property
 	def premium_users(self) -> tuple[UserData]:
-		"""Последовательность пользователей с Premium-подпиской."""
+		"""Последовательность пользователей с Premium-подпиской из числа хранящихся в памяти."""
 
 		PremiumUsers = list()
 
@@ -593,8 +614,14 @@ class UsersManager:
 		return self.__StorageDirectory
 
 	@property
+	def unloaded_users_id(self) -> tuple[int]:
+		"""Последовательность ID выгруженных из памяти пользователей."""
+
+		return tuple(self.__UnloadedUsersID)
+
+	@property
 	def users(self) -> tuple[UserData]:
-		"""Последовательность всех пользователей."""
+		"""Последовательность хранящихся в памяти пользователей."""
 
 		return tuple(self.__Users.values())
 
@@ -665,6 +692,10 @@ class UsersManager:
 
 		self.__SavingQueue: list[int] = list()
 		self.__SavingQueueThread = None
+
+		self.__Scheduler: BackgroundScheduler | None = None
+		self.__UnloaderTaskID: int | None = None
+		self.__UnloadedUsersID: list[int] = list()
 
 		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
 		self.reload_users(threads)
@@ -761,7 +792,7 @@ class UsersManager:
 		:rtype: bool
 		"""
 
-		return user_id in self.__Users
+		return user_id in self.__Users or user_id in self.__UnloadedUsersID
 
 	def push_to_saving_queue(self, user: UserData):
 		"""
@@ -797,6 +828,70 @@ class UsersManager:
 		Segments = tuple(tuple(Element) for Element in divide(threads, UsersID))
 		self.__Users = dict()
 		with ThreadPoolExecutor(max_workers = threads) as Executor: Executor.map(self.__LoadUsers, Segments)
+		self.__UnloadedUsersID = list()
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ ВЫГРУЗКИ ПОЛЬЗОВАТЕЛЕЙ <<<<< #
+	#==========================================================================================#
+
+	def restore_unloaded_users(self):
+		"""Заново загружает в память ранее выгруженные данные неактивных пользователей."""
+
+		self.__LoadUsers(self.__UnloadedUsersID)
+		self.__UnloadedUsersID = list()
+
+	def start_unloader(self, interval: int, days: int):
+		"""
+		Запускает фоновую задачу по периодической выгрузке неактивных пользователей из памяти.
+
+		:param interval: Интервал в часах для срабатывания выгрузки.
+		:type interval: int
+		:param days: Количество дней отсутствия активности.
+		:type days: int
+		"""
+
+		if not self.__Scheduler:
+			self.__Scheduler = BackgroundScheduler()
+			self.__Scheduler.start()
+
+		self.__UnloaderTaskID = self.__Scheduler.add_job(self.unload_users, args = (days,), trigger = "interval", hours = interval).id
+
+	def stop_unloader(self):
+		"""Останавливает фоновую задачу по периодической выгрузке неактивных пользователей из памяти."""
+
+		if not self.__Scheduler: return 
+		self.__Scheduler.remove_job(self.__UnloaderTaskID)
+		self.__Scheduler = None
+
+	def unload_users(self, days: int) -> tuple[int]:
+		"""
+		Выгружает из оперативной памяти данные пользователей, чья последняя активность выходит за указанное значение.
+
+		:param days: Количество дней отсутствия активности. Минимум 1.
+		:type days: int
+		:return: Последовательность ID пользователей, для которых были выгружены данные.
+		:rtype: tuple[int]
+		:raise ValueError: Выбрасывается при неверной спецификации количества дней.
+		"""
+
+		if days < 1: raise ValueError("Days must be more than 1.")
+		InactiveUsers = tuple(set(self.users) - set(self.get_active_users(hours = 24 * days)))
+
+		for User in InactiveUsers:
+
+			if User.objects:
+				ObjectsCount = len(User.objects)
+				LOGGER.debug(f"While unloading {User} unnatached {ObjectsCount} objects.")
+
+			if User.is_saving_suppressed: LOGGER.warning(f"For unloaded {User} saving suppressed. Data may be loss.")
+
+			User.save()
+			del self.__Users[User.id]
+
+		CurrentUnloadedUsersID = tuple(User.id for User in InactiveUsers)
+		self.__UnloadedUsersID.extend(CurrentUnloadedUsersID)
+
+		return CurrentUnloadedUsersID
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ НАСТРОЙКИ <<<<< #
