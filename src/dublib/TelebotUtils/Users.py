@@ -1,11 +1,14 @@
 from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
 from ..Methods.Data import Copy, ToIterable
 from ..Exceptions.TelebotUtils import *
+from ..Core import LOGS_HANDLER
 
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Iterable, Literal
 from datetime import datetime, timedelta
+from threading import Thread
 from os import PathLike
+import logging
 import hashlib
 import enum
 import os
@@ -14,6 +17,14 @@ from more_itertools import divide
 import dateparser
 import telebot
 import orjson
+
+#==========================================================================================#
+# >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
+#==========================================================================================#
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.addHandler(LOGS_HANDLER)
+LOGGER.setLevel(logging.DEBUG)
 
 #==========================================================================================#
 # >>>>> УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ <<<<< #
@@ -182,7 +193,8 @@ class UserData:
 		"""
 
 		Data = self.__Data.copy()
-		Data["last_activity"] = str(Data["last_activity"]) if Data["last_activity"] else None
+		LastActivity: datetime = Data["last_activity"]
+		if LastActivity:  Data["last_activity"] = LastActivity.strftime("%Y-%m-%d %H:%M")
 
 		return Data
 
@@ -255,7 +267,7 @@ class UserData:
 		:type force: bool
 		"""
 		
-		if key not in self.__Objects.keys() or force: self.__Objects[key] = object
+		if key not in self.__Objects or force: self.__Objects[key] = object
 
 	def check_flags(self, flags: Iterable[str] | str) -> bool:
 		"""
@@ -433,14 +445,24 @@ class UserData:
 		self.__Data["expected_type"] = None
 		self.save()
 
-	def save(self):
+	def save(self, use_queue: bool = True):
 		"""
 		Записывает данные пользователя в локальный файл.
 
 		Если значение с момента прошлого сохранения не изменено, сохранение будет пропущено.
+
+		:param use_queue: Указывает, помещать ли задачу в очередь, если доступна, или выполнить сохранение немедленно.
+		:type use_queue: bool
 		"""
+
 		
-		if self.__SuppressSaving or self.__DeltaHash == self.__CalculateHash(): return
+		if self.__SuppressSaving or self.__DeltaHash == self.__CalculateHash():
+			LOGGER.debug(f"User {self.id} data saving skipped.")
+			return
+		
+		if self.__Manager.is_saving_queue_enabled and use_queue:
+			self.__Manager.push_to_saving_queue(self)
+			return
 
 		WriteJSON(self.__Path, self.__ToSerializableDict(), pretty = self.__Manager.is_pretty_saving_enabled)
 		self.__DeltaHash = self.__CalculateHash()
@@ -554,12 +576,6 @@ class UsersManager:
 		return self.get_active_users()
 
 	@property
-	def is_pretty_saving_enabled(self) -> bool:
-		"""Состояние: форматировать ли локальные файлы отступами."""
-
-		return self.__IsPrettySaving
-
-	@property
 	def premium_users(self) -> tuple[UserData]:
 		"""Последовательность пользователей с Premium-подпиской."""
 
@@ -583,6 +599,22 @@ class UsersManager:
 		return tuple(self.__Users.values())
 
 	#==========================================================================================#
+	# >>>>> ЛОГИЧЕСКИЕ ПЕРЕКЛЮЧАТЕЛИ <<<<< #
+	#==========================================================================================#
+
+	@property
+	def is_pretty_saving_enabled(self) -> bool:
+		"""Состояние: форматировать ли локальные файлы отступами."""
+
+		return self.__IsPrettySaving
+	
+	@property
+	def is_saving_queue_enabled(self) -> bool:
+		"""Состояние: используется ли очередь сохранений."""
+
+		return self.__IsSavingQueue
+
+	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
@@ -595,6 +627,20 @@ class UsersManager:
 		"""
 
 		for UserID in users_id: self.__Users[UserID] = UserData(self, UserID)
+
+	def __SavingQueueProcessor(self):
+		"""Реализация очереди сохранений."""
+
+		LOGGER.debug("Saving queue started. Tasks: " + str(len(self.__SavingQueue)) + ".")
+
+		while self.__SavingQueue:
+			UserID = self.__SavingQueue[0]
+			User = self.get_user(UserID)
+			User.save(use_queue = False)
+			self.__SavingQueue.pop(0)
+
+		self.__SavingQueueThread = None
+		LOGGER.debug("Saving queue stopped.")
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -613,7 +659,12 @@ class UsersManager:
 		self.__StorageDirectory = NormalizePath(storage_directory)
 
 		self.__Users: dict[int, UserData] = dict()
+
 		self.__IsPrettySaving = True
+		self.__IsSavingQueue = False
+
+		self.__SavingQueue: list[int] = list()
+		self.__SavingQueueThread = None
 
 		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
 		self.reload_users(threads)
@@ -666,16 +717,6 @@ class UsersManager:
 		del self.__Users[user_id]
 		os.remove(f"{self.__StorageDirectory}/{user_id}.json")
 
-	def enable_pretty_saving(self, status: bool):
-		"""
-		Переключает форматирование локальных файлов с использованием отступов. Отключение может значительно ускорить операции записи.
-
-		:param status: Состояние форматирования.
-		:type status: bool
-		"""
-
-		self.__IsPrettySaving = status
-
 	def get_active_users(self, hours: int = 24) -> tuple[UserData]:
 		"""
 		Возвращает последовательность пользователей, для которых активных за последние N часов.
@@ -722,6 +763,24 @@ class UsersManager:
 
 		return user_id in self.__Users
 
+	def push_to_saving_queue(self, user: UserData):
+		"""
+		Добавляет данные пользователя в очередь на сохранение.
+
+		:param user: Данные пользователя.
+		:type user: UserData
+		:raise SavingQueueBlocked: Выбрасывается при отключённой очереди сохранений.
+		"""
+
+		if not self.__IsSavingQueue: raise SavingQueueBlocked()
+
+		if user.id not in self.__SavingQueue:
+			self.__SavingQueue.append(user.id)
+			
+			if not self.__SavingQueueThread or not self.__SavingQueueThread.is_alive():
+				self.__SavingQueueThread = Thread(target = self.__SavingQueueProcessor, name = "Users manager saving queue.")
+				self.__SavingQueueThread.start()
+
 	def reload_users(self, threads: int = 1):
 		"""
 		Загружает данные пользователей из локальных файлов.
@@ -735,9 +794,33 @@ class UsersManager:
 		Files = ListDir(self.__StorageDirectory)
 		Files = tuple(filter(lambda List: List.endswith(".json"), Files))
 		UsersID = tuple(int(File[:-5]) for File in Files)
-		Segments = divide(threads, UsersID)
+		Segments = tuple(tuple(Element) for Element in divide(threads, UsersID))
 		self.__Users = dict()
 		with ThreadPoolExecutor(max_workers = threads) as Executor: Executor.map(self.__LoadUsers, Segments)
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ НАСТРОЙКИ <<<<< #
+	#==========================================================================================#
+
+	def enable_pretty_saving(self, status: bool):
+		"""
+		Переключает форматирование локальных файлов с использованием отступов. Отключение может значительно ускорить операции записи.
+
+		:param status: Состояние форматирования.
+		:type status: bool
+		"""
+
+		self.__IsPrettySaving = status
+
+	def enable_saving_queue(self, status: bool):
+		"""
+		Переключает использование очереди сохранений.
+
+		:param status: Состояние использование очереди.
+		:type status: bool
+		"""
+
+		self.__IsSavingQueue = status
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ МАССОВОГО РЕДАКТИРОВАНИЯ ПОЛЬЗОВАТЕЛЕЙ <<<<< #

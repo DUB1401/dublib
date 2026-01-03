@@ -13,3 +13,11 @@ class RefreshingBlocked(Exception):
 		"""Исключение: считывание данных из локального файла заблокировано."""
 
 		super().__init__("While saving suppressed refreshing is blocked.") 
+
+class SavingQueueBlocked(Exception):
+	"""Исключение: очередь сохранения заблокирована."""
+
+	def __init__(self):
+		"""Исключение: очередь сохранения заблокирована."""
+
+		super().__init__("Saving queue disabled. If task remained they will be completed.") 
