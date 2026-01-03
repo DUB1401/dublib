@@ -2,6 +2,7 @@ from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
 from ..Methods.Data import Copy, ToIterable
 from ..Exceptions.TelebotUtils import *
 
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Iterable, Literal
 from datetime import datetime, timedelta
 from os import PathLike
@@ -9,6 +10,7 @@ import hashlib
 import enum
 import os
 
+from more_itertools import divide
 import dateparser
 import telebot
 import orjson
@@ -439,8 +441,8 @@ class UserData:
 		"""
 		
 		if self.__SuppressSaving or self.__DeltaHash == self.__CalculateHash(): return
-		
-		WriteJSON(self.__Path, self.__ToSerializableDict())
+
+		WriteJSON(self.__Path, self.__ToSerializableDict(), pretty = self.__Manager.is_pretty_saving_enabled)
 		self.__DeltaHash = self.__CalculateHash()
 
 	def set_chat_forbidden(self, status: bool):
@@ -458,7 +460,7 @@ class UserData:
 		"""
 		Задаёт ожидаемый тип данных.
 
-		:param expected_type: Ожидаемый от пользователя тип данных.
+		:param expected_type: Ожидаемый от пользователя тип данных. При указании элемента перечисления берётся его значение.
 		:type expected_type: str | Enum | None
 		"""
 
@@ -552,6 +554,12 @@ class UsersManager:
 		return self.get_active_users()
 
 	@property
+	def is_pretty_saving_enabled(self) -> bool:
+		"""Состояние: форматировать ли локальные файлы отступами."""
+
+		return self.__IsPrettySaving
+
+	@property
 	def premium_users(self) -> tuple[UserData]:
 		"""Последовательность пользователей с Premium-подпиской."""
 
@@ -578,34 +586,37 @@ class UsersManager:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __LoadUsers(self):
-		"""Загружает данные пользователей."""
+	def __LoadUsers(self, users_id: Iterable[int]):
+		"""
+		Загружает данные пользователей для списка ID.
 
-		Files = ListDir(self.__StorageDirectory)
-		Files = list(filter(lambda List: List.endswith(".json"), Files))
+		:param users_id: Последовательность ID пользователей.
+		:type users_id: Iterable[int]
+		"""
 
-		for File in Files:
-			UserID = int(File.replace(".json", ""))
-			self.__Users[UserID] = UserData(self, UserID)
+		for UserID in users_id: self.__Users[UserID] = UserData(self, UserID)
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, storage_directory: PathLike):
+	def __init__(self, storage_directory: PathLike, threads: int = 1):
 		"""
 		Менеджер пользователей.
 
 		:param storage_directory: Путь к каталог файлов пользователей. Директория создаётся автоматически.
 		:type storage_directory: PathLike
+		:param threads: Число потоков, использующихся для операций чтения при инициализации менеджера. По умолчанию 1.
+		:type threads: int
 		"""
 
 		self.__StorageDirectory = NormalizePath(storage_directory)
 
 		self.__Users: dict[int, UserData] = dict()
+		self.__IsPrettySaving = True
 
 		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
-		self.__LoadUsers()
+		self.reload_users(threads)
 
 	def __getitem__(self, user_id: int) -> UserData:
 		"""
@@ -655,6 +666,16 @@ class UsersManager:
 		del self.__Users[user_id]
 		os.remove(f"{self.__StorageDirectory}/{user_id}.json")
 
+	def enable_pretty_saving(self, status: bool):
+		"""
+		Переключает форматирование локальных файлов с использованием отступов. Отключение может значительно ускорить операции записи.
+
+		:param status: Состояние форматирования.
+		:type status: bool
+		"""
+
+		self.__IsPrettySaving = status
+
 	def get_active_users(self, hours: int = 24) -> tuple[UserData]:
 		"""
 		Возвращает последовательность пользователей, для которых активных за последние N часов.
@@ -688,57 +709,6 @@ class UsersManager:
 			self.__Users[user_id] = UserData(self, user_id)
 
 		return self.__Users[user_id]
-
-	def get_users(
-			self,
-			last_activity: int | None = None,
-			premium: bool | None = None,
-			include_permissions: Iterable[str] | str | None = None,
-			exclude_permissions: Iterable[str] | str | None = None
-		) -> tuple[UserData]:
-		"""
-		Возвращает последовательность пользователей, удовлетворяющих переданным фильтрам. При передаче `None` фильтр игнорируется.
-
-		:param last_activity: Количество часов для проверки активности.
-		:type last_activity: int | None
-		:param premium: Состояние Premium-подписки пользователя.
-		:type premium: bool | None
-		:param include_permissions: Набор прав или право, которое должно иметься.
-		:type include_permissions: Iterable[str] | str | None
-		:param exclude_permissions: Набор прав или право, которого быть не должно.
-		:type exclude_permissions: Iterable[str] | str | None
-		:return: Последовательность данных пользователей.
-		:rtype: tuple[UserData]
-		"""
-
-		Users = self.users
-		if last_activity: Users = self.get_active_users(last_activity)
-
-		if premium != None:
-			Buffer = list()
-
-			for User in Users: 
-				if User.is_premium == premium: Buffer.append(User)
-
-			Users = Buffer
-
-		if include_permissions:
-			Buffer = list()
-
-			for User in Users: 
-				if User.has_permissions(include_permissions): Buffer.append(User)
-
-			Users = Buffer
-
-		if exclude_permissions:
-			Buffer = list()
-
-			for User in Users: 
-				if not User.has_permissions(exclude_permissions): Buffer.append(User)
-
-			Users = Buffer
-
-		return tuple(Users)
 	
 	def is_user_exists(self, user_id: int) -> bool:
 		"""
@@ -750,7 +720,24 @@ class UsersManager:
 		:rtype: bool
 		"""
 
-		return user_id in self.__Users.keys()
+		return user_id in self.__Users
+
+	def reload_users(self, threads: int = 1):
+		"""
+		Загружает данные пользователей из локальных файлов.
+		
+		Вызывается автоматически при инициализации менеджера. Повторный вызов без реализации механизмов защиты может привести к потере данных.
+
+		:param threads: Число потоков, использующихся для операций чтения. По умолчанию 1.
+		:type threads: int
+		"""
+
+		Files = ListDir(self.__StorageDirectory)
+		Files = tuple(filter(lambda List: List.endswith(".json"), Files))
+		UsersID = tuple(int(File[:-5]) for File in Files)
+		Segments = divide(threads, UsersID)
+		self.__Users = dict()
+		with ThreadPoolExecutor(max_workers = threads) as Executor: Executor.map(self.__LoadUsers, Segments)
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ МАССОВОГО РЕДАКТИРОВАНИЯ ПОЛЬЗОВАТЕЛЕЙ <<<<< #
