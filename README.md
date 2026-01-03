@@ -25,4 +25,4 @@ pip install dublib[telebot]
 pip install git+https://github.com/DUB1401/dublib
 ```
 
-_Copyright © DUB1401. 2023-2025._
+_Copyright © DUB1401. 2023-2026._

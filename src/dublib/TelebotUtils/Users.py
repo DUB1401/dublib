@@ -5,11 +5,13 @@ from ..Exceptions.TelebotUtils import *
 from typing import Any, Iterable, Literal
 from datetime import datetime, timedelta
 from os import PathLike
+import hashlib
 import enum
 import os
 
 import dateparser
 import telebot
+import orjson
 
 #==========================================================================================#
 # >>>>> УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ <<<<< #
@@ -84,7 +86,7 @@ class UserData:
 	def is_saving_suppressed(self) -> bool:
 		"""Состояние: подавляется ли сохранение в локальный файл."""
 
-		return self.__Path
+		return self.__SuppressSaving
 
 	@property
 	def path(self) -> PathLike:
@@ -118,6 +120,19 @@ class UserData:
 		if IsChanged:
 			self.__Data[key] = sorted(self.__Data[key])
 			self.save()
+
+	def __CalculateHash(self) -> str:
+		"""
+		Вычисляет MD5 хэш JSON строки пользователя.
+
+		:return: MD5 хэш.
+		:rtype: str
+		"""
+
+		Data = self.__ToSerializableDict()
+		Bytes = orjson.dumps(Data)
+
+		return hashlib.md5(Bytes).hexdigest()
 
 	def __RemoveFlags(self, flags: Iterable[str] | str, key: str):
 		"""
@@ -157,6 +172,18 @@ class UserData:
 		self.__Data[property_type][key] = value
 		self.save()
 
+	def __ToSerializableDict(self) -> dict:
+		"""
+		Приводит объект к сериализуемому словарю.
+		:return: Сериализуемый словарь.
+		:rtype: dict
+		"""
+
+		Data = self.__Data.copy()
+		Data["last_activity"] = str(Data["last_activity"]) if Data["last_activity"] else None
+
+		return Data
+
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
@@ -189,6 +216,7 @@ class UserData:
 		self.__Objects = dict()
 		self.__Path = f"{self.__Manager.storage_directory}/{user_id}.json"
 		self.__SuppressSaving = False
+		self.__DeltaHash: str | None = None
 
 		if not os.path.exists(self.__Path): self.save()
 		else: self.refresh()
@@ -404,12 +432,16 @@ class UserData:
 		self.save()
 
 	def save(self):
-		"""Записывает данные пользователя в локальный файл."""
+		"""
+		Записывает данные пользователя в локальный файл.
 
-		if self.__SuppressSaving: return
-		Data = self.__Data.copy()
-		Data["last_activity"] = str(Data["last_activity"]) if Data["last_activity"] else None
-		WriteJSON(self.__Path, Data)
+		Если значение с момента прошлого сохранения не изменено, сохранение будет пропущено.
+		"""
+		
+		if self.__SuppressSaving or self.__DeltaHash == self.__CalculateHash(): return
+		
+		WriteJSON(self.__Path, self.__ToSerializableDict())
+		self.__DeltaHash = self.__CalculateHash()
 
 	def set_chat_forbidden(self, status: bool):
 		"""
@@ -596,16 +628,16 @@ class UsersManager:
 		:type user: telebot.types.User
 		:param update_activity: Указывает, нужно ли обновить дату и время последней активности пользователя.
 		:type update_activity: bool
-		:raises ValueError: Выбрасывается при передаче неверного типа структуры данных пользователя.
+		:raises TypeError: Выбрасывается при передаче неверного типа структуры данных пользователя.
 		:return: Данные пользователя.
 		:rtype: UserData
 		"""
 		
-		if type(user) != telebot.types.User: raise ValueError(f"telebot.types.User object expected, not {type(user)}.")
+		if type(user) != telebot.types.User: raise TypeError(f"telebot.types.User object expected, not {type(user)}.")
 
-		if user.id not in self.__Users.keys():self.__Users[user.id] = UserData(self, user.id)
-		self.__Users[user.id].update(user)
+		if user.id not in self.__Users: self.__Users[user.id] = UserData(self, user.id)
 		CurrentUser = self.__Users[user.id]
+		CurrentUser.update(user)
 		if CurrentUser.is_chat_forbidden: CurrentUser.set_chat_forbidden(False)
 		if update_activity: CurrentUser.update_acitivity()
 
@@ -649,7 +681,12 @@ class UsersManager:
 		:return: Данные пользователя.
 		:rtype: UserData
 		"""
-		
+
+		if user_id not in self.__Users: 
+			UserPath = f"{self.__StorageDirectory}/{user_id}.json"
+			if not os.path.exists(UserPath): raise KeyError(f"User with ID {user_id} not exists.")
+			self.__Users[user_id] = UserData(self, user_id)
+
 		return self.__Users[user_id]
 
 	def get_users(
