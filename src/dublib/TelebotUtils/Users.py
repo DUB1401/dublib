@@ -177,6 +177,7 @@ class UserData:
 
 		self.__Objects = dict()
 		self.__Path = f"{self.__Manager.storage_directory}/{user_id}.json"
+		self.__SuppressSaving = False
 
 		if not os.path.exists(self.__Path): self.save()
 		else: self.refresh()
@@ -318,8 +319,13 @@ class UserData:
 		return False 
 
 	def refresh(self):
-		"""Считывает данные из файла пользователя и дополняет отсутствующие поля."""
+		"""
+		Считывает данные из файла пользователя и дополняет отсутствующие поля.
 
+		:raise RefreshingBlocked: Выбрасывается при попытке чтения файла пользователя во время подавления сохранений.
+		"""
+
+		if self.__SuppressSaving: raise RefreshingBlocked()
 		Data = ReadJSON(self.__Path)
 
 		for Key in self.__Data.keys():
@@ -389,6 +395,7 @@ class UserData:
 	def save(self):
 		"""Записывает данные пользователя в локальный файл."""
 
+		if self.__SuppressSaving: return
 		Data = self.__Data.copy()
 		Data["last_activity"] = str(Data["last_activity"]) if Data["last_activity"] else None
 		WriteJSON(self.__Path, Data)
@@ -445,27 +452,36 @@ class UserData:
 		
 		if key not in self.__Data["temp"].keys() or force: self.__SetProperty("temp", key, value)
 
+	def suppress_saving(self, status: bool):
+		"""
+		Подавляет сохранение в локальный файл.
+		
+		Следует использовать для оптимизации при множественных изменениях. Во время подавления недоступен вызов метода `refresh()`.
+
+		:param status: Статус подавления.
+		:type status: bool
+		"""
+
+		self.__SuppressSaving = status
+
 	def update(self, user: telebot.types.User, is_chat_forbidden: bool | None = None):
 		"""
 		Обновляет данные пользователя (язык, наличие подписки, ник) из его структуры Telegram.
-			user – объект представления пользователя;\n
-			is_chat_forbidden – указывает, заблокировал ли пользователь бота.
 
-		:param user: Структура данных пользователя Telegram.
+		:param user: Объект представления пользователя.
 		:type user: telebot.types.User
-		:param is_chat_forbidden: Состояние: может ли бот контактировать с пользователем. Если указать `None`, обновление состояния не произойдёт.
+		:param is_chat_forbidden: Указывает, заблокировал ли пользователь бота.
 		:type is_chat_forbidden: bool | None
-		:raises IncorrectUserToUpdate: Выбрасывается при передаче несоответствующей по ID структуры.
+		:raises IncorrectUserToUpdate: Выбрасывается при передаче несоответствующей по ID структуры пользователя.
 		"""
 
-		if user.id == self.__ID:
-			if is_chat_forbidden != None: self.__Data["is_chat_forbidden"] = is_chat_forbidden
-			self.__Data["is_premium"] = bool(user.is_premium)
-			self.__Data["language"] = user.language_code
-			self.__Data["username"] = user.username
-			self.save()
+		if user.id != self.__ID: raise IncorrectUserToUpdate(self.__ID, user.id)
 
-		else: raise IncorrectUserToUpdate()
+		if is_chat_forbidden != None: self.__Data["is_chat_forbidden"] = is_chat_forbidden
+		self.__Data["is_premium"] = bool(user.is_premium)
+		self.__Data["language"] = user.language_code
+		self.__Data["username"] = user.username
+		self.save()
 
 	def update_acitivity(self) -> datetime:
 		"""

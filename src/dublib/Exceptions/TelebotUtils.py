@@ -1,11 +1,15 @@
 class IncorrectUserToUpdate(Exception):
 	"""Исключение: использование данных другого пользователя для обновления."""
 
-	def __init__(self):
+	def __init__(self, current_id: int, given_id: int):
 		"""Исключение: использование данных другого пользователя для обновления."""
 
-		self.__Message = "Current user ID and ID in updating method differ."
-		super().__init__(self.__Message) 
-			
-	def __str__(self):
-		return self.__Message
+		super().__init__(f"Current user is {current_id}, but given {given_id}.")
+
+class RefreshingBlocked(Exception):
+	"""Исключение: считывание данных из локального файла заблокировано."""
+
+	def __init__(self):
+		"""Исключение: считывание данных из локального файла заблокировано."""
+
+		super().__init__("While saving suppressed refreshing is blocked.") 
