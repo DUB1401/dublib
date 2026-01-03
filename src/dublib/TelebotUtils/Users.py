@@ -5,6 +5,7 @@ from ..Exceptions.TelebotUtils import *
 from typing import Any, Iterable, Literal
 from datetime import datetime, timedelta
 from os import PathLike
+import enum
 import os
 
 import dateparser
@@ -64,12 +65,6 @@ class UserData:
 		return self.__Data["language"]
 
 	@property
-	def path(self) -> PathLike:
-		"""Путь к файлу пользователя."""
-
-		return self.__Path
-
-	@property
 	def permissions(self) -> tuple[str]:
 		"""Список прав пользователя."""
 
@@ -80,6 +75,22 @@ class UserData:
 		"""Ник пользователя."""
 
 		return self.__Data["username"]
+
+	#==========================================================================================#
+	# >>>>> НЕСЕРИАЛИЗУЕМЫЕ СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def is_saving_suppressed(self) -> bool:
+		"""Состояние: подавляется ли сохранение в локальный файл."""
+
+		return self.__Path
+
+	@property
+	def path(self) -> PathLike:
+		"""Путь к файлу пользователя."""
+
+		return self.__Path
 
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
@@ -411,15 +422,16 @@ class UserData:
 		self.__Data["is_chat_forbidden"] = status
 		self.save()
 
-	def set_expected_type(self, type_name: str | None):
+	def set_expected_type(self, expected_type: str | enum.Enum | None):
 		"""
-		Задаёт название ожидаемого типа данных.
+		Задаёт ожидаемый тип данных.
 
-		:param type_name: Название ожидаемого от пользователя типа данных.
-		:type type_name: str | None
+		:param expected_type: Ожидаемый от пользователя тип данных.
+		:type expected_type: str | Enum | None
 		"""
 
-		self.__Data["expected_type"] = type_name
+		if isinstance(expected_type, enum.Enum): self.__Data["expected_type"] = expected_type.value
+		else: self.__Data["expected_type"] = expected_type
 		self.save()
 
 	def set_property(self, key: str, value: Any, force: bool = True):
