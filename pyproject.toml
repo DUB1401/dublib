@@ -3,7 +3,7 @@ requires = ["setuptools"]
 
 [project]
 name = "dublib"
-version = "0.24.0"
+version = "0.24.1"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}
@@ -22,9 +22,9 @@ dependencies = [
 	"orjson",
 	"prettytable",
 	"requests",
-	"pyyaml",
+	"pyyaml; python_version == \"3.10\"",
 	"pydantic",
-	"gnureadline; sys_platform == \"linux\" and python_version < \"3.14\"",
+	"gnureadline>=8.3.3; sys_platform == \"linux\"",
 	"pyreadline3; sys_platform == \"win32\""
 ]
 classifiers = [
