@@ -49,7 +49,7 @@ class TeleMaster:
 
 		self.__Bot = TeleBot(bot) if type(bot) == str else bot
 
-	def check_user_subscriptions(self, user: UserData, chats: int | Iterable[int], max_tries: int = 3) -> bool:
+	def check_user_subscriptions(self, user: UserData, chats: int | Iterable[int], max_tries: int = 3) -> bool | None:
 		"""
 		Проверяет, состоит ли пользователь в указанных чатах. Бот должен иметь доступ ко всем проверяемым чатам.
 		
@@ -61,17 +61,17 @@ class TeleMaster:
 		:type chats: int | Iterable[int]
 		:param max_tries: Количество попыток запросов. Повторные запросы отправляются только в случае превышения времени ожидания ответа. Не может быть меньше 1.
 		:type max_tries: int
-		:return: Возвращает `True`, если пользователь состоит во всех указанных чатах.
+		:return: Возвращает `True`, если пользователь состоит во всех указанных чатах, или `None` при ошибке проверки.
+		:rtype: bool | None
 		:raise ValueError: Выбрасывается, если количество попыток запросов меньше 1.
 		:raise urllib3.exceptions.ReadTimeoutError: Выбрасывается в случае превышения времени ожидания ответа от сервера.
 		:raise requests.exceptions.ReadTimeout: Выбрасывается в случае превышения времени ожидания ответа от сервера.
-		:rtype: bool
 		"""
 
 		chats = ToIterable(chats)
 		if max_tries < 1: raise ValueError("Max tries can't be less than 1.")
 
-		IsSubscripted = False
+		IsSubscripted = None
 		Subscriptions = 0
 			
 		for ChatID in chats:
@@ -93,6 +93,7 @@ class TeleMaster:
 				else: break
 		
 		if Subscriptions == len(chats): IsSubscripted = True
+		else: IsSubscripted = False
 		
 		return IsSubscripted
 	
