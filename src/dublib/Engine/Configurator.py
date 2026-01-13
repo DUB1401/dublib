@@ -8,13 +8,13 @@ from typing import Any
 from pydantic import BaseModel
 
 class Config:
-	"""Модуль параметров."""
+	"""Контейнер конфигурации."""
 
 	#==========================================================================================#
 	# >>>>> СТАТИЧЕСКИЕ АТРИБУТЫ <<<<< #
 	#==========================================================================================#
 
-	__INSTANCE: "Config | None" = None
+	__INSTANCES: "dict[PathLike, Config]" = dict()
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА <<<<< #
@@ -38,7 +38,7 @@ class Config:
 
 	def __new__(cls: "Config", *args, **kwargs) -> "Config":
 		"""
-		Инициализирует новый объект или возвращает уже существующий (паттерн Singleton).
+		Инициализирует новый объект или возвращает уже существующий (поддерживает множественные конфигурации).
 
 		:param cls: Текущий экземпляр объекта.
 		:type cls: Config
@@ -46,24 +46,31 @@ class Config:
 		:rtype: Config
 		"""
 
-		if not cls.__INSTANCE: cls.__INSTANCE = super().__new__(cls)
+		if args[0] not in cls.__INSTANCES:
+			Instance = super().__new__(cls)
+			Instance._IS_INITIALIZED = False
+			cls.__INSTANCES[args[0]] = Instance
 
-		return cls.__INSTANCE
+		return cls.__INSTANCES[args[0]]
 	
 	def __init__(self, path: PathLike):
 		"""
-		Модуль параметров.
+		Контейнер конфигурации.
 
-		Может работать с файлами конфигураций JSON и YAML. Определение происходит по расширению файла, в противном случае предпочтение отдаётся JSON.
+		Может работать с файлами JSON и YAML. Определение происходит по расширению файла, в противном случае предпочтение отдаётся JSON.
 
 		:param path: Путь к файлу параметров. На данный момент поддерживается только JSON.
 		:type path: PathLike
 		"""
 
+		if self._IS_INITIALIZED: return
+
 		self.__Path = Path(path)
 
 		self.__Data: dict  = dict()
 		self.__Model: BaseModel | None = None
+
+		self._IS_INITIALIZED = True
 
 	def __getitem__(self, key: str) -> Any:
 		"""
@@ -121,22 +128,18 @@ class Config:
 		:raise pydantic.ValidationError: Выбрасывается при ошибке валидации.
 		"""
 
-		PosixPath = self.__Path.as_posix()
-
 		match self.__Path.suffix:
-			case ".yaml" | ".yml": self.__Data = ReadYAML(PosixPath)
-			case _: self.__Data = ReadJSON(PosixPath)
+			case ".yaml" | ".yml": self.__Data = ReadYAML(self.path)
+			case _: self.__Data = ReadJSON(self.path)
 
 		if self.__Model and validate: self.validate()
 
 	def save(self):
 		"""Записывает изменения параметров в файл."""
 
-		PosixPath = self.__Path.as_posix()
-
 		match self.__Path.suffix:
-			case ".yaml" | ".yml": WriteYAML(PosixPath, self.__Data)
-			case _: WriteJSON(PosixPath, self.__Data)
+			case ".yaml" | ".yml": WriteYAML(self.path, self.__Data)
+			case _: WriteJSON(self.path, self.__Data)
 
 	def set(self, key: str, value: Any):
 		"""
@@ -174,6 +177,11 @@ class Config:
 		"""
 
 		self.__Model = model
+
+	def unload(self):
+		"""Выгружает контейнер из памяти."""
+
+		del self.__INSTANCES[self.path]
 
 	def validate(self, model: BaseModel | None = None):
 		"""
