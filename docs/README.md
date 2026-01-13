@@ -13,7 +13,7 @@ python3 -m venv .venv
 # Активация вирутальной среды.
 source .venv/bin/activate
 # Установка зависимостей.
-pip install .[all]
+pip install .[dev]
 # Генерация документации (вместо docs/build можно указать любой каталог).
 sphinx-build -b html docs docs/build
 # Открытие главного файла документации в браузере.
