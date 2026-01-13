@@ -71,7 +71,7 @@ class TeleMaster:
 		chats = ToIterable(chats)
 		if max_tries < 1: raise ValueError("Max tries can't be less than 1.")
 
-		IsSubscripted = None
+		IsSubscripted = False
 		Subscriptions = 0
 			
 		for ChatID in chats:
@@ -90,12 +90,9 @@ class TeleMaster:
 				except Exception as ExceptionData:
 					if str(ExceptionData).endswith("chat not found"):
 						LOGGER.error(f"Chat {ChatID} not found. May be bot not a member.")
-						break
+						return
 
 				else: break
-		
-		if Subscriptions == len(chats): IsSubscripted = True
-		else: IsSubscripted = False
 		
 		return IsSubscripted
 	

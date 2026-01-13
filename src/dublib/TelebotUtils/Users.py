@@ -547,7 +547,7 @@ class UserData:
 		
 		if key not in self.__Data["temp"].keys() or force: self.__SetProperty("temp", key, value)
 
-	def suppress_saving(self, status: bool, save: bool = False):
+	def suppress_saving(self, status: bool, save_on_disabling: bool = True):
 		"""
 		Подавляет сохранение в локальный файл.
 		
@@ -555,12 +555,12 @@ class UserData:
 
 		:param status: Статус подавления.
 		:type status: bool
-		:param save: Указывает, следует ли выполнить обязательное сохранение после изменение статуса.
-		:type save: bool
+		:param save_on_disabling: Указывает, следует ли выполнить обязательное сохранение после отключения подавления. Игнорируется при включении подавления.
+		:type save_on_disabling: bool
 		"""
 
 		self.__SuppressSaving = status
-		if save: self.save()
+		if not status and save_on_disabling: self.save()
 
 	def update(self, user: telebot.types.User, is_chat_forbidden: bool | None = None):
 		"""
