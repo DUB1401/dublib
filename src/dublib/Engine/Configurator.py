@@ -1,11 +1,13 @@
 from ..Methods.Filesystem import ReadJSON, ReadYAML, WriteJSON, WriteYAML
 from ..Methods.Data import Copy
 
+from typing import Any, Callable
+from threading import Thread
 from pathlib import Path
 from os import PathLike
-from typing import Any
 
 from pydantic import BaseModel
+from watchfiles import watch
 
 class Config:
 	"""Контейнер конфигурации."""
@@ -32,6 +34,38 @@ class Config:
 
 		return self.__Path.as_posix()
 	
+	#==========================================================================================#
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __GetValue(self, key: str, copy: bool = True) -> Any:
+		"""
+		Возвращает значение параметра.
+
+		:param key: Ключ параметра.
+		:type key: str
+		:param copy: Указывает, нужно ли вернуть копию для изменяемых типов (`dict`, `list`). Не рекомендуется отключать без острой необходимости прямой манипуляции объектами.
+		:type copy: bool
+		:raise KeyError: Выбрасывается при отсутствии параметра с указанным ключом.
+		:return: Значение параметра.
+		:rtype: Any
+		"""
+
+		Value = self.__Data[key]
+		if copy and type(Value) in (dict, list): Value = Copy(Value)
+
+		return Value
+
+	def __SyncProcessor(self):
+		"""Метод отслеживания изменений в файле конфигурации."""
+
+		for _ in watch(self.__Path):
+			if not self.__IsSync: break
+			if self.__OnChangesCallback: self.__OnChangesCallback()
+			self.load()
+
+		self.__SyncThread = None
+
 	#==========================================================================================#
 	# >>>>> СПЕЦИАЛЬНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
@@ -70,6 +104,10 @@ class Config:
 		self.__Data: dict  = dict()
 		self.__Model: BaseModel | None = None
 
+		self.__IsSync = True
+		self.__SyncThread = None
+		self.__OnChangesCallback = None
+
 		self._IS_INITIALIZED = True
 
 	def __getitem__(self, key: str) -> Any:
@@ -95,13 +133,39 @@ class Config:
 		:type value: Any
 		"""
 		
-		self.set(key, value)
+		self.__GetValue(key, value)
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def get(self, key: str, copy: bool = True) -> Any:
+	def disable_sync(self):
+		"""
+		Отключает отслеживание изменений в файле конфигурации.
+
+		Демон остаётся функционировать до следующего изменения файла, но загрузку изменений и вызов Callback-функции пропустит. Это связано с отсутствием в Python механизмов прерывания потоков.
+		"""
+
+		self.__IsSync = False
+
+	def enable_sync(self, callback: Callable | None = None):
+		"""
+		Включает отслеживание изменений в файле конфигурации.
+
+		При отключении синхронизации демон остаётся функционировать до следующего изменения файла, но загрузку изменений пропустит. Это связано с отсутствием в Python механизмов прерывания потоков.
+
+		:param callback: Функция, вызываемая при обнаружении изменений в файле конфигурации.
+		:type callback: Callable | None
+		"""
+
+		self.__IsSync = True
+		self.__OnChangesCallback = callback
+
+		if self.__IsSync and not self.__SyncThread:
+			self.__SyncThread = Thread(target = self.__SyncProcessor, daemon = True)
+			self.__SyncThread.start()
+
+	def get(self, key: str, copy: bool = True, default: Any = None) -> Any:
 		"""
 		Возвращает значение параметра.
 
@@ -109,15 +173,14 @@ class Config:
 		:type key: str
 		:param copy: Указывает, нужно ли вернуть копию для изменяемых типов (`dict`, `list`). Не рекомендуется отключать без острой необходимости прямой манипуляции объектами.
 		:type copy: bool
-		:raise KeyError: Выбрасывается при отсутствии параметра с указанным ключом.
+		:param default: Значение по умолчанию.
+		:type default: Any
 		:return: Значение параметра.
 		:rtype: Any
 		"""
 
-		Value = self.__Data[key]
-		if copy and type(Value) in (dict, list): Value = Copy(Value)
-
-		return Value
+		try: return self.__GetValue(key, copy)
+		except KeyError: return default
 	
 	def load(self, validate: bool = True):
 		"""
