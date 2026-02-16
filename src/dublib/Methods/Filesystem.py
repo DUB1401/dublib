@@ -3,6 +3,7 @@ from .Data import ToIterable
 from typing import Iterable
 from pathlib import Path
 from os import PathLike
+import tempfile
 import random
 import shutil
 import json
@@ -14,6 +15,25 @@ import yaml
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ФАЙЛАМИ И ДИРЕКТОРИЯМИ <<<<< #
 #==========================================================================================#
+
+def AtomicWrite(path: PathLike, data: bytes):
+	"""
+	Атомарно производит запись файла в бинарном представлении.
+
+	:param path: Путь к записываемому файлу.
+	:type path: PathLike
+	:param data: Набор байтов для записи.
+	:type data: bytes
+	"""
+
+	PathObject = Path(path)
+	TempPath = None
+
+	with tempfile.NamedTemporaryFile("wb", delete = False, dir = PathObject.parent) as TempWriter:
+		TempWriter.write(data)
+		TempPath = Path(TempWriter.name)
+
+	os.replace(TempPath, path)
 
 def GetRandomFile(directory: PathLike) -> PathLike | None:
 	"""
