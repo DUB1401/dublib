@@ -9,8 +9,8 @@ import sys
 import os
 
 from prettytable import PLAIN_COLUMNS, PrettyTable
-from urllib.parse import urlparse
 import dateparser
+import validators
 
 #==========================================================================================#
 # >>>>> ПЕРЕЧИСЛЕНИЯ ТИПОВ <<<<< #
@@ -19,12 +19,18 @@ import dateparser
 class ParametersTypes(enum.Enum):
 	"""Перечисление типов значений параметров."""
 
-	All = "All"
+	All = None
+	Base64 = "Base64"
 	Bool = "Bool"
 	Date = "Date"
+	Email = "Email"
+	Float = "Float"
+	Integer = "Integer"
+	IPv4 = "IPv4"
+	IPv6 = "IPv6"
 	Number = "Number"
 	ValidPath = "ValidPath"
-	Text = "Text"
+	Alpha = "Alpha"
 	URL = "URL"
 
 #==========================================================================================#
@@ -1057,42 +1063,63 @@ class Terminalyzer:
 		
 		return IsDetermined
 
-	def __ConfirmParameterType(self, value: str, type_name: ParametersTypes = ParametersTypes.All, raise_exception: bool = True) -> bool | int | str | datetime:
+	def __ConfirmParameterType(self, value: str, verifiable_type: ParametersTypes = ParametersTypes.All, exception: bool = True) -> bool | float | int | str | datetime:
 		"""
-		Проверяет и парсит значение параметра согласно его типу.
-			value – значение параметра;\n
-			type_name – тип параметра;\n
-			raise_exception – указывает, нужно ли выбрасывать исключение при ошибке проверки типа.
+		Проверяет, соответствует ли строка ожидаемому типу данных и преобразует её в этот самый тип.
+
+		:param value: Проверяемая строка.
+		:type value: str
+		:param verifiable_type: Проверяемый тип.
+		:type verifiable_type: ParametersTypes
+		:param exception: Указывает, следует ли выбрасывать исключение при ошибке верификации типа параметра.
+		:type exception: bool
+		:raises InvalidParameterType: Выбрасывается при ошибке верификации типа параметра.
+		:return: Преобразованные в целевой тип данные.
+		:rtype: bool | float | int | str | datetime
 		"""
 		
 		Value = None
 
-		if type_name != ParametersTypes.All:
+		match verifiable_type:
 
-			if type_name == ParametersTypes.Bool:
+			case ParametersTypes.All:
+				Value = value
+
+			case ParametersTypes.Alpha:
+				if value.isalpha(): Value = value
+
+			case ParametersTypes.Bool:
 				Buffer = value.lower()
 				if Buffer == "true": Value = True
 				elif Buffer == "false": Value = False
 
-			elif type_name == ParametersTypes.Date:
+			case ParametersTypes.Date:
 				try: Value = dateparser.parse(value).date()
 				except: pass
-			
-			elif type_name == ParametersTypes.Number:
-				if value.lstrip("-").isdigit(): Value = int(value)
-				
-			elif type_name == ParametersTypes.ValidPath:
+
+			case ParametersTypes.Float:
+				if value.count("-") <= 1 and value.strip(".").count(".") == 1 and value.replace(".", "").isdigit(): Value = float(value)
+
+			case ParametersTypes.Integer:
+				if value.count("-") <= 1 and value.lstrip("-").isdigit(): Value = int(value)
+
+			case ParametersTypes.Number:
+
+				if "." in value:
+					try: Value = float(value)
+					except ValueError: pass
+
+				else:
+					try: Value = int(value)
+					except ValueError: pass
+
+			case ParametersTypes.ValidPath:
 				if os.path.exists(value): Value = value
 
-			elif type_name == ParametersTypes.Text:
-				if value.isalpha(): Value = value
+			case _:
+				if self.__ValidableTypes[verifiable_type](value): Value = value
 
-			elif type_name == ParametersTypes.URL:
-				if bool(urlparse(value).scheme): Value = value 
-
-		else: Value = value
-
-		if Value == None and raise_exception: raise InvalidParameterType(value, type_name.value)
+		if Value == None and exception: raise InvalidParameterType(value, verifiable_type.value)
 
 		return Value
 
@@ -1234,18 +1261,16 @@ class Terminalyzer:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, parameters: list[str] | None = None, free_mode: bool = False):
+	def __init__(self, parameters: Iterable[str] | None = None, free_mode: bool = False):
 		"""
 		Обработчик консольных параметров.
 
-		:param parameters: Cписок параметров. По умолчанию берётся из аргументов запуска скрипта.
-		:type parameters: list[str] | None
+		:param parameters: Набор параметров. По умолчанию берётся из аргументов запуска скрипта.
+		:type parameters: Iterable[str] | None
 		:param free_mode: Включает свободный режим анализатора, в котором не используются индикаторы ключей и флагов.
 		:type free_mode: bool
 		"""
 
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
 		self.__Parameters = parameters or sys.argv[1:]
 		self.__FreeMode = free_mode
 
@@ -1257,9 +1282,15 @@ class Terminalyzer:
 		self.__ParametersLocks = None
 		self.__PositionsLocks = dict()
 
-		self.__HelpCallback = print
-
 		self.__Helper = Helper(self)
+
+		self.__ValidableTypes = {
+			ParametersTypes.Base64: validators.base64,
+			ParametersTypes.Base64: validators.email,
+			ParametersTypes.Base64: validators.ipv4,
+			ParametersTypes.Base64: validators.ipv6,
+			ParametersTypes.Base64: validators.url
+		}
 
 		self.set_source(self.__Parameters)
 
