@@ -491,7 +491,7 @@ class UserData:
 			self.__Manager.push_to_saving_queue(self)
 			return
 
-		WriteJSON(self.__Path, self.__ToSerializableDict(), pretty = self.__Manager.is_pretty_saving_enabled)
+		WriteJSON(self.__Path, self.__ToSerializableDict(), pretty = self.__Manager.is_pretty_saving_enabled, atomic = self.__Manager.is_atomic_writes)
 		self.__DeltaHash = self.__CalculateHash()
 
 	def set_chat_forbidden(self, status: bool):
@@ -633,6 +633,12 @@ class UsersManager:
 	#==========================================================================================#
 
 	@property
+	def is_atomic_writes(self) -> bool:
+		"""Состояние: используется ли атомарная запись."""
+
+		return self.__IsAtomicWrites
+
+	@property
 	def is_pretty_saving_enabled(self) -> bool:
 		"""Состояние: форматировать ли локальные файлы отступами."""
 
@@ -690,6 +696,7 @@ class UsersManager:
 
 		self.__Users: dict[int, UserData] = dict()
 
+		self.__IsAtomicWrites = False
 		self.__IsPrettySaving = True
 		self.__IsSavingQueue = False
 
@@ -900,6 +907,16 @@ class UsersManager:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ НАСТРОЙКИ <<<<< #
 	#==========================================================================================#
 
+	def enable_atomic_writing(self, status: bool):
+		"""
+		Переключает режим атомарной записи файлов, увеличивает время сохранения JSON за счёт гарантии сохранности.
+
+		:param status: Состояние использования атомарной записи.
+		:type status: bool
+		"""
+
+		self.__IsAtomicWrites = status
+
 	def enable_pretty_saving(self, status: bool):
 		"""
 		Переключает форматирование локальных файлов с использованием отступов. Отключение может значительно ускорить операции записи.
@@ -914,7 +931,7 @@ class UsersManager:
 		"""
 		Переключает использование очереди сохранений.
 
-		:param status: Состояние использование очереди.
+		:param status: Состояние использования очереди.
 		:type status: bool
 		"""
 
