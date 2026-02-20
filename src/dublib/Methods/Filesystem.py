@@ -18,7 +18,7 @@ import yaml
 
 def AtomicWrite(path: PathLike, data: bytes):
 	"""
-	Атомарно производит запись файла в бинарном представлении.
+	Атомарно производит запись файла в бинарном представлении, используя создание временного файла и операцию `os.replace()`.
 
 	:param path: Путь к записываемому файлу.
 	:type path: PathLike
@@ -128,7 +128,7 @@ def ReadJSON(path: PathLike) -> dict:
 
 	with open(path, "rb") as FileReader: return orjson.loads(FileReader.read())
 
-def WriteJSON(path: PathLike, data: dict, pretty: bool = True):
+def WriteJSON(path: PathLike, data: dict, pretty: bool = True, atomic: bool = False):
 	"""
 	Записывает отформатированный файл JSON.
 
@@ -138,15 +138,19 @@ def WriteJSON(path: PathLike, data: dict, pretty: bool = True):
 	:type data: dict
 	:param pretty: Включает режим форматирования с использованием символов новых строк и табуляции.
 	:type pretty: bool
+	:param atomic: Переключает использование атомарной записи.
+	:type atomic: bool
 	:raise TypeError: Выбрасывается при невозможности сериализации данных в JSON.
 	"""
 
-	if pretty:
-		Content: str = json.dumps(data, ensure_ascii = False, indent = "\t", separators = (",", ": "))
-		with open(path, "w") as FileWriter: FileWriter.write(Content)
+	Content = None
 
+	if pretty: Content: str = json.dumps(data, ensure_ascii = False, indent = "\t", separators = (",", ": ")).encode()
+	else: Content: bytes = orjson.dumps(data)
+
+	if atomic:
+		AtomicWrite(path, Content)
 	else:
-		Content: bytes = orjson.dumps(data)
 		with open(path, "wb") as FileWriter: FileWriter.write(Content)
 
 #==========================================================================================#
@@ -166,7 +170,7 @@ def ReadYAML(path: PathLike) -> dict:
 
 	with open(path, "r") as FileReader: return yaml.safe_load(FileReader)
 
-def WriteYAML(path: PathLike, data: dict):
+def WriteYAML(path: PathLike, data: dict, atomic: bool = False):
 	"""
 	Записывает файл YAML.
 
@@ -174,9 +178,16 @@ def WriteYAML(path: PathLike, data: dict):
 	:type path: PathLike
 	:param data: Словарь для сериализации в YAML.
 	:type data: dict
+	:param atomic: Переключает использование атомарной записи.
+	:type atomic: bool
 	"""
 
-	with open(path, "w") as FileWriter: yaml.dump(data, FileWriter, allow_unicode = True, sort_keys = False)
+	data: str = yaml.dump(data, allow_unicode = True, sort_keys = False)
+
+	if atomic:
+		AtomicWrite(path, data.encode())
+	else:
+		with open(path, "w", encoding = "utf-8") as FileWrite: FileWrite.write(data)
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ТЕКСТОВЫМИ ФАЙЛАМИ <<<<< #
@@ -207,7 +218,7 @@ def ReadTextFile(path: PathLike, split: bool = False, strip: bool = False) -> st
 
 	return Text
 
-def WriteTextFile(path: PathLike, text: str | Iterable[str]):
+def WriteTextFile(path: PathLike, text: str | Iterable[str], atomic: bool = False):
 	"""
 	Записывает текстовый файл.
 
@@ -215,7 +226,13 @@ def WriteTextFile(path: PathLike, text: str | Iterable[str]):
 	:type path: PathLike
 	:param text: Строка или последовательность строк, которые должны быть объединены через символ новой строки.
 	:type text: str | Iterable[str]
+	:param atomic: Переключает использование атомарной записи.
+	:type atomic: bool
 	"""
 
 	if type(text) != str: text = "\n".join(text)
-	with open(path, "w", encoding = "utf-8") as FileWrite: FileWrite.write(text)
+
+	if atomic:
+		AtomicWrite(path, text.encode())
+	else:
+		with open(path, "w", encoding = "utf-8") as FileWrite: FileWrite.write(text)
