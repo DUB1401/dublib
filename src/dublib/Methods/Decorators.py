@@ -1,21 +1,23 @@
-from ..CLI.TextStyler import TextStyler
+from ..CLI.TextStyler import FastStyler
 
 from typing import Callable
 import warnings
 
 def deprecated(message: str | None = None) -> Callable:
-    """
-    Помечает функцию как устаревшую.
-        message – сопровождающее сообщение.
-    """
+	"""
+	Декоратор: помечает функцию как устаревшую.
 
-    def decorator(function: Callable) -> Callable:
+	:param message: Сопровождающее сообщение.
+	:type message: str | None
+	"""
 
-        def new_function(*args, **kwargs) -> Callable:
-            Message = f" {message}" or ""
-            Function = TextStyler(function.__name__).decorate.bold
-            warnings.warn(f"{Function} is deprecated.{Message}", DeprecationWarning, stacklevel = 2)
+	def decorator(function: Callable) -> Callable:
 
-            return function(*args, **kwargs)
-        return new_function
-    return decorator
+		def new_function(*args, **kwargs) -> Callable:
+			Message = f" {message}" or ""
+			Function = FastStyler(function.__name__).decorate.bold
+			warnings.warn(f"{Function} is deprecated.{Message}", DeprecationWarning, stacklevel = 2)
+
+			return function(*args, **kwargs)
+		return new_function
+	return decorator
