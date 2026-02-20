@@ -19,7 +19,7 @@ import validators
 class ParametersTypes(enum.Enum):
 	"""Перечисление типов значений параметров."""
 
-	All = None
+	All = "All"
 	Base64 = "Base64"
 	Bool = "Bool"
 	Date = "Date"
