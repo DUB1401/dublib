@@ -2,6 +2,7 @@ from .TextStyler.FastStyler import FastStyler
 from ..Exceptions.CLI import *
 
 from typing import Any, Callable, Iterable
+from dataclasses import dataclass
 from datetime import datetime
 from functools import reduce
 import enum
@@ -627,82 +628,19 @@ class ParsedCommandData:
 # >>>>> МОДУЛЬ ПОМОЩИ <<<<< #
 #==========================================================================================#
 
-class HelpLabelsIndexes(enum.Enum):
-	"""Индексы строк модуля помощи."""
-
-	COMMAND_DESCRIPTION = 0
-	ARGUMENT_DESCRIPTION = 1
-	IMPORTANT_NOTE = 2
-	COMMAND_NOT_FOUND = 3
-	CATEGORY_OTHER = 4
-
+@dataclass
 class HelpLabels:
-	"""Оператор работы с используемыми в модуле помощи строками."""
+	"""
+	Контейнер используемых в модуле помощи строк.
 
-	#==========================================================================================#
-	# >>>>> СВОЙСТВА <<<<< #
-	#==========================================================================================#
+	Для `COMMAND_NOT_FOUND` можно определить место подстановки команды через `%c`.
+	"""
 
-	@property
-	def lines(self) -> tuple[str]:
-		"""Упорядоченная последовательность используемых в модуле помощи строк."""
-
-		return tuple(self.__Lines)
-
-	#==========================================================================================#
-	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
-	#==========================================================================================#
-
-	def __init__(self):
-		"""Оператор работы с используемыми в модуле помощи строками."""
-
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
-		self.__Lines = [
-			"Print list of supported commands. For details, add name of command as argument.",
-			"The name of command for which you want to see detailed help.",
-			"Important parameters marked with * symbol.",
-			"Command \"%c\" not found.",
-			"Other"
-		]
-
-	def __getitem__(self, index: int | HelpLabelsIndexes) -> str:
-		"""
-		Возвращает строку с определённым индексом.
-
-		:param index: Индекс строки.
-		:type index: int | HelpLabelsIndexes
-		:return: Строка, используемая в модуле помощи.
-		:rtype: str
-		"""
-
-		if type(index) == HelpLabelsIndexes: index = index.value
-
-		return self.__Lines[index]
-	
-	def __setitem__(self, index: int | HelpLabelsIndexes, line: str):
-		"""
-		Задаёт строку по определённому индексу.
-
-		:param index: Индекс строки.
-		:type index: int | HelpLabelsIndexes
-		:param line: Новая строка.
-		:type line: str
-		"""
-
-		if type(index) == HelpLabelsIndexes: index = index.value
-		self.__Lines[index] = line
-
-	def set_lines(self, lines: Iterable[str]):
-		"""
-		Задаёт новый набор строк для модуля помощи.
-		
-		:param lines: Набор строк. Может быть меньше оригинального, в таком случае строки заменяются в порядке возрастания индекса.
-		:type lines: Iterable[str]
-		:raises IndexError: Выбрасывается в случае, если передано больше строк, чем необходимо.
-		"""
-
-		for Index in range(len(self.__Lines)): self.__Lines[Index] = lines[Index]
+	COMMAND_DESCRIPTION: str = "Print list of supported commands. For details, add name of command as argument."
+	ARGUMENT_DESCRIPTION: str = "The name of command for which you want to see detailed help."
+	IMPORTANT_NOTE: str = "Important parameters marked with * symbol."
+	COMMAND_NOT_FOUND: str = "Command \"%c\" not found."
+	CATEGORY_OTHER: str = "Other"
 
 class Helper:
 	"""Модуль помощи."""
@@ -871,10 +809,10 @@ class Helper:
 			if CommandForHelp.description: Help += "\n" + FastStyler(CommandForHelp.description).decorate.italic
 			for Position in CommandForHelp.positions: Help += self.__BuildPositionDescription(Position)
 			# Проверка на наличие обязательной позиции и соответствующего пояснения.
-			if "*" in Help.split("\n")[0] and self.__Labels[HelpLabelsIndexes.IMPORTANT_NOTE]: Help += "\n" + self.__Labels[HelpLabelsIndexes.IMPORTANT_NOTE] or ""
+			if "*" in Help.split("\n")[0] and self.__Labels.IMPORTANT_NOTE: Help += "\n" + self.__Labels.IMPORTANT_NOTE or ""
 			self.__Callback(Help)
 
-		else: self.__Callback(self.__Labels[HelpLabelsIndexes.COMMAND_NOT_FOUND].replace(r"%c", command_name))
+		else: self.__Callback(self.__Labels.COMMAND_NOT_FOUND.replace(r"%c", command_name))
 
 	def generate_help_list(self, commands: list[Command]):
 		"""
@@ -919,7 +857,7 @@ class Helper:
 				HelpTable["Descriptions"].append(CurrentCommand.description or "")
 
 			TableObject = PrettyTable()
-			if len(CommandsCategories.keys()) > 1: TableObject.title = FastStyler(Category or self.__Labels[HelpLabelsIndexes.CATEGORY_OTHER]).decorate.bold
+			if len(CommandsCategories.keys()) > 1: TableObject.title = FastStyler(Category or self.__Labels.CATEGORY_OTHER).decorate.bold
 			TableObject.set_style(PLAIN_COLUMNS)
 
 			for ColumnName in HelpTable.keys():
@@ -1310,8 +1248,8 @@ class Terminalyzer:
 		if type(commands) == Command: commands = [commands]
 
 		if self.__Helper.is_enabled:
-			Help = Command("help", self.__Helper.labels[HelpLabelsIndexes.COMMAND_DESCRIPTION], self.__Helper.category)
-			Help.base.add_argument(description =  self.__Helper.labels[HelpLabelsIndexes.ARGUMENT_DESCRIPTION])
+			Help = Command("help", self.__Helper.labels.COMMAND_DESCRIPTION, self.__Helper.category)
+			Help.base.add_argument(description =  self.__Helper.labels.ARGUMENT_DESCRIPTION)
 			commands.append(Help)
 
 		for CurrentCommand in commands: self.__CheckCommand(CurrentCommand)
