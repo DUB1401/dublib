@@ -8,10 +8,12 @@ on:
     paths:
       - "src/dublib/Methods/Data.py"
       - "src/dublib/Polyglot/**"
+      - "tests/**"
   pull_request:
     paths:
       - "src/dublib/Methods/Data.py"
       - "src/dublib/Polyglot/**"
+      - "tests/**"
 
 jobs:
   test:

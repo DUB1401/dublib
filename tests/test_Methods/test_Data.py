@@ -10,6 +10,7 @@ def test_StringifyFloat():
 	assert Data.StringifyFloat(1.056) == "1.06"
 	assert Data.StringifyFloat(1.054) == "1.05"
 	assert Data.StringifyFloat(1.0) == "1"
+	assert Data.StringifyFloat(0.00) == "0"
 
 def test_ToIterable():
 	assert Data.ToIterable("test") == ("test",)
