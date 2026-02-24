@@ -6,6 +6,11 @@ def test_Copy():
 	assert Copy is not Dictionary
 	assert Copy["test"] is not Dictionary["test"]
 
+def test_StringifyFloat():
+	assert Data.StringifyFloat(1.056) == "1.06"
+	assert Data.StringifyFloat(1.054) == "1.05"
+	assert Data.StringifyFloat(1.0) == "1"
+
 def test_ToIterable():
 	assert Data.ToIterable("test") == ("test",)
 	assert Data.ToIterable(["test"]) == ["test"]

@@ -23,6 +23,23 @@ def Copy(data: Any) -> Any:
 	try: return orjson.loads(orjson.dumps(data))
 	except: return copy.deepcopy(data)
 
+def StringifyFloat(number: float, round_factor: int = 2) -> str:
+	"""
+	Преобразует число с плавающей запятой в строку, отсекая `.0` в конце при наличии.
+
+	:param number: Преобразуемое число.
+	:type number: float
+	:param round_factor: Оставляемое количество символов после запятой.
+	:type round_factor: int
+	:return: Полученная строка.
+	:rtype: str
+	"""
+
+	String = str(round(number, round_factor))
+	if String.endswith(".0"): String = String[:-2]
+
+	return String
+
 def ToIterable(value: Any, iterable_type: Type[Iterable] = tuple, exclude: tuple[Type[Iterable], ...] = (bytes, str)) -> Iterable:
 	"""
 	Преобразует значение в итерируемый тип.
