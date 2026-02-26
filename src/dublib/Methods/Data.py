@@ -39,6 +39,24 @@ def StringifyFloat(number: float, round_factor: int = 2) -> str:
 
 	return String
 
+def StringToBool(value: str, literals: Iterable[str] = ("false", "0")) -> bool:
+	"""
+	Преобразует строку в логический тип, учитывая её содержимое.
+	
+	Например, `"false"` будет приведено к `False`, в отличие от стандартной реализации.
+
+	:param value: Преобразуемая строка.
+	:type value: str
+	:param literals: Набор строк, интерпретируемых как `False`.
+	:type literals: Iterable[str]
+	:return: Результирующее значение.
+	:rtype: bool
+	"""
+
+	if value.lower() in literals: return False
+
+	return bool(value)
+
 def ToIterable(value: Any, iterable_type: Type[Iterable] = tuple, exclude: tuple[Type[Iterable], ...] = (bytes, str)) -> Iterable:
 	"""
 	Преобразует значение в итерируемый тип.

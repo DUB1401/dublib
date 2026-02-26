@@ -12,6 +12,13 @@ def test_StringifyFloat():
 	assert Data.StringifyFloat(1.0) == "1"
 	assert Data.StringifyFloat(0.00) == "0"
 
+def test_StringToBool():
+	assert Data.StringToBool("0") == False
+	assert Data.StringToBool("fAlsE") == False
+	assert Data.StringToBool("1") == True
+	assert Data.StringToBool("") == False
+
+
 def test_ToIterable():
 	assert Data.ToIterable("test") == ("test",)
 	assert Data.ToIterable(["test"]) == ["test"]
