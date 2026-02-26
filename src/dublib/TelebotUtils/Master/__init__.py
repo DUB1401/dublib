@@ -93,6 +93,8 @@ class TeleMaster:
 						return
 
 				else: break
+
+		if Subscriptions == len(chats): IsSubscripted = True
 		
 		return IsSubscripted
 	
