@@ -227,11 +227,15 @@ class ExecutionStatus:
 
 	def check_data(self, key: Any) -> bool:
 		"""
-		Проверяет, существует ли значение в словаре дополнительных данных.
-			key – ключ.
+		Проверяет существование значения в словаре дополнительных данных.
+
+		:param key: Ключ для проверки.
+		:type key: Any
+		:return: Возвращает `True`, если значение по переданному ключу найдено.
+		:rtype: bool
 		"""
 
-		return key in self._Data.keys()
+		return key in self._Data
 
 	def merge(self, status: "ExecutionStatus", overwrite: bool = True):
 		"""
@@ -269,6 +273,11 @@ class ExecutionStatus:
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ РАБОТЫ С СООБЩЕНИЯМИ <<<<< #
 	#==========================================================================================#
+
+	def clear_messages(self):
+		"""Удаляет хранящиеся в статусе сообщения."""
+
+		self._Messages = list()
 
 	def print_messages(self, indent: int = 0):
 		"""
