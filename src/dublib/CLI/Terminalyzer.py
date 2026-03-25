@@ -1224,10 +1224,10 @@ class Terminalyzer:
 
 		self.__ValidableTypes = {
 			ParametersTypes.Base64: validators.base64,
-			ParametersTypes.Base64: validators.email,
-			ParametersTypes.Base64: validators.ipv4,
-			ParametersTypes.Base64: validators.ipv6,
-			ParametersTypes.Base64: validators.url
+			ParametersTypes.Email: validators.email,
+			ParametersTypes.IPv4: validators.ipv4,
+			ParametersTypes.IPv6: validators.ipv6,
+			ParametersTypes.URL: validators.url
 		}
 
 		self.set_source(self.__Parameters)
