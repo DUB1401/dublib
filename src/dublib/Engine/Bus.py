@@ -1,10 +1,11 @@
 from ..CLI.Templates.Bus import GenerateMessage, MessagesTypes, PrintMessage
+from ..Exceptions.Engine import Bus as BusExceptions
 from ..CLI.TextStyler import Codes, TextStyler
 
-from typing import Any
+from typing import Any, Iterable
 
 #==========================================================================================#
-# >>>>> ВСПОМОГАТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
+# >>>>> СИСТЕМА СООБЩЕНИЙ <<<<< #
 #==========================================================================================#
 
 class ExecutionMessage:
@@ -74,12 +75,229 @@ class ExecutionMessage:
 
 		PrintMessage(self._Text, self._Type, self._Origin)
 
+class MessagesContainer:
+	"""Контейнер сообщений."""
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def count(self) -> int:
+		"""Количество сообщений."""
+
+		return len(self.__Messages)
+
+	@property
+	def has_errors(self) -> bool:
+		"""Состояние: имеются ли сообщения-ошибки."""
+
+		return self.__HasErrors
+	
+	@property
+	def has_warnings(self) -> bool:
+		"""Состояние: имеются ли сообщения-предупреждения."""
+
+		return self.__HasWarnings
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __init__(self):
+		"""Контейнер сообщений."""
+
+		self.__Messages: list[ExecutionMessage] = list()
+		self.__HasErrors = False
+		self.__HasWarnings = False
+
+	def as_list(self) -> list[ExecutionMessage]:
+		"""
+		Возвращает копию списка сообщений.
+
+		:return: Список сообщений.
+		:rtype: list[ExecutionMessage]
+		"""
+
+		return self.__Messages.copy()
+
+	def clear(self):
+		"""Удаляет сообщения."""
+
+		self.__Messages = list()
+
+	def create_message(self, text: str, type: MessagesTypes | None = None, origin: str | None = None):
+		"""
+		Создаёт сообщение.
+
+		:param text: Текст сообщения.
+		:type text: str
+		:param type: Тип сообщения.
+		:type type: MessagesTypes | None
+		:param origin: Идентификатор источника сообщения.
+		:type origin: str | None
+		"""
+
+		self.__Messages.append(ExecutionMessage(text, type, origin))
+
+	def print(self, character: str = " ", indent: int = 0):
+		"""
+		Выводит в консоль все сообщения.
+		
+		:param character: Символ для реализации отступа.
+		:type character: str
+		:param indent: Количество символов отстутпа перед сообщением.
+		:type indent: int
+		"""
+		
+		for Message in self.__Messages:
+			if character and indent: print(character * int(indent), end = "")
+			Message.print()
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ СОЗДАНИЯ КОНКРЕТНЫХ ТИПОВ СООБЩЕНИЙ <<<<< #
+	#==========================================================================================#
+
+	def push_critical(self, text: str, origin: str | None = None):
+		"""
+		Добавляет сообщение типа **Critical**.
+
+		:param text: Текст сообщения.
+		:type text: str
+		:param origin: Идентификатор источника сообщения.
+		:type origin: str | None
+		"""
+
+		self.create_message(text, MessagesTypes.Critical, origin)
+		self.__HasErrors = True
+
+	def push_error(self, text: str, origin: str | None = None):
+		"""
+		Добавляет сообщение типа **Error**.
+
+		:param text: Текст сообщения.
+		:type text: str
+		:param origin: Идентификатор источника сообщения.
+		:type origin: str | None
+		"""
+
+		self.create_message(text, MessagesTypes.Error, origin)
+		self.__HasErrors = True
+
+	def push_info(self, text: str, origin: str | None = None):
+		"""
+		Добавляет сообщение типа **Info**.
+
+		:param text: Текст сообщения.
+		:type text: str
+		:param origin: Идентификатор источника сообщения.
+		:type origin: str | None
+		"""
+
+		self.create_message(text, MessagesTypes.Info, origin)
+
+	def push_warning(self, text: str, origin: str | None = None):
+		"""
+		Добавляет сообщение типа **Warning**.
+
+		:param text: Текст сообщения.
+		:type text: str
+		:param origin: Идентификатор источника сообщения.
+		:type origin: str | None
+		"""
+
+		self.create_message(text, MessagesTypes.Warning, origin)
+		self.__HasWarnings = True
+
+#==========================================================================================#
+# >>>>> КОНТЕЙНЕР ПРАВИЛ <<<<< #
+#==========================================================================================#
+
+class LogicalRule:
+	"""Логическое правило взаимодействия."""
+
+	def __init__(self):
+		"""Логическое правило взаимодействия."""
+
+		self.__IsEnabled = False
+
+	def __bool__(self) -> bool:
+		"""
+		Возвращает статус правила.
+
+		:return: Статус правила.
+		:rtype: bool
+		"""
+
+		return self.__IsEnabled
+
+	def disable(self):
+		"""Отключает правило."""
+
+		self.set_status(False)
+
+	def enable(self):
+		"""Включает правило."""
+
+		self.set_status(True)
+
+	def set_status(self, status: bool):
+		"""
+		Устанавливает статус активации правила.
+
+		:param status: Статус правила.
+		:type status: bool
+		"""
+
+		self.__IsEnabled = status
+
+class RulesContainer:
+	"""Хранилище правил взаимодействия."""
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def allowed_data_keys(self) -> tuple[Any]:
+		"""Последовательность доступных для использования в качестве ключей значений."""
+
+		return self.__AllowedKeys
+
+	@property
+	def require_value_initialization(self) -> LogicalRule:
+		"""Правило: требуется ли обязательная инициализация значения."""
+
+		return self.__ValueInitializationRule
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	def __init__(self):
+		"""Хранилище правил взаимодействия."""
+
+		self.__ValueInitializationRule = LogicalRule()
+		self.__AllowedKeys = tuple()
+
+	def set_allowed_keys(self, keys: Iterable[Any]):
+		"""
+		Задаёт последовательность ключей, для которых можно задавать значения в словаре дополнительных данных.
+
+		Если последовательность не указана, разрешаются любые варианты.
+
+		:param keys: Последовательность ключей.
+		:type keys: Iterable[Any]
+		"""
+
+		self.__AllowedKeys = tuple(keys)
+
 #==========================================================================================#
 # >>>>> ОСНОВНЫЕ КЛАССЫ <<<<< #
 #==========================================================================================#
 
-class ExecutionStatus:
-	"""Отчёт о выполнении."""
+class ExecutionResult:
+	"""Контейнер результата выполнения."""
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА <<<<< #
@@ -87,7 +305,7 @@ class ExecutionStatus:
 
 	@property
 	def code(self) -> int | None:
-		"""Код выполнения."""
+		"""Целочисленный код."""
 
 		return self._Code
 
@@ -98,26 +316,32 @@ class ExecutionStatus:
 		return self._Data.copy()
 
 	@property
-	def has_errors(self) -> bool:
-		"""Состояние: имеются ли ошибки."""
+	def is_value_setted(self) -> bool:
+		"""Состояние: вызывался ли метод установки значения у данного контейнера."""
 
-		return self._HasErrors
-	
-	@property
-	def has_warnings(self) -> bool:
-		"""Состояние: имеются ли предупреждения."""
-
-		return self._HasWarnings
+		return self._IsValueSetted
 
 	@property
-	def messages(self) -> tuple[ExecutionMessage]:
-		"""Сообщение."""
+	def messages(self) -> MessagesContainer:
+		"""Контейнер сообщений."""
 
-		return tuple(self._Messages)
+		return self._Messages
 	
+	@property
+	def rules(self) -> RulesContainer:
+		"""Набор правил взаимодействия."""
+
+		return self._Rules
+
 	@property
 	def value(self) -> Any:
-		"""Вложенное возвращаемое значение."""
+		"""
+		Вложенное возвращаемое значение.
+
+		:raises ValueNotInintialized: Включено правило проверки инициализации значения.
+		"""
+
+		if self._Rules.require_value_initialization and not self._IsValueSetted: raise BusExceptions.ValueNotInintialized()
 
 		return self._Value
 
@@ -135,7 +359,7 @@ class ExecutionStatus:
 	def value(self, new_value: Any) -> Any:
 		"""Вложенное возвращаемое значение."""
 
-		self._Value = new_value
+		self.set_value(new_value)
 
 	#==========================================================================================#
 	# >>>>> ПЕРЕОПРЕДЕЛЯЕМЫЕ МЕТОДЫ <<<<< #
@@ -151,15 +375,15 @@ class ExecutionStatus:
 	#==========================================================================================#
 
 	def __init__(self):
-		"""Отчёт о выполнении."""
+		"""Контейнер результата выполнения."""
 
 		self._Code = None
-		self._Messages: list[ExecutionMessage] = list()
+		self._Messages = MessagesContainer()
+		self._Rules = RulesContainer()
 		self._Value = None
 		self._Data = dict()
 
-		self._HasErrors = False
-		self._HasWarnings = False
+		self._IsValueSetted = False
 
 		self._PostInitMethod()
 
@@ -167,7 +391,7 @@ class ExecutionStatus:
 		"""
 		Приводит вложенное значение к логическому типу.
 
-		:return: Возвращает `True`, если значение в статусе возможно привести к таковому.
+		:return: Возвращает `True`, если значение в контейнере возможно привести к таковому.
 		:rtype: bool
 		"""
 
@@ -185,33 +409,38 @@ class ExecutionStatus:
 
 		return self._Data[key]
 	
-	def __iadd__(self, status: "ExecutionStatus") -> "ExecutionStatus":
+	def __iadd__(self, status: "ExecutionResult") -> "ExecutionResult":
 		"""
-		Выполняет слияние другого статуса с текущим объектом, объединяя списки сообщений и перезаписывая данные. 
+		Выполняет слияние другого контейнера с текущим, объединяя списки сообщений. 
 
-		:param status: Статус для слияния.
-		:type status: ExecutionStatus
+		:param status: Контейнер результата для слияния.
+		:type status: ExecutionResult
+		:param overwrite: Если включено, дополнительные данные, код и значение другого контейнера перезупишут текущие.
+		:type overwrite: bool, optional
 		:raises TypeError: Выбрасывается при попытке слияния с объектом другого типа.
-		:return: Результирующий отчёт о выполнении.
-		:rtype: ExecutionStatus
 		"""
 
-		if isinstance(status, ExecutionStatus): self.merge(status)
-		else: raise TypeError("can only concatenate ExecutionStatus")
+		if isinstance(status, ExecutionResult): self.merge(status)
+		else: raise TypeError("Can only concatenate ExecutionResult objects.")
 
 		return self
 
 	def __setitem__(self, key: Any, value: Any):
 		"""
-		Задаёт значение в словаре дополнительных данных.
-			key – ключ;\n
-			value – значение.
+		Устанавливает значение в словарь дополнительных данных.
+
+		:param key: Ключ.
+		:type key: Any
+		:param value: Значение.
+		:type value: Any
+		:raises KeyNotAllowed: Ключ не может быть использован из-за правила взаимодействия.
 		"""
 
+		if self._Rules.allowed_data_keys and key not in self._Rules.allowed_data_keys: raise BusExceptions.KeyNotAllowed()
 		self._Data[key] = value
 
 	def __str__(self) -> str:
-		"""Возвращает текстовое представление статуса."""
+		"""Возвращает текстовое представление результата."""
 
 		Status = str()
 		Bolder = TextStyler(Codes.Decorations.Bold)
@@ -237,103 +466,48 @@ class ExecutionStatus:
 
 		return key in self._Data
 
-	def merge(self, status: "ExecutionStatus", overwrite: bool = True):
+	def merge(self, result: "ExecutionResult", overwrite: bool = True):
 		"""
-		Выполняет слияние другого статуса с текущим объектом, объединяя списки сообщений и перезаписывая данные. 
-			status – статус для слиянитя;\n
-			overwrite – переключает перезапись данных статуса.
+		Выполняет слияние другого контейнера с текущим, объединяя списки сообщений. 
+
+		:param status: Контейнер результата для слияния.
+		:type status: ExecutionResult
+		:param overwrite: Если включено, дополнительные данные, код и значение другого контейнера перезупишут текущие.
+		:type overwrite: bool, optional
 		"""
 
 		if overwrite:
-			self._Code = status.code
-			self._Value = status.value
+			if result.code: self._Code = result.code
+			if result.is_value_setted: self._Value = result.value
 
-		for Key in status.data.keys():
-			if Key in self._Data and overwrite or Key not in self._Data: self._Data[Key] = status.data[Key]
+		for Key in result.data.keys():
+			if Key in self._Data and overwrite or Key not in self._Data: self._Data[Key] = result.data[Key]
 		
-		self._Messages += status.messages
+		self._Messages += result.messages
+
+	def delete_value(self):
+		"""Удаляет значение."""
+
+		self._IsValueSetted = False
+		self._Value = None
 
 	def set_code(self, code: int | None):
 		"""
-		Задаёт код выполнения.
-			code – код выполнения.
+		Задаёт целочисленный код.
+
+		:param code: Целочисленный код.
+		:type code: int | None
 		"""
 
 		self._Code = code
 
-	def set_value(self, value: Any, force: bool = False):
+	def set_value(self, value: Any):
 		"""
-		Устанавливает значение, которое необходимо вернуть в результате выполнения.
-			value – значение;\n
-			force – указывает, что нужно перезаписать существующее значение.
+		Задаёт результат выполнения.
+
+		:param value: Результат выполнения.
+		:type value: Any
 		"""
 
+		self._IsValueSetted = True
 		self._Value = value
-
-	#==========================================================================================#
-	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ РАБОТЫ С СООБЩЕНИЯМИ <<<<< #
-	#==========================================================================================#
-
-	def clear_messages(self):
-		"""Удаляет хранящиеся в статусе сообщения."""
-
-		self._Messages = list()
-
-	def print_messages(self, indent: int = 0):
-		"""
-		Выводит в консоль все сообщения.
-			indent – количество пробелов перед выводом сообщения.
-		"""
-		
-		for Message in self._Messages:
-			if indent: print(" " * int(indent), end = "")
-			Message.print()
-
-	def push_critical(self, text: str, origin: str | None = None):
-		"""
-		Добавляет сообщение типа Critical.
-			text – текст сообщения;\n
-			origin – строка идентификации источника сообщения.
-		"""
-
-		self.push_message(text, MessagesTypes.Critical, origin)
-		self._HasErrors = True
-
-	def push_error(self, text: str, origin: str | None = None):
-		"""
-		Добавляет сообщение типа Error.
-			text – текст сообщения;\n
-			origin – строка идентификации источника сообщения.
-		"""
-
-		self.push_message(text, MessagesTypes.Error, origin)
-		self._HasErrors = True
-
-	def push_info(self, text: str, origin: str | None = None):
-		"""
-		Добавляет сообщение типа Info.
-			text – текст сообщения;\n
-			origin – строка идентификации источника сообщения.
-		"""
-
-		self.push_message(text, MessagesTypes.Info, origin)
-
-	def push_message(self, text: str, type: MessagesTypes | None = None, origin: str | None = None):
-		"""
-		Добавляет сообщение.
-			text – текст сообщения;\n
-			type – тип сообщения;\n
-			origin – строка идентификации источника сообщения.
-		"""
-
-		self._Messages.append(ExecutionMessage(text, type, origin))
-
-	def push_warning(self, text: str, origin: str | None = None):
-		"""
-		Добавляет сообщение типа Warning.
-			text – текст сообщения;\n
-			origin – строка идентификации источника сообщения.
-		"""
-
-		self.push_message(text, MessagesTypes.Warning, origin)
-		self._HasWarnings = True
