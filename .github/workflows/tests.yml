@@ -4,11 +4,13 @@ on:
   workflow_dispatch:
   push:
     paths:
+      - "src/dublib/Engine/Bus.py"
       - "src/dublib/Methods/Data.py"
       - "src/dublib/Polyglot/**"
       - "tests/**"
   pull_request:
     paths:
+      - "src/dublib/Engine/Bus.py"
       - "src/dublib/Methods/Data.py"
       - "src/dublib/Polyglot/**"
       - "tests/**"
