@@ -1,1 +1,1 @@
-from .Terminalyzer import *
+from . import Terminalyzer

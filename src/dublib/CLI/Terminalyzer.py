@@ -1,5 +1,6 @@
 from .TextStyler.FastStyler import FastStyler
-from ..Exceptions.CLI import *
+from ..Methods.Data import ToIterable
+from .. import Exceptions
 
 from typing import Any, Callable, Iterable
 from dataclasses import dataclass
@@ -560,14 +561,19 @@ class ParsedCommandData:
 		:type arguments: tuple[str]
 		"""
 
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
 		self.__Arguments = arguments
 		self.__Flags = flags
 		self.__Keys = keys
 		self.__Name = name
 
-	def __str__(self):
+	def __str__(self) -> str:
+		"""
+		Возвращает строковое представление данных команды.
+
+		:return: Строковое представление данных команды.
+		:rtype: str
+		"""
+
 		return str({
 			"name": self.__Name, 
 			"flags": self.__Flags, 
@@ -801,7 +807,9 @@ class Helper:
 		CommandForHelp = None
 
 		for CurrentCommand in commands:
-			if CurrentCommand.name == command_name: CommandForHelp = CurrentCommand
+			if CurrentCommand.name == command_name:
+				CommandForHelp = CurrentCommand
+				break
 
 		if CommandForHelp:
 			Help = FastStyler(CommandForHelp.name).decorate.bold
@@ -1240,12 +1248,17 @@ class Terminalyzer:
 		:type commands: list[Command] | Command
 		:return: При успешной проверке парсит данные команды и возвращает их.
 		:rtype: ParsedCommandData | None
+		:raises MultipleCommandDefinition: Несколько определений для одной команды.
 		"""
+
+		commands: list[Command] = ToIterable(commands, list)
+
+		CommandsNames = [CurrentCommand.name for CurrentCommand in commands]
+		for Name in CommandsNames:
+			if CommandsNames.count(Name) > 1: raise Exceptions.CLI.Terminalyzer.MultipleCommandDefinition(Name)
 
 		self.__CommandData: ParsedCommandData = None
 		self.__Command = None
-
-		if type(commands) == Command: commands = [commands]
 
 		if self.__Helper.is_enabled:
 			Help = Command("help", self.__Helper.labels.COMMAND_DESCRIPTION, self.__Helper.category)

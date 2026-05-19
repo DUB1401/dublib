@@ -34,6 +34,19 @@ class InvalidParameterType(Exception):
 
 		super().__init__(f"\"{value}\" isn't \"{type_name}\".") 
 	
+class MultipleCommandDefinition(Exception):
+	"""Исключение: множественное определение команды."""
+
+	def __init__(self, command: str):
+		"""
+		Исключение: множественное определение команды.
+
+		:param command: Название команды.
+		:type command: str
+		"""
+
+		super().__init__(command) 
+
 class MutuallyExclusiveParameters(Exception):
 	"""Исключение: переданы взаимоисключающие параметры."""
 
