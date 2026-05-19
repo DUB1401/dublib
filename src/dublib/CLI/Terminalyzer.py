@@ -978,14 +978,14 @@ class Terminalyzer:
 		"""Проверяет соответвтсие количества параметров."""
 		
 		if not self.__Command.check_parameters_count: return
-		if len(self.__Parameters) - 1 > self.__Command.max_parameters_count: raise TooManyParameters(" ".join(self.__Parameters))
-		if len(self.__Parameters) - 1 < self.__Command.min_parameters_count: raise NotEnoughParameters(" ".join(self.__Parameters))
+		if len(self.__Parameters) - 1 > self.__Command.max_parameters_count: raise Exceptions.CLI.Terminalyzer.TooManyParameters(" ".join(self.__Parameters))
+		if len(self.__Parameters) - 1 < self.__Command.min_parameters_count: raise Exceptions.CLI.Terminalyzer.NotEnoughParameters(" ".join(self.__Parameters))
 
 	def __CheckUnlockedParameters(self):
 		"""Проверяет незаблокированные параметры."""
 
 		IndicatorsOrder = [self.flags_indicator, self.keys_indicator]
-		ExceptionsOrder = [UnknownFlag, UnknownKey]
+		ExceptionsOrder = [Exceptions.CLI.Terminalyzer.UnknownFlag, Exceptions.CLI.Terminalyzer.UnknownKey]
 
 		if len(self.keys_indicator) > len(self.flags_indicator):
 			IndicatorsOrder.reverse()
@@ -1065,7 +1065,7 @@ class Terminalyzer:
 			case _:
 				if self.__ValidableTypes[verifiable_type](value): Value = value
 
-		if Value == None and exception: raise InvalidParameterType(value, verifiable_type.value)
+		if Value == None and exception: raise Exceptions.CLI.Terminalyzer.InvalidParameterType(value, verifiable_type.value)
 
 		return Value
 
@@ -1122,7 +1122,7 @@ class Terminalyzer:
 						if not self.__ParametersLocks[index + 1]: self.__ParametersLocks[index + 1] = True
 
 					except IndexError:
-						if not self.__FreeMode: raise UnboundKey(parameter)
+						if not self.__FreeMode: raise Exceptions.CLI.Terminalyzer.UnboundKey(parameter)
 
 					Value = self.__ConfirmParameterType(self.__Parameters[index + 1], Key.type) 
 
@@ -1135,6 +1135,14 @@ class Terminalyzer:
 		Проверяет, является ли параметр аргументом. При успехе возвращает значение аргумента.
 			parameter – проверяемый параметр;\n
 			index – индекс параметра.
+
+		:param parameter: Проверяемый параметр.
+		:type parameter: str
+		:param index: Индекс параметра.
+		:type index: int
+		:raises Exceptions.CLI.Terminalyzer.MutuallyExclusiveParameters: Указано несколько параметров для одной позиции.
+		:return: Значение аргумента.
+		:rtype: Any
 		"""
 
 		#---> Проверка переполнения заблокированных позиций.
@@ -1149,8 +1157,8 @@ class Terminalyzer:
 			if HasFlagIndicator and not self.__FreeMode: ParameterName = ParameterName[len(self.__FlagsIndicator):]
 			if HasKeyIndicator and not self.__FreeMode: ParameterName = ParameterName[len(self.__KeysIndicator):]
 
-			if ParameterName in [Flag.name for Flag in Position.flags]: raise MutuallyExclusiveParameters(Position.name, self.__PositionsLocks[Position.name], parameter)
-			if ParameterName in [Key.name for Key in Position.keys]: raise MutuallyExclusiveParameters(Position.name, self.__PositionsLocks[Position.name], parameter)
+			if ParameterName in [Flag.name for Flag in Position.flags]: raise Exceptions.CLI.Terminalyzer.MutuallyExclusiveParameters(Position.name, self.__PositionsLocks[Position.name], parameter)
+			if ParameterName in [Key.name for Key in Position.keys]: raise Exceptions.CLI.Terminalyzer.MutuallyExclusiveParameters(Position.name, self.__PositionsLocks[Position.name], parameter)
 
 		#---> Определение принадлежности аргумента.
 		#==========================================================================================#
@@ -1160,7 +1168,7 @@ class Terminalyzer:
 			for CurrentArgument in Position.arguments:
 
 				try: parameter = self.__ConfirmParameterType(parameter, CurrentArgument.type)
-				except InvalidParameterType: pass
+				except Exceptions.CLI.Terminalyzer.InvalidParameterType: pass
 				else:
 					if not Position.is_base: self.__PositionsLocks[Position.name] = True
 					self.__ParametersLocks[index] = True
@@ -1184,7 +1192,6 @@ class Terminalyzer:
 			ParameterCache = self.__CheckFlag(Parameter, Index)
 
 			if ParameterCache:
-				
 				Flags.append(ParameterCache)
 				continue
 
@@ -1296,7 +1303,7 @@ class Terminalyzer:
 		if indicator != self.__KeysIndicator:
 			self.__FlagsIndicator = indicator
 
-		else: raise IdenticalIndicators()
+		else: raise Exceptions.CLI.Terminalyzer.IdenticalIndicators()
 
 	def set_keys_indicator(self, indicator: str):
 		"""
@@ -1310,4 +1317,4 @@ class Terminalyzer:
 		if indicator != self.__FlagsIndicator:
 			self.__KeysIndicator = indicator
 
-		else: raise IdenticalIndicators()
+		else: raise Exceptions.CLI.Terminalyzer.IdenticalIndicators()
