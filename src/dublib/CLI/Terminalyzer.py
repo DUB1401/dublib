@@ -24,7 +24,7 @@ class ParametersTypes(enum.Enum):
 	All = "All"
 	Base64 = "Base64"
 	Bool = "Bool"
-	Date = "Date"
+	Datetime = "Datetime"
 	Email = "Email"
 	Float = "Float"
 	Integer = "Integer"
@@ -1082,8 +1082,8 @@ class Terminalyzer:
 				if Buffer == "true": Value = True
 				elif Buffer == "false": Value = False
 
-			case ParametersTypes.Date:
-				try: Value = dateparser.parse(value).date()
+			case ParametersTypes.Datetime:
+				try: Value = dateparser.parse(value)
 				except: pass
 
 			case ParametersTypes.Float:
