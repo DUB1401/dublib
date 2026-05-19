@@ -677,12 +677,7 @@ class Helper:
 	def command(self) -> Command:
 		"""Описание команды помощи."""
 
-		Com = Command("help", self.labels.COMMAND_DESCRIPTION, self.__Category)
-		ComPos = Com.create_position("COMMAND", "Command name for help details.", important = True)
-		ComPos.add_argument()
-		Com.base.add_flag("-t" if self.__Terminalyzer.is_free_mode_enabled else "t", "Show arguments and keys expected types.")
-
-		return Com
+		return self.__HelpCommand
 
 	@property
 	def is_enabled(self) -> bool:
@@ -828,6 +823,11 @@ class Helper:
 
 		self.__IsEnabled = False
 		self.__IsSortingEnabled = False
+
+		self.__HelpCommand = Command("help", self.labels.COMMAND_DESCRIPTION, self.__Category)
+		ComPos = self.__HelpCommand.create_position("COMMAND", "Command name for help details.")
+		ComPos.add_argument()
+		self.__HelpCommand.base.add_flag("-t" if self.__Terminalyzer.is_free_mode_enabled else "t", "Show arguments and keys expected types.")
 
 	def generate_help_command(self, commands: list[Command], command_name: str, typing: bool = True):
 		"""
