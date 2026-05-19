@@ -1,5 +1,6 @@
-from ..Methods.Data import ToIterable
 from .TextStyler import FastStyler
+
+from ..Methods.Data import ToIterable
 from .. import Exceptions
 
 from typing import Any, Callable, Iterable
@@ -204,12 +205,6 @@ class Position:
 		"""Список аргументов."""
 
 		return self.__Arguments.copy()
-
-	@property
-	def defined_parameters_count(self) -> int:
-		"""Количество описанных для позиции параметров."""
-
-		return len(self.__Flags) + len(self.__Keys) + len(self.__Arguments)
 
 	@property
 	def description(self) -> str | None:
@@ -775,7 +770,7 @@ class Helper:
 			if position.is_important: Name = FastStyler(Name).colorize.blue
 			Title += Name
 
-			if position.defined_parameters_count == 1:
+			if len(position.parameters) == 1:
 				Title += " " + self.__BuildParameterLabel(position.parameters[0], typing)
 				if position.description: Title += f": {position.description}"
 				Help.append(Title)
@@ -1009,6 +1004,7 @@ class Terminalyzer:
 		:type command: Command
 		:return: Данные команды или `None` в случае несоответствия.
 		:rtype: ParsedCommandData | None
+		:raises EmptyPosition: Для позиции не описан ни один параметр.
 		"""
 		
 		if command.name == self.__CommandName:
@@ -1019,7 +1015,10 @@ class Terminalyzer:
 			self.__Command = command
 			self.__ParametersLocks = [False] * len(self.__Parameters)
 			self.__ParametersLocks[0] = True
-			for Position in command.positions: self.__PositionsLocks[Position.name] = False
+
+			for CurrentPosition in command.positions:
+				if not CurrentPosition.parameters and not CurrentPosition.is_base: raise Exceptions.CLI.Terminalyzer.EmptyPosition(CurrentPosition.name)
+				self.__PositionsLocks[CurrentPosition.name] = False
 
 			Flags, Keys, Arguments = self.__ParseParameters()
 

@@ -1,3 +1,16 @@
+class EmptyPosition(Exception):
+	"""Исключение: для позиции не описан ни один параметр."""
+
+	def __init__(self, position: str):
+		"""
+		Исключение: для позиции не описан ни один параметр.
+
+		:param position: Имя позиции.
+		:type position: str
+		"""
+
+		super().__init__(position) 
+
 class IdenticalArguments(Exception):
 	"""Исключение: попытка установки нескольких аргументов одинаковых типов на одну позицию."""
 
