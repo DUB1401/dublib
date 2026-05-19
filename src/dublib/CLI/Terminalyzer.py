@@ -1,4 +1,4 @@
-from .TextStyler.FastStyler import FastStyler
+from .TextStyler import Codes, FastStyler, TextStyler
 from ..Methods.Data import ToIterable
 from .. import Exceptions
 
@@ -203,7 +203,13 @@ class Position:
 	def arguments(self) -> list[Argument]:
 		"""Список аргументов."""
 
-		return self.__Arguments
+		return self.__Arguments.copy()
+
+	@property
+	def defined_parameters_count(self) -> int:
+		"""Количество описанных для позиции параметров."""
+
+		return len(self.__Flags) + len(self.__Keys) + len(self.__Arguments)
 
 	@property
 	def description(self) -> str | None:
@@ -215,7 +221,7 @@ class Position:
 	def flags(self) -> list[Flag]:
 		"""Список флагов."""
 
-		return self.__Flags
+		return self.__Flags.copy()
 	
 	@property
 	def is_base(self) -> bool:
@@ -233,7 +239,7 @@ class Position:
 	def keys(self) -> list[Key]:
 		"""Список ключей."""
 
-		return self.__Keys
+		return self.__Keys.copy()
 
 	@property
 	def max_parameters_count(self) -> int:
@@ -280,6 +286,12 @@ class Position:
 		"""Название позиции."""
 
 		return self.__Name
+
+	@property
+	def parameters(self) -> list[Argument | Flag | Key]:
+		"""Список всех описанных параметров позиции."""
+
+		return self.__Arguments + self.__Flags + self.__Keys
 
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ <<<<< #
@@ -463,15 +475,15 @@ class Command:
 		self.__MinParametersCount = None
 		self.__MaxParametersCount = None
 
-	def create_position(self, name: str | None = None, description: str | None = None, important: bool = False) -> Position:
+	def create_position(self, name: str, description: str | None = None, important: bool = False) -> Position:
 		"""
 		Создаёт дополнительную позицию.
 
-		:param name: Название позиции. По умолчанию `None`.
-		:type name: str | None
-		:param description: Описание позиции. По умолчанию `None`.
+		:param name: Название позиции.
+		:type name: str
+		:param description: Описание позиции.
 		:type description: str | None
-		:param important: Указывает, является ли позиция обязательной. По умолчанию `False`.
+		:param important: Указывает, является ли позиция обязательной. Для всех параметров позиции автоматически выставляется такое же значение.
 		:type important: bool
 		:return: Представление новой позиции.
 		:rtype: Position
@@ -644,7 +656,6 @@ class HelpLabels:
 
 	COMMAND_DESCRIPTION: str = "Print list of supported commands. For details, add name of command as argument."
 	ARGUMENT_DESCRIPTION: str = "The name of command for which you want to see detailed help."
-	IMPORTANT_NOTE: str = "Important parameters marked with * symbol."
 	COMMAND_NOT_FOUND: str = "Command \"%c\" not found."
 	CATEGORY_OTHER: str = "Other"
 
@@ -668,6 +679,17 @@ class Helper:
 		return self.__Category
 
 	@property
+	def command(self) -> Command:
+		"""Описание команды помощи."""
+
+		Com = Command("help", self.labels.COMMAND_DESCRIPTION, self.__Category)
+		ComPos = Com.create_position("COMMAND", "Command name for help details.", important = True)
+		ComPos.add_argument()
+		Com.base.add_flag("t", "Show parameters types.")
+
+		return Com
+
+	@property
 	def is_enabled(self) -> bool:
 		"""Состояние: активирован ли модуль помощи."""
 
@@ -688,79 +710,95 @@ class Helper:
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ГЕНЕРАЦИИ ПОМОЩИ <<<<< #
 	#==========================================================================================#
-
-	def __BuildArgumentDescription(self, argument: Argument, indent: str | None = None) -> str:
-		"""
-		Строит описание для аргумента.
-			argument – аргумент;\n
-			indent – отступ, добавляемый к каждой строке.
-		"""
-
-		MSG_Indent = indent or "  "
-		MSG_Type = f" <{argument.type.value}>"
-		MSG_Description = f": {argument.description}" if argument.description else ""
-		Description = f"\n{MSG_Indent}    • [argument{MSG_Type}]{MSG_Description}"
-
-		return Description
 	
-	def __BuildFlagDescription(self, flag: Flag, indent: str | None = None) -> str:
+	def __BuildParameterLabel(self, parameter: Argument | Flag | Key, typing: bool = True) -> str:
 		"""
-		Строит описание для флага.
-			flag – флаг;\n
-			indent – отступ, добавляемый к каждой строке.
-		"""
+		Строит надпись-индикатор для параметра.
 
-		MSG_Indent = indent or "  "
-		MSG_Name = FastStyler(self.__Terminalyzer.flags_indicator + flag.name).decorate.bold
-		MSG_Description = f": {flag.description}" if flag.description else ""
-		Description = f"\n{MSG_Indent}    • [flag] {MSG_Name}{MSG_Description}"
-
-		return Description
-	
-	def __BuildKeyDescription(self, key: Key, indent: str | None = None) -> str:
-		"""
-		Строит описание для ключа.
-			key – ключ;\n
-			indent – отступ, добавляемый к каждой строке.
+		:param parameter: Параметр позиции.
+		:type parameter: Argument | Flag | Key
+		:param typing: Переключает отображение типов.
+		:type typing: bool
+		:raises ValueError: Передан неверный объект.
+		:return: Надпиьс-индикатор.
+		:rtype: str
 		"""
 
-		MSG_Indent = indent or "  "
-		MSG_Name = FastStyler(self.__Terminalyzer.keys_indicator + key.name).decorate.bold
-		MSG_Type = f" <{key.type.value}>"
-		MSG_Description = f": {key.description}" if key.description else ""
-		Description = f"\n{MSG_Indent}    • [key{MSG_Type}] {MSG_Name}{MSG_Description}"
+		match parameter.__class__.__name__:
 
-		return Description
+			case "Argument": 
+				Typer = f"<{parameter.type.value}>" if typing else ""
+				return f"[argument{Typer}]"
+			
+			case "Flag":
+				FlagName = FastStyler(self.__Terminalyzer.flags_indicator + parameter.name).decorate.bold
+				return f"[flag {FlagName}]"
+			
+			case "Key":
+				Typer = f"<{parameter.type.value}>" if typing else ""
+				KeyName = FastStyler(self.__Terminalyzer.keys_indicator + parameter.name).decorate.bold
+				return f"[key{Typer} {KeyName}]"
+			
+			case _: raise ValueError("Incorrect parameter object.")
 
-	def __BuildPositionDescription(self, position: Command | Position) -> str:
+	def __BuildPositionDescription(self, position: Position, typing: bool = True) -> list[str]:
 		"""
-		Строит описание позиции или свободных параметров команды.
-			position – позиция или описание команды.
+		Строит описание позиции.
+
+		:param position: Данные позиции.
+		:type position: Position
+		:param typing: Переключает отображение типов.
+		:type typing: bool
+		:return: Список строк, описывающих позицию.
+		:rtype: list[str]
 		"""
 
-		if not any((position.flags, position.keys, position.arguments)): return str()
-
-		Help = ""
+		Indicator = "• "
 		Indent = "  "
-		PositionName = f"{Indent}{position.name}" if position.name else f"{Indent}POS"
-		Description = f": {position.description}" if position.description else ""
+		Help = list()
 
 		if position.is_base:
-			PositionName = f"{Indent}Other parameters:"
-			Description = ""
+			if not position.parameters: return Help
+			Help.append(f"{Indicator}Other parameters:")
 
-		Help += FastStyler(f"\n{PositionName}").decorate.bold + Description
-		
-		for CurrentArgument in position.arguments: Help += self.__BuildArgumentDescription(CurrentArgument, Indent)
-		for CurrentFlag in position.flags: Help += self.__BuildFlagDescription(CurrentFlag, Indent)
-		for CurrentKey in position.keys: Help += self.__BuildKeyDescription(CurrentKey, Indent)
+			for CurrentParameter in position.parameters:
+				Description = Indent * 2
+				Description += self.__BuildParameterLabel(CurrentParameter, typing)
+				if CurrentParameter.description: Description += f": {CurrentParameter.description}"
+				Help.append(Description)
+
+		else:
+			Title = Indicator
+			Name = position.name
+			if position.is_important: Name = FastStyler(Name).colorize.blue
+			Title += Name
+
+			if position.defined_parameters_count == 1:
+				Title += " " + self.__BuildParameterLabel(position.parameters[0], typing)
+				if position.description: Title += f": {position.description}"
+				Help.append(Title)
+
+			else:
+				if position.description: Title += f": {position.description}"
+				Help.append(Title)
+
+				for CurrentParameter in position.parameters:
+					Description = Indent * 2
+					Description += self.__BuildParameterLabel(CurrentParameter, typing)
+					Help.append(Description)
+	
+		for Index in range(len(Help)): Help[Index] = f"\n{Indent}" + Help[Index]
 
 		return Help
 
 	def __GenerateCommandMap(self, command: Command) -> str:
 		"""
 		Генерирует позиционную карту команды.
-			command – описание команды.
+
+		:param command: Данные команды.
+		:type command: Command
+		:return: Позиционная карта. Обязательные позиции выделены синим.
+		:rtype: str
 		"""
 
 		CommandMap = str()
@@ -768,8 +806,8 @@ class Helper:
 		for Position in command.positions:
 			if Position.is_base: continue
 			Name = Position.name or "POSITION"
-			IsImportant = "*" if Position.is_important else ""
-			CommandMap += f" [{Name}{IsImportant}]"
+			if Position.is_important: Name = FastStyler(Name).colorize.blue
+			CommandMap += " {" + Name + "}"
 
 		return CommandMap
 
@@ -794,7 +832,7 @@ class Helper:
 		self.__IsEnabled = False
 		self.__IsSortingEnabled = False
 
-	def generate_help_command(self, commands: list[Command], command_name: str):
+	def generate_help_command(self, commands: list[Command], command_name: str, typing: bool = True):
 		"""
 		Отправляет подробное описание команды в callback-функцию.
 
@@ -802,6 +840,8 @@ class Helper:
 		:type commands: list[Command]
 		:param command_name: Название команды, для которой требуется получить помощь.
 		:type command_name: str
+		:param typing: Переключает отображение типов.
+		:type typing: bool
 		"""
 
 		CommandForHelp = None
@@ -815,9 +855,11 @@ class Helper:
 			Help = FastStyler(CommandForHelp.name).decorate.bold
 			Help += self.__GenerateCommandMap(CommandForHelp)
 			if CommandForHelp.description: Help += "\n" + FastStyler(CommandForHelp.description).decorate.italic
-			for Position in CommandForHelp.positions: Help += self.__BuildPositionDescription(Position)
-			# Проверка на наличие обязательной позиции и соответствующего пояснения.
-			if "*" in Help.split("\n")[0] and self.__Labels.IMPORTANT_NOTE: Help += "\n" + self.__Labels.IMPORTANT_NOTE or ""
+			
+			for Position in CommandForHelp.positions:
+				Lines = self.__BuildPositionDescription(Position, typing)
+				if Lines: Help += "".join(Lines)
+
 			self.__Callback(Help)
 
 		else: self.__Callback(self.__Labels.COMMAND_NOT_FOUND.replace(r"%c", command_name))
@@ -954,10 +996,14 @@ class Terminalyzer:
 	def __CheckCommand(self, command: Command) -> ParsedCommandData | None:
 		"""
 		Выполняет проверку соответствия параметров конкретной команде.
-			command – описание команды.
+
+		:param command: Данные проверяемой команды.
+		:type command: Command
+		:return: Данные команды или `None` в случае несоответствия.
+		:rtype: ParsedCommandData | None
 		"""
 		
-		if self.__ConfirmCommandName(command):
+		if command.name == self.__CommandName:
 			Flags = list()
 			Keys = dict()
 			Arguments = list()
@@ -997,17 +1043,6 @@ class Terminalyzer:
 
 				for Indicator, ExceptionType in zip(IndicatorsOrder, ExceptionsOrder):
 					if self.__Parameters[Index].startswith(Indicator): raise ExceptionType(self.__Parameters[Index])
-
-	def __ConfirmCommandName(self, command: Command) -> bool:
-		"""
-		Проверяет, соответствует ли название команды из описания текущему.
-			command – описание команды.
-		"""
-		
-		IsDetermined = False
-		if command.name == self.__CommandName: IsDetermined = True
-		
-		return IsDetermined
 
 	def __ConfirmParameterType(self, value: str, verifiable_type: ParametersTypes = ParametersTypes.All, exception: bool = True) -> bool | float | int | str | datetime:
 		"""
@@ -1257,9 +1292,9 @@ class Terminalyzer:
 		:rtype: ParsedCommandData | None
 		:raises MultipleCommandDefinition: Несколько определений для одной команды.
 		"""
-
+		
 		commands: list[Command] = ToIterable(commands, list)
-
+		
 		CommandsNames = [CurrentCommand.name for CurrentCommand in commands]
 		for Name in CommandsNames:
 			if CommandsNames.count(Name) > 1: raise Exceptions.CLI.Terminalyzer.MultipleCommandDefinition(Name)
@@ -1267,15 +1302,11 @@ class Terminalyzer:
 		self.__CommandData: ParsedCommandData = None
 		self.__Command = None
 
-		if self.__Helper.is_enabled:
-			Help = Command("help", self.__Helper.labels.COMMAND_DESCRIPTION, self.__Helper.category)
-			Help.base.add_argument(description =  self.__Helper.labels.ARGUMENT_DESCRIPTION)
-			commands.append(Help)
-
+		if self.__Helper.is_enabled: commands.append(self.__Helper.command)
 		for CurrentCommand in commands: self.__CheckCommand(CurrentCommand)
 
 		if self.__Helper.is_enabled and self.__CommandData and self.__CommandData.name == "help":
-			if self.__CommandData.arguments: self.__Helper.generate_help_command(commands, self.__CommandData.arguments[0])
+			if self.__CommandData.arguments: self.__Helper.generate_help_command(commands, self.__CommandData.arguments[0], self.__CommandData.check_flag("t"))
 			else: self.__Helper.generate_help_list(commands)
 		
 		return self.__CommandData
