@@ -1,5 +1,5 @@
-from .TextStyler import Codes, FastStyler, TextStyler
 from ..Methods.Data import ToIterable
+from .TextStyler import FastStyler
 from .. import Exceptions
 
 from typing import Any, Callable, Iterable
@@ -685,7 +685,7 @@ class Helper:
 		Com = Command("help", self.labels.COMMAND_DESCRIPTION, self.__Category)
 		ComPos = Com.create_position("COMMAND", "Command name for help details.", important = True)
 		ComPos.add_argument()
-		Com.base.add_flag("t", "Show parameters types.")
+		Com.base.add_flag("-t" if self.__Terminalyzer.is_free_mode_enabled else "t", "Show arguments and keys expected types.")
 
 		return Com
 
@@ -732,11 +732,13 @@ class Helper:
 			
 			case "Flag":
 				FlagName = FastStyler(self.__Terminalyzer.flags_indicator + parameter.name).decorate.bold
+				if self.__Terminalyzer.is_free_mode_enabled: FlagName = FastStyler(parameter.name).decorate.bold
 				return f"[flag {FlagName}]"
 			
 			case "Key":
 				Typer = f"<{parameter.type.value}>" if typing else ""
 				KeyName = FastStyler(self.__Terminalyzer.keys_indicator + parameter.name).decorate.bold
+				if self.__Terminalyzer.is_free_mode_enabled: KeyName = FastStyler(parameter.name).decorate.bold
 				return f"[key{Typer} {KeyName}]"
 			
 			case _: raise ValueError("Incorrect parameter object.")
@@ -982,6 +984,12 @@ class Terminalyzer:
 		"""Настройки модуля помощи."""
 
 		return self.__Helper
+
+	@property
+	def is_free_mode_enabled(self) -> bool:
+		"""Состояние: используется ли свободный режим."""
+
+		return self.__FreeMode
 
 	@property
 	def keys_indicator(self) -> str:
