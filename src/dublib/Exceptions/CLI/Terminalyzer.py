@@ -1,3 +1,7 @@
+#==========================================================================================#
+# >>>>> ИСКЛЮЧЕНИЯ ВАЛИДАТОРА <<<<< #
+#==========================================================================================#
+
 class EmptyPosition(Exception):
 	"""Исключение: для позиции не описан ни один параметр."""
 
@@ -11,26 +15,35 @@ class EmptyPosition(Exception):
 
 		super().__init__(position) 
 
-class IdenticalArguments(Exception):
-	"""Исключение: попытка установки нескольких аргументов одинаковых типов на одну позицию."""
+class MultipleCommandDefinition(Exception):
+	"""Исключение: множественное определение команды."""
 
-	def __init__(self, type_name: str):
+	def __init__(self, command: str):
 		"""
-		Исключение: попытка установки нескольких аргументов одинаковых типов на одну позицию.
+		Исключение: множественное определение команды.
 
-		:param type_name: Название типа аргумента.
-		:type type_name: str
+		:param command: Название команды.
+		:type command: str
 		"""
 
-		super().__init__(f"Can't set same arguments \"{type_name}\" on position.") 
+		super().__init__(command) 
 
-class IdenticalIndicators(Exception):
-	"""Исключение: попытка установки одинаковых индикаторов ключей и флагов."""
+#==========================================================================================#
+# >>>>> ИСКЛЮЧЕНИЯ ВРЕМЕНИ ВЫПОЛНЕНИЯ <<<<< #
+#==========================================================================================#
 
-	def __init__(self):
-		"""Исключение: попытка установки одинаковых индикаторов ключей и флагов."""
+class ImportantPositionEmpty(Exception):
+	"""Исключение: для обязательной позиции не задан параметр."""
 
-		super().__init__("Cannot set same indicators for keys and flags.") 
+	def __init__(self, position: str):
+		"""
+		Исключение: для обязательной позиции не задан параметр.
+
+		:param position: Имя позиции.
+		:type position: str
+		"""
+
+		super().__init__(position) 
 
 class InvalidParameterType(Exception):
 	"""Исключение: значение параметра не соответсвует ожидаемому типу."""
@@ -46,62 +59,49 @@ class InvalidParameterType(Exception):
 		"""
 
 		super().__init__(f"\"{value}\" isn't \"{type_name}\".") 
-	
-class MultipleCommandDefinition(Exception):
-	"""Исключение: множественное определение команды."""
 
-	def __init__(self, command: str):
+class MultipleParametersOnPosition(Exception):
+	"""Исключение: попытка установить несколько параметров для одной позиции."""
+
+	def __init__(self, position_name: str): 
 		"""
-		Исключение: множественное определение команды.
+		Исключение: попытка установить несколько параметров для одной позиции.
 
-		:param command: Название команды.
-		:type command: str
-		"""
-
-		super().__init__(command) 
-
-class MutuallyExclusiveParameters(Exception):
-	"""Исключение: переданы взаимоисключающие параметры."""
-
-	def __init__(self, position: str, blocked_parameter: str, parameter: str): 
-		"""
-		Исключение: переданы взаимоисключающие параметры.
-
-		:param position: Название позиции.
-		:type position: str
-		:param blocked_parameter: Блокирующий параметр.
-		:type blocked_parameter: str
-		:param parameter: Обрабатываемый параметр.
-		:type parameter: str
+		:param position_name: Название позиции.
+		:type position_name: str
 		"""
 
-		super().__init__(f"\"{blocked_parameter}\" blocked \"{parameter}\" on position \"{position}\".") 
+		super().__init__(f"On positioin \"{position_name}\" setted more than 1 parameter.") 
 
 class NotEnoughParameters(Exception):
 	"""Исключение: недостаточно параметров."""
 
-	def __init__(self, command: str):
+	def __init__(self, minimal: int, given: int):
 		"""
 		Исключение: недостаточно параметров.
 
-		:param command: Все параметры команды через пробел.
-		:type command: str
+		:param minimal: Минимальное количество параметров команды.
+		:type minimal: int
+		:param given: Переданное количество параметров.
+		:type given: int
 		"""
 
-		super().__init__(f"\"{command}\".") 
+		super().__init__(f"Minimal parameters count is {minimal}. Given {given}.") 
 
 class TooManyParameters(Exception):
 	"""Исключение: слишком много параметров."""
 
-	def __init__(self, command: str):
+	def __init__(self, maximal: int, given: int):
 		"""
 		Исключение: слишком много параметров.
 
-		:param command: Все параметры команды через пробел.
-		:type command: str
+		:param maximal: Максимальное количество параметров команды.
+		:type maximal: int
+		:param given: Переданное количество параметров.
+		:type given: int
 		"""
 
-		super().__init__(f"\"{command}\".") 
+		super().__init__(f"Maximal parameters count is {maximal}. Given {given}.") 
 
 class UnboundKey(Exception):
 	"""Исключение: ключ не связан со значением."""
@@ -115,42 +115,3 @@ class UnboundKey(Exception):
 		"""
 		
 		super().__init__(f"\"{key}\".") 
-
-class UnknownFlag(Exception):
-	"""Исключение: неизвестный флаг."""
-
-	def __init__(self, flag: str):
-		"""
-		Исключение: неизвестный флаг.
-
-		:param flag: Название флага.
-		:type flag: str
-		"""
-		
-		super().__init__(f"\"{flag}\".") 
-	
-class UnknownKey(Exception):
-	"""Исключение: неизвестный ключ."""
-
-	def __init__(self, key: str):
-		"""
-		Исключение: неизвестный ключ.
-
-		:param key: Название ключа.
-		:type key: str
-		"""
-		
-		super().__init__(f"\"{key}\".") 
-
-class UnknownCommand(Exception):
-	"""Исключение: неизвестная комманда."""
-
-	def __init__(self, command: str):
-		"""
-		Исключение: неизвестная комманда.
-
-		:param command: Название команды.
-		:type command: str
-		"""
-		
-		super().__init__(f"\"{command}\".") 

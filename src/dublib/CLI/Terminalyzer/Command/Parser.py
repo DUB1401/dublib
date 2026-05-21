@@ -1,0 +1,593 @@
+from ..Enums import ParametersTypes
+
+from .... import Exceptions
+
+from typing import Any, Iterable, TYPE_CHECKING
+from datetime import datetime
+import os
+
+import dateparser
+import validators
+
+if TYPE_CHECKING:
+	from .Definition import _BasePosition, _Position, Command
+
+	from .. import Terminalyzer
+
+#==========================================================================================#
+# >>>>> ПРЕДСТАВЛЕНИЯ ОБРАБОТАННЫХ ПАРАМЕТРОВ <<<<< #
+#==========================================================================================#
+
+class _ParsedArgument:
+	"""Представление обработанного аргумента."""
+
+	@property
+	def value(self) -> bool | float | int | str | datetime:
+		"""Значение ключа."""
+
+		return self.__Value
+
+	def __init__(self, value: bool | float | int | str | datetime):
+		"""
+		Представление обработанного аргумента.
+
+		:param value: Значение ключа.
+		:type value: bool | float | int | str | datetime
+		"""
+
+		self.__Value = value
+
+	def __repr__(self) -> str:
+		"""
+		Возвращает текстовое представление объекта.
+
+		:return: Текстовое представление объекта.
+		:rtype: str
+		"""
+
+		return str(self.__Value)
+
+class _ParsedFlag:
+	"""Представление обработанного флага."""
+
+	@property
+	def aliases(self) -> list[str]:
+		"""Список псевдонимов."""
+
+		return self.__Aliases.copy()
+
+	@property
+	def name(self) -> str:
+		"""Имя флага."""
+
+		return self.__Name
+
+	def __init__(self, parameter: str, aliases: list[str]):
+		"""
+		Представление обработанного флага.
+
+		:param parameter: Обработанный параметр.
+		:type parameter: str
+		:param aliases: Список псевдонимов.
+		:type aliases: list[str]
+		"""
+
+		self.__Name = parameter
+		self.__Aliases = aliases
+
+	def __repr__(self) -> str:
+		"""
+		Возвращает текстовое представление объекта.
+
+		:return: Текстовое представление объекта.
+		:rtype: str
+		"""
+
+		return self.__Name
+
+class _ParsedKey:
+	"""Представление обработанного ключа."""
+
+	@property
+	def aliases(self) -> list[str]:
+		"""Список псевдонимов."""
+
+		return self.__Aliases.copy()
+
+	@property
+	def name(self) -> str:
+		"""Имя ключа."""
+
+		return self.__Name
+
+	@property
+	def value(self) -> bool | float | int | str | datetime:
+		"""Значение ключа."""
+
+		return self.__Value
+
+	def __init__(self, parameter: str, aliases: list[str], value: bool | float | int | str | datetime):
+		"""
+		Представление обработанного ключа.
+
+		:param parameter: Обработанный параметр.
+		:type parameter: str
+		:param aliases: Список псевдонимов.
+		:type aliases: list[str]
+		:param value: Значение ключа.
+		:type value: bool | float | int | str | datetime
+		"""
+
+		self.__Name = parameter
+		self.__Aliases = aliases
+		self.__Value = value
+
+	def __repr__(self) -> str:
+		"""
+		Возвращает текстовое представление объекта.
+
+		:return: Текстовое представление объекта.
+		:rtype: str
+		"""
+
+		return f"<key {self.__Name}={self.__Value}>"
+
+class _ParsedCommandParameters:
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def arguments(self) -> tuple[_ParsedArgument]:
+		"""Последовательность представлений аргументов."""
+
+		return self.__GetParametersType(_ParsedArgument)
+	
+	@property
+	def flags(self) -> tuple[_ParsedFlag]:
+		"""Последовательность представлений флагов."""
+
+		return self.__GetParametersType(_ParsedFlag)
+	
+	@property
+	def keys(self) -> tuple[_ParsedKey]:
+		"""Последовательность представлений ключей."""
+
+		return self.__GetParametersType(_ParsedKey)
+	
+	@property
+	def positions(self) -> dict[str, _ParsedArgument | _ParsedFlag | _ParsedKey | None]:
+		"""Словарь параеметров позиций."""
+
+		return self.__Positions.copy()
+
+	#==========================================================================================#
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __GetParametersType(self, requred_type: _ParsedArgument | _ParsedFlag | _ParsedKey) -> tuple[type]:
+		"""
+		Возвращает последовательность представлений параметров определённого типа.
+
+		:param requred_type: Требуемый тип.
+		:type requred_type: _ParsedArgument | _ParsedFlag | _ParsedKey
+		:return: Последовательность представлений параметров определённого типа.
+		:rtype: tuple[type]
+		"""
+
+		Result = list()
+
+		for Sequence in (self.__Positions.values(), self.__BasePosition):
+			for Parameter in Sequence:
+				if type(Parameter) == requred_type: Result.append(Parameter)
+
+		return tuple(Result)
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __init__(self):
+		"""Данные о спаршенных параметрах команды."""
+
+		self.__Positions: dict[str, _ParsedArgument | _ParsedFlag | _ParsedKey | None] = dict()
+		self.__BasePosition: list[_ParsedArgument | _ParsedFlag | _ParsedKey] = list()
+
+	def add_base_parameter(self, parameter: _ParsedArgument | _ParsedFlag | _ParsedKey):
+		"""
+		Добавляет представление параметра на базовую позицию.
+
+		:param parameter: Представление параметра.
+		:type parameter: _ParsedArgument | _ParsedFlag | _ParsedKey
+		"""
+
+		self.__BasePosition.append(parameter)
+
+	def set_positional_parameter(self, position_name: str, parameter: _ParsedArgument | _ParsedFlag | _ParsedKey):
+		"""
+		Устанавливает представление параметра на позицию.
+
+		:param position_name: Имя позиции.
+		:type position_name: str
+		:param parameter: Представление параметра.
+		:type parameter: _ParsedArgument | _ParsedFlag | _ParsedKey
+		:raises Exceptions.CLI.Terminalyzer.MultipleParametersOnPosition: Попытка установки нескольких параметров для одной позиции.
+		"""
+
+		if position_name in self.__Positions: raise Exceptions.CLI.Terminalyzer.MultipleParametersOnPosition(position_name)
+		self.__Positions[position_name] = parameter
+
+#==========================================================================================#
+# >>>>> ДАННЫЕ ОБРАБОТАННОЙ КОМАНДЫ <<<<< #
+#==========================================================================================#
+
+class _ParsedCommandData:
+	"""Данные обработанной команды."""
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def arguments(self) -> tuple[bool | float | int | str | datetime]:
+		"""Последовательность значений аргументов."""
+
+		return tuple(Element.value for Element in self.__ParsedData.arguments)
+	
+	@property
+	def flags(self) -> tuple[_ParsedFlag]:
+		"""Последовательность активированных флагов."""
+
+		return self.__ParsedData.flags
+	
+	@property
+	def keys(self) -> tuple[str, bool | float | int | str | datetime]:
+		"""Cловарь имён активированных ключей и их значений."""
+
+		return self.__ParsedData.keys
+	
+	@property
+	def name(self) -> str:
+		"""Название команды."""
+
+		return self.__Name
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __init__(self, name: str, parsed_data: _ParsedCommandParameters):
+
+		self.__Name = name
+		self.__ParsedData = parsed_data
+
+	def __str__(self) -> str:
+		"""
+		Возвращает строковое представление данных команды.
+
+		:return: Строковое представление данных команды.
+		:rtype: str
+		"""
+
+		return str({
+			"name": self.__Name, 
+			"flags": self.__ParsedData.flags, 
+			"keys": self.__ParsedData.keys, 
+			"arguments": self.__ParsedData.arguments
+		})
+
+	def check_flag(self, flag: str) -> bool:
+		"""
+		Проверяет, активирован ли флаг.
+		
+		:param flag: Название флага.
+		:type flag: str
+		:return: Состояние проверки.
+		:rtype: bool
+		"""
+
+		for CurrentFlag in self.__ParsedData.flags:
+			if flag == CurrentFlag.name or flag in CurrentFlag.aliases: return True
+
+		return False
+	
+	def check_key(self, key: str) -> bool:
+		"""
+		Проверяет, активирован ли ключ.
+		
+		:param flag: Название ключа.
+		:type flag: str
+		:return: Состояние проверки.
+		:rtype: bool
+		"""
+
+		for CurrentKey in self.__ParsedData.keys:
+			if key == CurrentKey.name or key in CurrentKey.aliases: return True
+
+		return False
+	
+	def get_key_value(self, key: str, exception: bool = False) -> bool | float | int | str | datetime:
+		"""
+		Возвращает значение активированного ключа.
+
+		:param key: Название ключа.
+		:type key: str
+		:param exception: Указывает, нужно ли выбросить исключение при отсутствии ключа.
+		:type exception: bool
+		:raises KeyError: Выбрасывается в случае активации соответствующего параметра и запросе значения отсутствующего ключа.
+		:return: Значение ключа.
+		:rtype: Any
+		"""
+
+		for CurrentKey in self.__ParsedData.keys:
+			if key == CurrentKey.name or key in CurrentKey.aliases: return CurrentKey.value
+
+		if exception: raise KeyError(key)
+
+	def get_position_parameter(self, position_name: str) -> _ParsedArgument | _ParsedFlag | _ParsedKey | None:
+		"""
+		Возвращает параметр позиции.
+
+		:param position_name: Имя позиции.
+		:type position_name: str
+		:return: Параметр позиции или `None` при пустой позиции.
+		:rtype: _ParsedArgument | _ParsedFlag | _ParsedKey | None
+		:raises KeyError: Позиция не обнаружена.
+		"""
+
+		return self.__ParsedData.positions[position_name]
+
+#==========================================================================================#
+# >>>>> ОСНОВНОЙ КЛАСС <<<<< #
+#==========================================================================================#
+
+class _CommandParser:
+	"""Парсер команды."""
+
+	#==========================================================================================#
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ВАЛИДАЦИИ <<<<< #
+	#==========================================================================================#
+
+	def __CheckImportantPositionsLocks(self):
+		"""
+		Проверяет, все ли обязательные позиции заблокированы.
+
+		:raises ImportantPositionEmpty: Для обязательной позиции не задан параметр.
+		"""
+
+		for CurrentPosition in self.__Command.positions:
+			if CurrentPosition.is_important and not self.__PositionsLocks[CurrentPosition.name]:
+				raise Exceptions.CLI.Terminalyzer.ImportantPositionEmpty(CurrentPosition.name)
+
+	def __CheckParametersCount(self):
+		"""
+		Проверяет соответвтсие количества параметров.
+		
+		:raises TooManyParameters: Слишком много параметров.
+		:raises NotEnoughParameters: Недостаточно параметров.
+		"""
+		
+		ParametersCount = len(self.__Parameters)
+		if ParametersCount > self.__Command.max_parameters_count: raise Exceptions.CLI.Terminalyzer.TooManyParameters(self.__Command.max_parameters_count, ParametersCount)
+		if ParametersCount < self.__Command.min_parameters_count: raise Exceptions.CLI.Terminalyzer.NotEnoughParameters(self.__Command.min_parameters_count, ParametersCount)
+
+	def __ValidateCommandDefinition(self, command: "Command") -> "Command":
+		"""
+		Проводит валидацию определения команды.
+
+		:param command: Определение команды.
+		:type command: Command
+		:raises Exceptions.CLI.Terminalyzer.EmptyPosition: Для позиции не описан ни один параметр.
+		:return: Определение команды.
+		:rtype: Command
+		"""
+
+		for CurrentPosition in command.positions:
+			if not CurrentPosition.parameters and not CurrentPosition.is_base: raise Exceptions.CLI.Terminalyzer.EmptyPosition(CurrentPosition.name)
+
+		return command
+
+	#==========================================================================================#
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ПАРСИНГА <<<<< #
+	#==========================================================================================#
+
+	def __CatchParameterForPositions(self, index: str):
+		"""
+		Поочерёдно проверяет позиции и пытается заполнить их параметрами соответствующего типа.
+
+		:param index: Индекс проверяемого параметра.
+		:type index: str
+		"""
+
+		Parameter = self.__Parameters[index]
+
+		for CurrentPosition in self.__Command.positions:
+			
+			for CurrentFlag in CurrentPosition.flags:
+				if Parameter in [CurrentFlag.name] + CurrentFlag.aliases:
+					self.__ParametersLocks[index] = True
+					self.__IsPositionLocked(CurrentPosition.name, exception = True)
+					self.__PositionsLocks[CurrentPosition.name] = _ParsedFlag(CurrentFlag.name, CurrentFlag.aliases)
+					return
+			
+			for CurrentKey in CurrentPosition.keys:
+				if Parameter == CurrentKey.name or Parameter in CurrentKey.aliases:
+					self.__ParametersLocks[index] = True
+					if len(self.__Parameters) < index + 2 or self.__ParametersLocks[index + 1]: raise Exceptions.CLI.Terminalyzer.UnboundKey(Parameter)
+					self.__ParametersLocks[index + 1] = True
+
+					self.__IsPositionLocked(CurrentPosition.name, exception = True)
+					Value = self.__GetTypedValue(self.__Parameters[index + 1], CurrentKey.type)
+					self.__PositionsLocks[CurrentPosition.name] = _ParsedKey(CurrentKey.name, CurrentKey.aliases, Value)
+					return
+				
+			if CurrentPosition.argument and not self.__IsPositionLocked(CurrentPosition.name):
+				Value = self.__GetTypedValue(self.__Parameters[index], CurrentPosition.argument.type)
+				self.__ParametersLocks[index] = True
+				self.__PositionsLocks[CurrentPosition.name] = _ParsedArgument(Value)
+				return
+
+	def __GetTypedValue(self, value: str, verifiable_type: ParametersTypes = ParametersTypes.All, exception: bool = True) -> bool | float | int | str | datetime:
+		"""
+		Проверяет, соответствует ли строка ожидаемому типу данных и преобразует её в этот самый тип.
+
+		:param value: Проверяемая строка.
+		:type value: str
+		:param verifiable_type: Проверяемый тип.
+		:type verifiable_type: ParametersTypes
+		:param exception: Указывает, следует ли выбрасывать исключение при ошибке верификации типа параметра.
+		:type exception: bool
+		:raises InvalidParameterType: Выбрасывается при ошибке верификации типа параметра.
+		:return: Преобразованные в целевой тип данные.
+		:rtype: bool | float | int | str | datetime
+		"""
+		
+		Value = None
+
+		match verifiable_type:
+
+			case ParametersTypes.All:
+				Value = value
+
+			case ParametersTypes.Alpha:
+				if value.isalpha(): Value = value
+
+			case ParametersTypes.Bool:
+				Buffer = value.lower()
+				if Buffer == "true": Value = True
+				elif Buffer == "false": Value = False
+
+			case ParametersTypes.Datetime:
+				try: Value = dateparser.parse(value)
+				except: pass
+
+			case ParametersTypes.Float:
+				if value.count("-") <= 1 and value.strip(".").count(".") == 1 and value.replace(".", "").isdigit(): Value = float(value)
+
+			case ParametersTypes.Integer:
+				if value.count("-") <= 1 and value.lstrip("-").isdigit(): Value = int(value)
+
+			case ParametersTypes.Number:
+
+				if "." in value:
+					try: Value = float(value)
+					except ValueError: pass
+
+				else:
+					try: Value = int(value)
+					except ValueError: pass
+
+			case ParametersTypes.ValidPath:
+				if os.path.exists(value): Value = value
+
+			case _:
+				if self.__ValidableTypes[verifiable_type](value): Value = value
+
+		if Value == None and exception: raise Exceptions.CLI.Terminalyzer.InvalidParameterType(value, verifiable_type.value)
+
+		return Value
+
+	def __IsPositionLocked(self, position_name: str, exception: bool = False) -> bool:
+		"""
+		Проверяет, заблокирована ли позиция параметром.
+
+		:param position_name: Имя позиции.
+		:type position_name: str
+		:param exception: Указывает, выбрасывать ли исключение в случае подтверждения блокировки позиции.
+		:type exception: bool
+		:raises Exceptions.CLI.Terminalyzer.MultipleParametersOnPosition: Позиция заблокирована.
+		:return: Возвращает `True`, если позиция заблокирована и выброс исключения отключён.
+		:rtype: bool
+		"""
+
+		if self.__PositionsLocks[position_name] and exception: raise Exceptions.CLI.Terminalyzer.MultipleParametersOnPosition(position_name)
+
+		return bool(self.__PositionsLocks[position_name])
+
+	def __ParseBasePositionParameters(self, index: str):
+		"""
+		Проверяет возможность заполнения базовой позиции остаточными параметрами.
+
+		:param index: Индекс проверяемого параметра.
+		:type index: str
+		"""
+
+		Parameter = self.__Parameters[index]
+		BasePosition = self.__Command.base
+
+		for CurrentFlag in BasePosition.flags:
+			if Parameter in [CurrentFlag.name] + CurrentFlag.aliases:
+				self.__ParametersLocks[index] = True
+				self.__BaseParameters.append(_ParsedFlag(Parameter, CurrentFlag.aliases))
+				return
+		
+		for CurrentKey in BasePosition.keys:
+			if Parameter == CurrentKey.name or Parameter in CurrentKey.aliases:
+				self.__ParametersLocks[index] = True
+				if len(self.__Parameters) < index + 2 or self.__ParametersLocks[index + 1]: raise Exceptions.CLI.Terminalyzer.UnboundKey(Parameter)
+				self.__ParametersLocks[index + 1] = True
+				Value = self.__GetTypedValue(self.__Parameters[index + 1], CurrentKey.type)
+				self.__BaseParameters.append(_ParsedKey(Parameter, CurrentKey.aliases, Value))
+				return
+			
+		for CurrentArgument in BasePosition.arguments:
+			Value = self.__GetTypedValue(self.__Parameters[index], CurrentArgument.type)
+			self.__ParametersLocks[index] = True
+			self.__BaseParameters.append(_ParsedArgument(Value))
+			return
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __init__(self, command: Command, parameters: Iterable[str]):
+		"""
+		Парсер команды.
+
+		:param command: Данные команды.
+		:type command: Command
+		:param parameters: Последовательность строковых параметров команды (не включает имя самой команды).
+		:type parameters: Iterable[str]
+		"""
+
+		self.__Command = self.__ValidateCommandDefinition(command)
+		self.__Parameters = tuple(parameters)
+
+		self.__ParametersLocks = [False for _ in self.__Parameters]
+		self.__PositionsLocks = {CurrentPosition.name: None for CurrentPosition in self.__Command.positions}
+		self.__BaseParameters = list()
+
+		self.__ValidableTypes = {
+			ParametersTypes.Base64: validators.base64,
+			ParametersTypes.Email: validators.email,
+			ParametersTypes.IPv4: validators.ipv4,
+			ParametersTypes.IPv6: validators.ipv6,
+			ParametersTypes.URL: validators.url
+		}
+
+	def parse(self) -> _ParsedCommandData:
+		"""
+		Разбирает параметры команды и типизирует значения.
+
+		:return: Данные обработанной команды.
+		:rtype: ParsedCommandData
+		"""
+
+		ParsedData = _ParsedCommandParameters()
+
+		for Index in range(len(self.__Parameters)):
+			if self.__ParametersLocks[Index]: continue
+			self.__CatchParameterForPositions(Index)
+
+		for Index in range(len(self.__Parameters)):
+			if self.__ParametersLocks[Index]: continue
+			self.__ParseBasePositionParameters(Index)
+
+		for PositionName in self.__PositionsLocks: ParsedData.set_positional_parameter(PositionName, self.__PositionsLocks[PositionName])
+		for Parameter in self.__BaseParameters: ParsedData.add_base_parameter(Parameter)
+
+		self.__CheckImportantPositionsLocks()
+		self.__CheckParametersCount()
+
+		return _ParsedCommandData(self.__Command.name, ParsedData)
