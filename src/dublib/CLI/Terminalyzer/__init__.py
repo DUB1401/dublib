@@ -1,7 +1,7 @@
 from .Command.Parser import _CommandParser, _ParsedCommandData
 from .Command.Definition import Command
 from .Enums import ParametersTypes
-from .Helper import _Helper
+from .Helper import Helper
 
 from ...Methods.Data import ToIterable
 from ... import Exceptions
@@ -17,7 +17,7 @@ class Terminalyzer:
 	"""Обработчик консольных параметров."""
 
 	@property
-	def helper(self) -> _Helper:
+	def helper(self) -> Helper:
 		"""Настройки модуля помощи."""
 
 		return self.__Helper
@@ -53,7 +53,7 @@ class Terminalyzer:
 
 		self.set_input(input)
 		
-		self.__Helper = _Helper(self)
+		self.__Helper = Helper()
 
 	def check_commands(self, commands: list[Command] | Command) -> _ParsedCommandData | None:
 		"""

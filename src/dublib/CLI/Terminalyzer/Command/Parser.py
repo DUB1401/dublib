@@ -10,7 +10,7 @@ import dateparser
 import validators
 
 if TYPE_CHECKING:
-	from .Definition import _BasePosition, _Position, Command
+	from .Definition import _BasePosition, _Flag, _Key, _Position, Command
 
 	from .. import Terminalyzer
 
@@ -37,16 +37,6 @@ class _ParsedArgument:
 
 		self.__Value = value
 
-	def __repr__(self) -> str:
-		"""
-		Возвращает текстовое представление объекта.
-
-		:return: Текстовое представление объекта.
-		:rtype: str
-		"""
-
-		return str(self.__Value)
-
 class _ParsedFlag:
 	"""Представление обработанного флага."""
 
@@ -54,36 +44,23 @@ class _ParsedFlag:
 	def aliases(self) -> list[str]:
 		"""Список псевдонимов."""
 
-		return self.__Aliases.copy()
+		return self.__Flag.aliases
 
 	@property
 	def name(self) -> str:
 		"""Имя флага."""
 
-		return self.__Name
+		return self.__Flag.name
 
-	def __init__(self, parameter: str, aliases: list[str]):
+	def __init__(self, flag: "_Flag"):
 		"""
 		Представление обработанного флага.
 
-		:param parameter: Обработанный параметр.
-		:type parameter: str
-		:param aliases: Список псевдонимов.
-		:type aliases: list[str]
+		:param name: Флаг.
+		:type name: _Flag
 		"""
 
-		self.__Name = parameter
-		self.__Aliases = aliases
-
-	def __repr__(self) -> str:
-		"""
-		Возвращает текстовое представление объекта.
-
-		:return: Текстовое представление объекта.
-		:rtype: str
-		"""
-
-		return self.__Name
+		self.__Flag = flag
 
 class _ParsedKey:
 	"""Представление обработанного ключа."""
@@ -92,13 +69,13 @@ class _ParsedKey:
 	def aliases(self) -> list[str]:
 		"""Список псевдонимов."""
 
-		return self.__Aliases.copy()
+		return self.__Key.aliases
 
 	@property
 	def name(self) -> str:
 		"""Имя ключа."""
 
-		return self.__Name
+		return self.__Key.name
 
 	@property
 	def value(self) -> bool | float | int | str | datetime:
@@ -106,31 +83,18 @@ class _ParsedKey:
 
 		return self.__Value
 
-	def __init__(self, parameter: str, aliases: list[str], value: bool | float | int | str | datetime):
+	def __init__(self, key: "_Key", value: bool | float | int | str | datetime):
 		"""
 		Представление обработанного ключа.
 
-		:param parameter: Обработанный параметр.
-		:type parameter: str
-		:param aliases: Список псевдонимов.
-		:type aliases: list[str]
+		:param key: Ключ.
+		:type key: _Key
 		:param value: Значение ключа.
 		:type value: bool | float | int | str | datetime
 		"""
 
-		self.__Name = parameter
-		self.__Aliases = aliases
+		self.__Key = key
 		self.__Value = value
-
-	def __repr__(self) -> str:
-		"""
-		Возвращает текстовое представление объекта.
-
-		:return: Текстовое представление объекта.
-		:rtype: str
-		"""
-
-		return f"<key {self.__Name}={self.__Value}>"
 
 class _ParsedCommandParameters:
 
@@ -270,12 +234,7 @@ class _ParsedCommandData:
 		:rtype: str
 		"""
 
-		return str({
-			"name": self.__Name, 
-			"flags": self.__ParsedData.flags, 
-			"keys": self.__ParsedData.keys, 
-			"arguments": self.__ParsedData.arguments
-		})
+		return str(self.to_dict())
 
 	def check_flag(self, flag: str) -> bool:
 		"""
@@ -337,6 +296,38 @@ class _ParsedCommandData:
 		"""
 
 		return self.__ParsedData.positions[position_name]
+	
+	def get_position_value(self, position_name: str) -> bool | float | int | str | datetime | None:
+		"""
+		Для аргументов и ключей на позиции возвращает значение, для флагов – `True` при активации.
+
+		:param position_name: Имя позиции.
+		:type position_name: str
+		:return: Параметр позиции или `None` при пустой позиции.
+		:rtype: bool | float | int | str | datetime | None
+		:raises KeyError: Позиция не обнаружена.
+		"""
+
+		ParsedParameter = self.get_position_parameter(position_name)
+		if not ParsedParameter: return
+
+		if type(ParsedParameter) == _ParsedFlag: return True
+		else: return ParsedParameter.value
+
+	def to_dict(self) -> dict[str, list[bool | float | int | str | datetime] | str]:
+		"""
+		Возвращает словарное представление объекта.
+
+		:return: Словарное представление объекта.
+		:rtype: dict[str, list[bool | float | int | str | datetime] | str]
+		"""
+
+		return {
+			"name": self.__Name, 
+			"arguments": self.arguments,
+			"flags": list(self.__ParsedData.flags), 
+			"keys": {Key.name: Key.value for Key in self.__ParsedData.keys}
+		}
 
 #==========================================================================================#
 # >>>>> ОСНОВНОЙ КЛАСС <<<<< #
@@ -408,7 +399,7 @@ class _CommandParser:
 				if Parameter in [CurrentFlag.name] + CurrentFlag.aliases:
 					self.__ParametersLocks[index] = True
 					self.__IsPositionLocked(CurrentPosition.name, exception = True)
-					self.__PositionsLocks[CurrentPosition.name] = _ParsedFlag(CurrentFlag.name, CurrentFlag.aliases)
+					self.__PositionsLocks[CurrentPosition.name] = _ParsedFlag(CurrentFlag)
 					return
 			
 			for CurrentKey in CurrentPosition.keys:
@@ -419,7 +410,7 @@ class _CommandParser:
 
 					self.__IsPositionLocked(CurrentPosition.name, exception = True)
 					Value = self.__GetTypedValue(self.__Parameters[index + 1], CurrentKey.type)
-					self.__PositionsLocks[CurrentPosition.name] = _ParsedKey(CurrentKey.name, CurrentKey.aliases, Value)
+					self.__PositionsLocks[CurrentPosition.name] = _ParsedKey(CurrentKey, Value)
 					return
 				
 			if CurrentPosition.argument and not self.__IsPositionLocked(CurrentPosition.name):
@@ -519,7 +510,7 @@ class _CommandParser:
 		for CurrentFlag in BasePosition.flags:
 			if Parameter in [CurrentFlag.name] + CurrentFlag.aliases:
 				self.__ParametersLocks[index] = True
-				self.__BaseParameters.append(_ParsedFlag(Parameter, CurrentFlag.aliases))
+				self.__BaseParameters.append(_ParsedFlag(CurrentFlag))
 				return
 		
 		for CurrentKey in BasePosition.keys:
@@ -528,7 +519,7 @@ class _CommandParser:
 				if len(self.__Parameters) < index + 2 or self.__ParametersLocks[index + 1]: raise Exceptions.CLI.Terminalyzer.UnboundKey(Parameter)
 				self.__ParametersLocks[index + 1] = True
 				Value = self.__GetTypedValue(self.__Parameters[index + 1], CurrentKey.type)
-				self.__BaseParameters.append(_ParsedKey(Parameter, CurrentKey.aliases, Value))
+				self.__BaseParameters.append(_ParsedKey(CurrentKey, Value))
 				return
 			
 		for CurrentArgument in BasePosition.arguments:

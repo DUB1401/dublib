@@ -2,5 +2,5 @@ CLI
 ===
 .. toctree::
 	Templates/index
-	Terminalyzer
+	Terminalyzer/index
 	TextStyler/index
