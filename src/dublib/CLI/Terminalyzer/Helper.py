@@ -292,7 +292,7 @@ class Helper:
 
 		#---> Генерация таблицы.
 		#==========================================================================================#
-		TableString = ""
+		Tables = list()
 
 		for Category in CommandsCategories.keys():
 			HelpTable = {
@@ -307,7 +307,8 @@ class Helper:
 				HelpTable["Descriptions"].append(CurrentCommand.description or "")
 
 			TableObject = PrettyTable()
-			if len(CommandsCategories.keys()) > 1: TableObject.title = FastStyler(Category or self.__Labels.CATEGORY_OTHER).decorate.bold
+			CategoryTitle = Category or self.__Labels.CATEGORY_OTHER
+			if len(CommandsCategories.keys()) > 1: TableObject.title = FastStyler(f">>> {CategoryTitle} <<<").decorate.bold
 			TableObject.set_style(PLAIN_COLUMNS)
 
 			for ColumnName in HelpTable.keys():
@@ -315,10 +316,11 @@ class Helper:
 				TableObject.add_column(Buffer, HelpTable[ColumnName])
 
 			TableObject.align = "l"
-			TableString += TableObject.get_string(header = False)
-			TableString += "\n\n"
+			TableString = TableObject.get_string()
+			if TableObject.header: TableString = " " * 8 + TableString.lstrip()
+			Tables.append(TableString)
 
-		self.__Callback(TableString.rstrip())
+		self.__Callback("\n\n".join(Tables))
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ НАСТРОЙКИ <<<<< #
