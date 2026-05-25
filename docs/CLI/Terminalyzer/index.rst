@@ -31,7 +31,7 @@ Terminalyzer
 	ComPos.set_argument(ParametersTypes.ValidPath, "Path to file.")
 	# Добавление альтернативы аргументу, флага и ключа.
 	ComPos.add_flag("-l", aliases = ("--last",), description = "Open last file.")
-	ComPos.add_key("-p", aliases = ("--path",), description = "Open last file.")
+	ComPos.add_key("-p", aliases = ("--path",), description = "Specify path.")
 
 	Commands.append(Com)
 

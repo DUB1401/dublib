@@ -186,7 +186,7 @@ class _ParsedCommandParameters:
 # >>>>> ДАННЫЕ ОБРАБОТАННОЙ КОМАНДЫ <<<<< #
 #==========================================================================================#
 
-class _ParsedCommandData:
+class ParsedCommandData:
 	"""Данные обработанной команды."""
 
 	#==========================================================================================#
@@ -363,22 +363,6 @@ class _CommandParser:
 		if ParametersCount > self.__Command.max_parameters_count: raise Exceptions.CLI.Terminalyzer.TooManyParameters(self.__Command.max_parameters_count, ParametersCount)
 		if ParametersCount < self.__Command.min_parameters_count: raise Exceptions.CLI.Terminalyzer.NotEnoughParameters(self.__Command.min_parameters_count, ParametersCount)
 
-	def __ValidateCommandDefinition(self, command: "Command") -> "Command":
-		"""
-		Проводит валидацию определения команды.
-
-		:param command: Определение команды.
-		:type command: Command
-		:raises Exceptions.CLI.Terminalyzer.EmptyPosition: Для позиции не описан ни один параметр.
-		:return: Определение команды.
-		:rtype: Command
-		"""
-
-		for CurrentPosition in command.positions:
-			if not CurrentPosition.parameters and not CurrentPosition.is_base: raise Exceptions.CLI.Terminalyzer.EmptyPosition(CurrentPosition.name)
-
-		return command
-
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ПАРСИНГА <<<<< #
 	#==========================================================================================#
@@ -542,7 +526,7 @@ class _CommandParser:
 		:type parameters: Iterable[str]
 		"""
 
-		self.__Command = self.__ValidateCommandDefinition(command)
+		self.__Command = command
 		self.__Parameters = tuple(parameters)
 
 		self.__ParametersLocks = [False for _ in self.__Parameters]
@@ -557,7 +541,7 @@ class _CommandParser:
 			ParametersTypes.URL: validators.url
 		}
 
-	def parse(self) -> _ParsedCommandData:
+	def parse(self) -> ParsedCommandData:
 		"""
 		Разбирает параметры команды и типизирует значения.
 
@@ -581,4 +565,4 @@ class _CommandParser:
 		self.__CheckImportantPositionsLocks()
 		self.__CheckParametersCount()
 
-		return _ParsedCommandData(self.__Command.name, ParsedData)
+		return ParsedCommandData(self.__Command.name, ParsedData)

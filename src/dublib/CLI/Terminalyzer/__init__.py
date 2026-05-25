@@ -1,13 +1,23 @@
-from .Command.Parser import _CommandParser, _ParsedCommandData
+from .Command.Parser import _CommandParser, ParsedCommandData
 from .Command.Definition import Command
 from .Enums import ParametersTypes
 from .Helper import Helper
 
 from ...Methods.Data import ToIterable
+from ...Core import LOGS_HANDLER
 from ... import Exceptions
 
 from typing import Iterable
+import logging
 import sys
+
+#==========================================================================================#
+# >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
+#==========================================================================================#
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.addHandler(LOGS_HANDLER)
+LOGGER.setLevel(logging.INFO)
 
 #==========================================================================================#
 # >>>>> ОСНОВНОЙ КЛАСС <<<<< #
@@ -23,8 +33,34 @@ class Terminalyzer:
 		return self.__Helper
 
 	#==========================================================================================#
-	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ВАЛИДАЦИИ <<<<< #
 	#==========================================================================================#
+
+	def __CheckSinglePositionalParametersDescriptionMissing(self, command: Command):
+		"""
+		Проверяет параметры позиций команд на предмет дублирования описаний в случае установки лишь одного параметра для позиции. Результат выводит в формате предупреждений.
+
+		:param command: Определение команды.
+		:type command: Command
+		"""
+
+		for CurrentPosition in command.positions:
+			if CurrentPosition.description and len(CurrentPosition.parameters) == 1 and CurrentPosition.parameters[0].description:
+				LOGGER.warning(f"Command: \"{command.name}\". Parametr description suppressed by position description on \"{CurrentPosition.name}\".")
+
+	def __CheckCommandForEmptyPositions(self, command: Command):
+		"""
+		Проверяет команду на наличие пустых позиций.
+
+		:param command: Определение команды.
+		:type command: Command
+		:raises Exceptions.CLI.Terminalyzer.EmptyPosition: Для позиции не описан ни один параметр.
+		"""
+
+		for CurrentPosition in command.positions:
+			if not CurrentPosition.parameters and not CurrentPosition.is_base: raise Exceptions.CLI.Terminalyzer.EmptyPosition(CurrentPosition.name)
+
+		return command
 
 	def __CheckCommandsUniqueness(self, commands: list[Command]):
 		"""
@@ -35,9 +71,25 @@ class Terminalyzer:
 		:raises Exceptions.CLI.Terminalyzer.MultipleCommandDefinition: Множественное определение команды.
 		"""
 
-		CommandsNames = [CurrentCommand.name for CurrentCommand in commands]
+		CommandsNames = tuple(CurrentCommand.name for CurrentCommand in commands)
 		for Name in CommandsNames:
 			if CommandsNames.count(Name) > 1: raise Exceptions.CLI.Terminalyzer.MultipleCommandDefinition(Name)
+
+	def __ValidateCommandsDefinitions(self, commands: list[Command]):
+		"""
+		Проводит валидацию определений команд.
+
+		:param command: Список определений команд.
+		:type command: list[Command]
+		:raises Exceptions.CLI.Terminalyzer.EmptyPosition: Для позиции не описан ни один параметр.
+		:raises Exceptions.CLI.Terminalyzer.MultipleCommandDefinition: Множественное определение команды.
+		"""
+
+		self.__CheckCommandsUniqueness(commands)
+
+		for CurrentCommand in commands:
+			self.__CheckSinglePositionalParametersDescriptionMissing(CurrentCommand)
+			self.__CheckCommandForEmptyPositions(CurrentCommand)
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -55,7 +107,7 @@ class Terminalyzer:
 		
 		self.__Helper = Helper()
 
-	def check_commands(self, commands: list[Command] | Command) -> _ParsedCommandData | None:
+	def check_commands(self, commands: list[Command] | Command) -> ParsedCommandData | None:
 		"""
 		Проверяет каждое из переданных описаний команд на соответствие текущей. 
 
@@ -63,14 +115,16 @@ class Terminalyzer:
 		:type commands: list[Command] | Command
 		:return: При успешной проверке парсит данные команды и возвращает их.
 		:rtype: ParsedCommandData | None
-		:raises MultipleCommandDefinition: Несколько определений для одной команды.
+		:raises Exceptions.CLI.Terminalyzer.EmptyPosition: Для позиции не описан ни один параметр.
+		:raises Exceptions.CLI.Terminalyzer.MultipleCommandDefinition: Множественное определение команды.
 		"""
 		
 		if not self.__CommandName: return
 
 		commands: list[Command] = ToIterable(commands, list)
+		self.__ValidateCommandsDefinitions(commands)
 		if self.__Helper.is_enabled: commands.append(self.__Helper.command)
-		CommandData: _ParsedCommandData = None
+		CommandData: ParsedCommandData = None
  
 		self.__CheckCommandsUniqueness(commands)
 
