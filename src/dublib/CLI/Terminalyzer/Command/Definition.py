@@ -1,6 +1,5 @@
 from ..Enums import ParametersTypes
 
-from functools import reduce
 from typing import Iterable
 
 #==========================================================================================#
@@ -453,13 +452,13 @@ class Command:
 	def max_parameters_count(self) -> int:
 		"""Максимальное количество параметров."""
 
-		return reduce(lambda x, y: x + y, [Position.max_parameters_count for Position in self.positions]) + self.__BasePosition.max_parameters_count
+		return sum(position.max_parameters_count for position in self.positions) + self.__BasePosition.max_parameters_count
 
 	@property
 	def min_parameters_count(self) -> int:
 		"""Минимальное количество параметров."""
 
-		return reduce(lambda x, y: x + y, [Position.min_parameters_count for Position in self.positions]) + self.__BasePosition.min_parameters_count
+		return sum(position.min_parameters_count for position in self.positions) + self.__BasePosition.min_parameters_count
 
 	@property
 	def name(self) -> str:
