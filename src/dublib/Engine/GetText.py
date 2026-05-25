@@ -1,4 +1,9 @@
+from ..Methods.Data import ToIterable
+
+from typing import Iterable
+
 import gettext
+import os
 
 class GetText:
 	"""Абстракция управления GNU gettext."""
@@ -16,22 +21,23 @@ class GetText:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def initialize(domain: str, languages: list[str] | str, path: str | None = None):
+	def initialize(domain: str, languages: Iterable[str] | str, path: str | None = None):
 		"""
 		Инициализирует подключение к файлам для обработки GNU gettext.
-			domain – домен перевода;\n
-			languages – список требуемых языков;\n
-			path – путь к каталогу с PO файлами.
+
+		:param domain: Домен перевода.
+		:type domain: str
+		:param languages: Набор требуемых языков.
+		:type languages: Iterable[str] | str
+		:param path: Путь к каталогу с PO файлами. По умолчанию _Locales_.
+		:type path: str | None
+		:raises FileNotFoundError: Не найден кастомный каталог с локализацией.
 		"""
 
-		#---> Проверка переданных аргументов.
-		#==========================================================================================#
-		if type(languages) == str: languages = [languages]
+		if path and not os.path.exists(path): raise FileNotFoundError(path)
 
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
 		GetText.DOMAIN = domain
-		GetText.LANGUAGES = languages
+		GetText.LANGUAGES = ToIterable(languages)
 		GetText.PATH = path or "Locales"
 
 		try: GetText.METHOD = gettext.translation(GetText.DOMAIN, GetText.PATH, languages = GetText.LANGUAGES).gettext
