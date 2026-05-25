@@ -16,6 +16,7 @@ class Config:
 	# >>>>> СТАТИЧЕСКИЕ АТРИБУТЫ <<<<< #
 	#==========================================================================================#
 
+	__EXCEPTION_DISABLED = object()
 	__INSTANCES: "dict[PathLike, Config]" = dict()
 
 	#==========================================================================================#
@@ -121,7 +122,7 @@ class Config:
 		:rtype: Any
 		"""
 		
-		return self.get(key)
+		return self.__GetValue(key)
 	
 	def __setitem__(self, key: str, value: Any):
 		"""
@@ -133,7 +134,7 @@ class Config:
 		:type value: Any
 		"""
 		
-		self.__GetValue(key, value)
+		self.set(key, value)
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -165,7 +166,7 @@ class Config:
 			self.__SyncThread = Thread(target = self.__SyncProcessor, daemon = True)
 			self.__SyncThread.start()
 
-	def get(self, key: str, copy: bool = True, default: Any = None) -> Any:
+	def get(self, key: str, copy: bool = True, default: Any = __EXCEPTION_DISABLED) -> Any:
 		"""
 		Возвращает значение параметра.
 
@@ -173,14 +174,17 @@ class Config:
 		:type key: str
 		:param copy: Указывает, нужно ли вернуть копию для изменяемых типов (`dict`, `list`). Не рекомендуется отключать без острой необходимости прямой манипуляции объектами.
 		:type copy: bool
-		:param default: Значение по умолчанию.
+		:param default: Значение по умолчанию. При указании вместо выброса исключения будет возвращено данное значение.
 		:type default: Any
 		:return: Значение параметра.
 		:rtype: Any
+		:raise KeyError: Выбрасывается при отсутствии параметра с указанным ключом.
 		"""
 
 		try: return self.__GetValue(key, copy)
-		except KeyError: return default
+		except KeyError: 
+			if default is Config.__EXCEPTION_DISABLED: raise KeyError(key)
+			else: return default
 	
 	def load(self, validate: bool = True):
 		"""
