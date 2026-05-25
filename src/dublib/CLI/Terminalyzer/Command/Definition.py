@@ -513,3 +513,13 @@ class Command:
 		self.__Positions.append(NewPosition)
 
 		return self.__Positions[-1]
+	
+	def set_category(self, category: str | None):
+		"""
+		Задаёт категорию, в которой будет отображаться команда при выводе помощи.
+
+		:param category: Название категории.
+		:type category: str | None
+		"""
+
+		self.__Category = category
