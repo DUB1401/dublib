@@ -5,15 +5,17 @@
 class EmptyPosition(Exception):
 	"""Исключение: для позиции не описан ни один параметр."""
 
-	def __init__(self, position: str):
+	def __init__(self, command_name: str, position: str):
 		"""
 		Исключение: для позиции не описан ни один параметр.
 
+		:param command_name: Имя команды.
+		:type command_name: str
 		:param position: Имя позиции.
 		:type position: str
 		"""
 
-		super().__init__(position) 
+		super().__init__(f"Position \"{position}\" on command \"{command_name}\".") 
 
 class MultipleCommandDefinition(Exception):
 	"""Исключение: множественное определение команды."""

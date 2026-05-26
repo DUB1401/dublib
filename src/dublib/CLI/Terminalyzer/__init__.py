@@ -58,7 +58,7 @@ class Terminalyzer:
 		"""
 
 		for CurrentPosition in command.positions:
-			if not CurrentPosition.parameters and not CurrentPosition.is_base: raise Exceptions.CLI.Terminalyzer.EmptyPosition(CurrentPosition.name)
+			if not CurrentPosition.parameters: raise Exceptions.CLI.Terminalyzer.EmptyPosition(command.name, CurrentPosition.name)
 
 		return command
 
