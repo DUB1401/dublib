@@ -453,6 +453,9 @@ class _CommandParser:
 					try: Value = int(value)
 					except ValueError: pass
 
+			case ParametersTypes.UnsignedInteger:
+				if value.isdigit(): Value = int(value)
+
 			case ParametersTypes.ValidPath:
 				if os.path.exists(value): Value = value
 

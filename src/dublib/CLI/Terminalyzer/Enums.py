@@ -4,6 +4,7 @@ class ParametersTypes(Enum):
 	"""Перечисление типов значений параметров."""
 
 	All = "All"
+	Alpha = "Alpha"
 	Base64 = "Base64"
 	Bool = "Bool"
 	Datetime = "Datetime"
@@ -13,6 +14,6 @@ class ParametersTypes(Enum):
 	IPv4 = "IPv4"
 	IPv6 = "IPv6"
 	Number = "Number"
-	ValidPath = "ValidPath"
-	Alpha = "Alpha"
+	UnsignedInteger = "UnsignedInteger"
 	URL = "URL"
+	ValidPath = "ValidPath"
