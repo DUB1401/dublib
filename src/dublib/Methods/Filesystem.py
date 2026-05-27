@@ -18,7 +18,7 @@ import yaml
 
 def AtomicWrite(path: PathLike, data: bytes):
 	"""
-	Атомарно производит запись файла в бинарном представлении, используя создание временного файла и операцию `os.replace()`.
+	Атомарно производит запись файла в бинарном представлении, используя создание временного файла со сбросом кэша записи и операцию `os.replace()`.
 
 	:param path: Путь к записываемому файлу.
 	:type path: PathLike
@@ -31,6 +31,8 @@ def AtomicWrite(path: PathLike, data: bytes):
 
 	with tempfile.NamedTemporaryFile("wb", delete = False, dir = PathObject.parent) as TempWriter:
 		TempWriter.write(data)
+		TempWriter.flush()
+		os.fsync(TempWriter.fileno())
 		TempPath = Path(TempWriter.name)
 
 	os.replace(TempPath, path)
