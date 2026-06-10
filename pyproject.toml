@@ -3,14 +3,14 @@ requires = ["setuptools"]
 
 [project]
 name = "dublib"
-version = "0.27.1"
+version = "0.28.0"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
 	"curl_cffi>=0.11.0",
 	"dateparser",
@@ -33,7 +33,6 @@ classifiers = [
 	"Natural Language :: Russian",
 	"Operating System :: OS Independent",
 	"Programming Language :: Python",
-	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
@@ -49,8 +48,7 @@ telebot = [
 dev = [
 	"pytest",
 	"Sphinx",
-	"sphinx-rtd-theme",
-	"tomli; python_version == \"3.10\""
+	"sphinx-rtd-theme"
 ]
 
 [project.urls]

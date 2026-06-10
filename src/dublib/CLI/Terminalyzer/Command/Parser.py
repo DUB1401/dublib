@@ -1,18 +1,10 @@
-from ..Enums import ParametersTypes
-
 from .... import Exceptions
 
-from typing import Any, Iterable, TYPE_CHECKING
+from typing import Iterable, TYPE_CHECKING
 from datetime import datetime
-import os
-
-import dateparser
-import validators
 
 if TYPE_CHECKING:
-	from .Definition import _BasePosition, _Flag, _Key, _Position, Command
-
-	from .. import Terminalyzer
+	from .Definition import _Flag, _Key, Command
 
 #==========================================================================================#
 # >>>>> ПРЕДСТАВЛЕНИЯ ОБРАБОТАННЫХ ПАРАМЕТРОВ <<<<< #
@@ -393,78 +385,15 @@ class _CommandParser:
 					self.__ParametersLocks[index + 1] = True
 
 					self.__IsPositionLocked(CurrentPosition.name, exception = True)
-					Value = self.__GetTypedValue(self.__Parameters[index + 1], CurrentKey.type)
+					Value = CurrentKey.type.value.parse(self.__Parameters[index + 1])
 					self.__PositionsLocks[CurrentPosition.name] = _ParsedKey(CurrentKey, Value)
 					return
 				
 			if CurrentPosition.argument and not self.__IsPositionLocked(CurrentPosition.name):
-				Value = self.__GetTypedValue(self.__Parameters[index], CurrentPosition.argument.type)
+				Value = CurrentPosition.argument.type.value.parse(self.__Parameters[index])
 				self.__ParametersLocks[index] = True
 				self.__PositionsLocks[CurrentPosition.name] = _ParsedArgument(Value)
 				return
-
-	def __GetTypedValue(self, value: str, verifiable_type: ParametersTypes = ParametersTypes.All, exception: bool = True) -> bool | float | int | str | datetime:
-		"""
-		Проверяет, соответствует ли строка ожидаемому типу данных и преобразует её в этот самый тип.
-
-		:param value: Проверяемая строка.
-		:type value: str
-		:param verifiable_type: Проверяемый тип.
-		:type verifiable_type: ParametersTypes
-		:param exception: Указывает, следует ли выбрасывать исключение при ошибке верификации типа параметра.
-		:type exception: bool
-		:raises InvalidParameterType: Выбрасывается при ошибке верификации типа параметра.
-		:return: Преобразованные в целевой тип данные.
-		:rtype: bool | float | int | str | datetime
-		"""
-		
-		Value = None
-
-		match verifiable_type:
-
-			case ParametersTypes.All:
-				Value = value
-
-			case ParametersTypes.Alpha:
-				if value.isalpha(): Value = value
-
-			case ParametersTypes.Bool:
-				Buffer = value.lower()
-				if Buffer == "true": Value = True
-				elif Buffer == "false": Value = False
-
-			case ParametersTypes.Datetime:
-				try: Value = dateparser.parse(value)
-				except: pass
-
-			case ParametersTypes.Float:
-				if value.count("-") <= 1 and value.strip(".").count(".") == 1 and value.replace(".", "").isdigit(): Value = float(value)
-
-			case ParametersTypes.Integer:
-				if value.count("-") <= 1 and value.lstrip("-").isdigit(): Value = int(value)
-
-			case ParametersTypes.Number:
-
-				if "." in value:
-					try: Value = float(value)
-					except ValueError: pass
-
-				else:
-					try: Value = int(value)
-					except ValueError: pass
-
-			case ParametersTypes.UnsignedInteger:
-				if value.isdigit(): Value = int(value)
-
-			case ParametersTypes.ValidPath:
-				if os.path.exists(value): Value = value
-
-			case _:
-				if self.__ValidableTypes[verifiable_type](value): Value = value
-
-		if Value == None and exception: raise Exceptions.CLI.Terminalyzer.InvalidParameterType(value, verifiable_type.value)
-
-		return Value
 
 	def __IsPositionLocked(self, position_name: str, exception: bool = False) -> bool:
 		"""
@@ -505,12 +434,12 @@ class _CommandParser:
 				self.__ParametersLocks[index] = True
 				if len(self.__Parameters) < index + 2 or self.__ParametersLocks[index + 1]: raise Exceptions.CLI.Terminalyzer.UnboundKey(Parameter)
 				self.__ParametersLocks[index + 1] = True
-				Value = self.__GetTypedValue(self.__Parameters[index + 1], CurrentKey.type)
+				Value = CurrentKey.type.value.parse(self.__Parameters[index + 1])
 				self.__BaseParameters.append(_ParsedKey(CurrentKey, Value))
 				return
 			
 		for CurrentArgument in BasePosition.arguments:
-			Value = self.__GetTypedValue(self.__Parameters[index], CurrentArgument.type)
+			Value = CurrentArgument.type.value.parse(self.__Parameters[index])
 			self.__ParametersLocks[index] = True
 			self.__BaseParameters.append(_ParsedArgument(Value))
 			return
@@ -519,7 +448,7 @@ class _CommandParser:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, command: Command, parameters: Iterable[str]):
+	def __init__(self, command: "Command", parameters: Iterable[str]):
 		"""
 		Парсер команды.
 
@@ -535,14 +464,6 @@ class _CommandParser:
 		self.__ParametersLocks = [False for _ in self.__Parameters]
 		self.__PositionsLocks = {CurrentPosition.name: None for CurrentPosition in self.__Command.positions}
 		self.__BaseParameters = list()
-
-		self.__ValidableTypes = {
-			ParametersTypes.Base64: validators.base64,
-			ParametersTypes.Email: validators.email,
-			ParametersTypes.IPv4: validators.ipv4,
-			ParametersTypes.IPv6: validators.ipv6,
-			ParametersTypes.URL: validators.url
-		}
 
 	def parse(self) -> ParsedCommandData:
 		"""

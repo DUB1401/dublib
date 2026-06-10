@@ -3,8 +3,8 @@ Terminalyzer
 .. automodule:: dublib.CLI.Terminalyzer
 	:members:
 .. toctree::
+	Validators
 	Command
-	Enums
 	Helper
 
 Описание
@@ -20,7 +20,7 @@ Terminalyzer
 ------
 .. code-block:: python
 
-	from dublib.CLI.Terminalyzer import Terminalyzer, Command, ParametersTypes
+	from dublib.CLI.Terminalyzer import Terminalyzer, Command, ValidableValuesTypes
 
 	Commands = list()
 
@@ -28,7 +28,7 @@ Terminalyzer
 	Com = Command("open", "Open some file.")
 	# Создание обязательной позиции с аргументом типа существующего пути.
 	ComPos = Com.create_position("TARGET", "Target to open", important = True)
-	ComPos.set_argument(ParametersTypes.ValidPath, "Path to file.")
+	ComPos.set_argument(ValidableValuesTypes.ValidPath, "Path to file.")
 	# Добавление альтернативы аргументу, флага и ключа.
 	ComPos.add_flag("-l", aliases = ("--last",), description = "Open last file.")
 	ComPos.add_key("-p", aliases = ("--path",), description = "Specify path.")

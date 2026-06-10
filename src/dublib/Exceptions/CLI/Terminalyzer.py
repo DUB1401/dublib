@@ -47,21 +47,6 @@ class ImportantPositionEmpty(Exception):
 
 		super().__init__(position) 
 
-class InvalidParameterType(Exception):
-	"""Исключение: значение параметра не соответсвует ожидаемому типу."""
-
-	def __init__(self, value: str, type_name: str):
-		"""
-		Исключение: значение параметра не соответсвует ожидаемому типу.
-
-		:param value: Значение параметра.
-		:type value: str
-		:param type_name: Название ожидаемого типа.
-		:type type_name: str
-		"""
-
-		super().__init__(f"\"{value}\" isn't \"{type_name}\".") 
-
 class MultipleParametersOnPosition(Exception):
 	"""Исключение: попытка установить несколько параметров для одной позиции."""
 

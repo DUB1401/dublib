@@ -1,9 +1,8 @@
 from .Command.Parser import _CommandParser, ParsedCommandData
 from .Command.Definition import Command
-from .Enums import ParametersTypes
+from .Validators import ValidableValuesTypes
 from .Helper import Helper
 
-from ...Methods.Data import ToIterable
 from ...Core import LOGS_HANDLER
 from ... import Exceptions
 
@@ -107,12 +106,12 @@ class Terminalyzer:
 		
 		self.__Helper = Helper()
 
-	def check_commands(self, commands: list[Command] | Command) -> ParsedCommandData | None:
+	def check_commands(self, commands: list[Command]) -> ParsedCommandData | None:
 		"""
-		Проверяет каждое из переданных описаний команд на соответствие текущей. 
+		Проверяет текущую команду на соответствие одному из переданных описаний.
 
-		:param commands: Описательные структуры команд или их JSON-конфигурация.
-		:type commands: list[Command] | Command
+		:param commands: Список описаний команд.
+		:type commands: list[Command]
 		:return: При успешной проверке парсит данные команды и возвращает их.
 		:rtype: ParsedCommandData | None
 		:raises Exceptions.CLI.Terminalyzer.EmptyPosition: Для позиции не описан ни один параметр.
@@ -121,7 +120,6 @@ class Terminalyzer:
 		
 		if not self.__CommandName: return
 
-		commands: list[Command] = ToIterable(commands, list)
 		self.__ValidateCommandsDefinitions(commands)
 		if self.__Helper.is_enabled: commands.append(self.__Helper.command)
 		CommandData: ParsedCommandData = None
