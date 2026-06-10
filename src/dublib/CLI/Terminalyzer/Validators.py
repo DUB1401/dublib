@@ -31,8 +31,8 @@ class ValidationError(Exception):
 class BaseValidator(ABC, Generic[_PARSED_VALUE]):
 	"""Базовый валидатор строки."""
 
-	@abstractmethod
 	@staticmethod
+	@abstractmethod
 	def convert(value: str) -> _PARSED_VALUE:
 		"""
 		Конвертирует строку в значение определённого типа.
@@ -60,8 +60,8 @@ class BaseValidator(ABC, Generic[_PARSED_VALUE]):
 
 		return cls.convert(value)
 
-	@abstractmethod
 	@staticmethod
+	@abstractmethod
 	def validate(value: str) -> bool:
 		"""
 		Проверяет, соответствует ли строка критериям валидируемого типа.
