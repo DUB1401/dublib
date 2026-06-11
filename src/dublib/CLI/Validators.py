@@ -1,3 +1,5 @@
+from ..Exceptions.CLI.Validators import ValidationError
+
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic
 from datetime import datetime
@@ -12,21 +14,6 @@ import validators
 #==========================================================================================#
 
 _PARSED_VALUE = TypeVar("PARSED_VALUE")
-
-class ValidationError(Exception):
-	"""Исключение: ошибка приведения строки к определённому типу."""
-
-	def __init__(self, value: str, target_type: "ValidableValuesTypes"):
-		"""
-		Исключение: ошибка приведения строки к определённому типу.
-
-		:param value: Значение.
-		:type value: str
-		:param target_type: Тип, к которому происходило приведение.
-		:type target_type: ValidableValuesTypes
-		"""
-
-		super().__init__(f"Unable convert \"{value}\" to \"{target_type.__name__}\" type.")
 
 class BaseValidator(ABC, Generic[_PARSED_VALUE]):
 	"""Базовый валидатор строки."""
@@ -56,7 +43,7 @@ class BaseValidator(ABC, Generic[_PARSED_VALUE]):
 		:rtype: Any
 		"""
 
-		if not cls.validate(value): raise ValidationError(value, ValidableValuesTypes(cls))
+		if not cls.validate(value): raise ValidationError(value, cls)
 
 		return cls.convert(value)
 
@@ -531,7 +518,7 @@ class Validator_ValidPath(BaseValidator[Path]):
 # >>>>> ПЕРЕЧИСЛЕНИЕ ВАЛИДАТОРОВ <<<<< #
 #==========================================================================================#
 
-class ValidableValuesTypes(Enum):
+class ValidableTypes(Enum):
 	"""Перечисление типов валидаторов."""
 
 	All = Validator_All

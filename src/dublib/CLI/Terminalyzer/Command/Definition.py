@@ -1,4 +1,4 @@
-from ..Validators import ValidableValuesTypes
+from ...Validators import ValidableTypes
 
 from typing import Iterable
 
@@ -26,7 +26,7 @@ class _Argument:
 		return self.__IsImportant
 
 	@property
-	def type(self) -> ValidableValuesTypes:
+	def type(self) -> ValidableTypes:
 		"""Тип значения аргумента."""
 
 		return self.__Type
@@ -35,12 +35,12 @@ class _Argument:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, type: ValidableValuesTypes, description: str | None, important: bool):
+	def __init__(self, type: ValidableTypes, description: str | None, important: bool):
 		"""
 		Аргумент команды.
 
 		:param type: nип значения аргумента.
-		:type type: ValidableValuesTypes
+		:type type: ValidableTypes
 		:param description: Описание аргумента.
 		:type description: str | None
 		:param important: Указывает, является ли аргумент обязательным.
@@ -137,7 +137,7 @@ class _Key:
 		return self.__Name
 	
 	@property
-	def type(self) -> ValidableValuesTypes:
+	def type(self) -> ValidableTypes:
 		"""Тип значения ключа."""
 
 		return self.__Type
@@ -146,7 +146,7 @@ class _Key:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, name: str, aliases: Iterable[str] | None, type: ValidableValuesTypes, description: str | None, important: bool):
+	def __init__(self, name: str, aliases: Iterable[str] | None, type: ValidableTypes, description: str | None, important: bool):
 		"""
 		Ключ команды.
 
@@ -155,7 +155,7 @@ class _Key:
 		:param aliases: Список псевдонимов.
 		:type aliases: Iterable[str] | None
 		:param type: Тип значения ключа.
-		:type type: ValidableValuesTypes
+		:type type: ValidableTypes
 		:param description: Описание ключа.
 		:type description: str | None
 		:param important: Указывает, является ли ключ обязательным.
@@ -240,12 +240,12 @@ class _BasePosition:
 		self.__Flags: list[_Flag] = list()
 		self.__Keys: list[_Key] = list()
 		
-	def add_argument(self, type: ValidableValuesTypes = ValidableValuesTypes.All, description: str | None = None):
+	def add_argument(self, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
 		Добавляет аргумент на позицию.
 
 		:param type: Тип аргумента.
-		:type type: ValidableValuesTypes
+		:type type: ValidableTypes
 		:param description: Описание аргумента.
 		:type description: str | None
 		"""
@@ -266,7 +266,7 @@ class _BasePosition:
 
 		self.__Flags.append(_Flag(name, aliases, description, important = False))
 
-	def add_key(self, name: str, aliases: Iterable[str] | None = None, type: ValidableValuesTypes = ValidableValuesTypes.All, description: str | None = None):
+	def add_key(self, name: str, aliases: Iterable[str] | None = None, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
 		Добавляет ключ на позицию.
 
@@ -275,7 +275,7 @@ class _BasePosition:
 		:param aliases: Список псевдонимов.
 		:type aliases: Iterable[str] | None
 		:param type: Тип значения ключа.
-		:type type: ValidableValuesTypes
+		:type type: ValidableTypes
 		:param description: Описание ключа.
 		:type description: str | None
 		"""
@@ -391,7 +391,7 @@ class _Position:
 
 		self.__Flags.append(_Flag(name, aliases, description, self.__IsImportant))
 
-	def add_key(self, name: str, aliases: Iterable[str] | None = None, type: ValidableValuesTypes = ValidableValuesTypes.All, description: str | None = None):
+	def add_key(self, name: str, aliases: Iterable[str] | None = None, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
 		Добавляет ключ на позицию.
 
@@ -400,19 +400,19 @@ class _Position:
 		:param aliases: Список псевдонимов.
 		:type aliases: Iterable[str] | None
 		:param type: Тип значения ключа.
-		:type type: ValidableValuesTypes
+		:type type: ValidableTypes
 		:param description: Описание ключа.
 		:type description: str | None
 		"""
 
 		self.__Keys.append(_Key(name, aliases, type, description, self.__IsImportant))
 
-	def set_argument(self, type: ValidableValuesTypes = ValidableValuesTypes.All, description: str | None = None):
+	def set_argument(self, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
 		Устанавливает аргумент на позицию.
 
-		:param type: Тип аргумента. По умолчанию `ValidableValuesTypes.All`.
-		:type type: ValidableValuesTypes
+		:param type: Тип аргумента. По умолчанию `ValidableTypes.All`.
+		:type type: ValidableTypes
 		:param description: Описание аргумента. По умолчанию `None`.
 		:type description: str | None
 		"""

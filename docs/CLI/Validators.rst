@@ -1,9 +1,9 @@
 Validators
 ==========
-.. automodule:: dublib.CLI.Terminalyzer.Validators
-	:members:
 
-Для создания собственного валидатора необходимо унаследовать класс от ``BaseValidator``, указать целевой тип данных в квадратных скобках при наследовании, а также переопределить два статических метода: ``validate()`` и ``convert()``.
+Для создания собственного валидатора необходимо унаследовать класс от ``BaseValidator`` и указать целевой тип данных в квадратных скобках при наследовании, а также переопределить два статических метода: ``validate()`` и ``convert()``.
+
+В качестве имени кастомного валидатора рекомендуется использовать ``CustomValidator_{TYPE}``, что позволяет извлекать тип при генерации исключений.
 
 Любой валидатор наследует также метод ``parse()``, автоматически валидирующий и приводящий значение к нужному типу, а в случае ошибки выбрасывающий исключение типа ``ValidationError``.
 
@@ -12,7 +12,7 @@ Validators
 
 .. code-block:: python
 
-	from dublib.CLI.Terminalyzer.Validators import BaseValidator
+	from dublib.CLI.Validators import BaseValidator
 
 	class CustomValidator_ExampleBool(BaseValidator[bool]):
 
@@ -36,19 +36,20 @@ Validators
 
 .. code-block:: python
 
-	from dublib.CLI.Terminalyzer import Terminalyzer, Command, ValidableValuesTypes
+	from dublib.CLI.Terminalyzer import Terminalyzer, Command, ValidableTypes
 
 	from enum import Enum
 
-	class CustomValidableValuesTypes(ValidableValuesTypes):
+	class CustomValidableTypes(ValidableTypes):
 		ExampleBool = CustomValidator_ExampleBool
 
 	Commands = list()
 
 	Com = Command("example")
-	Com.base.add_argument(CustomValidableValuesTypes.ExampleBool)
+	Com.base.add_argument(CustomValidableTypes.ExampleBool)
 	Commands.append(Com)
 
 	# Дальнейшая обработка через Terminalyzer...
 
-	
+.. automodule:: dublib.CLI.Validators
+	:members:

@@ -4,3 +4,4 @@ CLI
 	Templates/index
 	Terminalyzer/index
 	TextStyler/index
+	Validators
