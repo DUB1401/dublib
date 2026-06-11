@@ -46,7 +46,11 @@ telebot = [
 	"pyTelegramBotAPI"
 ]
 dev = [
+	"mypy",
+	"types-requests",
+
 	"pytest",
+	
 	"Sphinx",
 	"sphinx-rtd-theme"
 ]

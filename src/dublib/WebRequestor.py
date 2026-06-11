@@ -2,18 +2,20 @@ from .Exceptions.WebRequestor import *
 from .Methods.Data import ToIterable
 from .Core import LOGS_HANDLER
 
-from typing import Any, Iterable
+from typing import Any, Callable, cast, get_args, Iterable, TYPE_CHECKING
 from time import sleep
 import logging
 import random
 import enum
 import json
 
-from curl_cffi import requests as curl_cffi_requests
-from curl_cffi import CurlHttpVersion
+from curl_cffi import BrowserTypeLiteral, CurlHttpVersion, ProxySpec, requests as curl_cffi_requests
 from fake_useragent import UserAgent
 import requests
 import httpx
+
+if TYPE_CHECKING:
+	from requests.cookies import RequestsCookieJar
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
@@ -62,7 +64,7 @@ class _curl_cffi_config:
 	#==========================================================================================#
 
 	@property
-	def fingerprint(self) -> str | None:
+	def fingerprint(self) -> BrowserTypeLiteral | None:
 		"""Отпечаток браузера."""
 
 		return self.__Fingerprint
@@ -80,18 +82,15 @@ class _curl_cffi_config:
 	def __init__(self):
 		"""Дополнительная конфигурация библиотеки curl_cffi."""
 
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
 		self.__HttpVersion = CurlHttpVersion.V1_1
-		self.__Fingerprint = None
-		self.__SwitchProtocol = False
+		self.__Fingerprint: BrowserTypeLiteral | None = None
 	
 	def select_http_version(self, version: CurlHttpVersion):
 		"""
 		Указывает используемую версию протокола HTTP.
 		
   		:param version: Версия протокола HTTP.
-    		:type version: CurlHttpVersion
+    	:type version: CurlHttpVersion
 		"""
 
 		self.__HttpVersion = version
@@ -100,11 +99,13 @@ class _curl_cffi_config:
 		"""
   		Выбирает используемый отпечаток браузера.
 
-    		:param fingerprint: Строковый идентификатор отпечатка браузера или `None` для удаления. Список идентификаторов можно получить на [странице](https://github.com/lexiforest/curl_cffi?tab=readme-ov-file#supported-impersonate-browsers) библиотеки.
-    		:type fingerprint: str | None
+		:param fingerprint: Строковый идентификатор отпечатка браузера или `None` для удаления. Список идентификаторов можно получить на [странице](https://github.com/lexiforest/curl_cffi?tab=readme-ov-file#supported-impersonate-browsers) библиотеки.
+		:type fingerprint: str | None
+		:raises ValueError: 
    		"""
 
-		self.__Fingerprint = fingerprint
+		if fingerprint not in get_args(BrowserTypeLiteral): raise ValueError(fingerprint)
+		self.__Fingerprint = cast(BrowserTypeLiteral | None, fingerprint)
 
 class _httpx_config:
 	"""Дополнительная конфигурация библиотеки httpx."""
@@ -126,8 +127,6 @@ class _httpx_config:
 	def __init__(self):
 		"""Дополнительная конфигурация библиотеки curl_cffi."""
 
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
 		self.__EnableHTTP2 = False
 	
 	def enable_http2(self, status: bool):
@@ -150,7 +149,7 @@ class Proxy:
 	#==========================================================================================#
 
 	@property
-	def protocol(self) -> Protocols | None:
+	def protocol(self) -> Protocols:
 		"""Тип протокола подключения."""
 
 		return self.__Protocol
@@ -183,16 +182,16 @@ class Proxy:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, protocol: Protocols | None = None, host: str | None = None, port: int | str | None = None, login: str | None = None, password: str | None = None):
+	def __init__(self, protocol: Protocols = Protocols.HTTPS, host: str | None = None, port: int | None = None, login: str | None = None, password: str | None = None):
 		"""
 		Данные прокси-сервера.
 
 		:param protocol: Тип протокола подключения.
-		:type protocol: Protocols | None
+		:type protocol: Protocols
 		:param host: IP адрес или домен хоста.
 		:type host: str | None
 		:param port: Номер порта.
-		:type port: int | str | None
+		:type port: int | None
 		:param login: Логин.
 		:type login: str | None
 		:param password: Пароль.
@@ -365,7 +364,7 @@ class WebConfig:
 		return self.__UserAgent
 
 	@property
-	def good_codes(self) -> tuple[int | None]:
+	def good_codes(self) -> tuple[int | None, ...]:
 		"""Список кодов, означающих успешное выполнение запроса."""
 
 		return self.__GoodCodes
@@ -384,7 +383,7 @@ class WebConfig:
 		self.__UserAgent = None
 		self.__Headers = dict()
 		self.__Retries = 0
-		self.__GoodCodes = (200, 404)
+		self.__GoodCodes: tuple[int | None, ...] = (200, 404)
 		self.__Delay = 0.25
 		self.__VerifySSL = True
 
@@ -419,7 +418,7 @@ class WebConfig:
 		:type good_codes: Iterable[int | None]
 		"""
 
-		self.__GoodCodes = good_codes
+		self.__GoodCodes = tuple(good_codes)
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ УПРАВЛЕНИЯ ЗАГОЛОВКАМИ <<<<< #
@@ -552,7 +551,7 @@ class WebResponse:
 		return self.__Content
 
 	@property
-	def exceptions(self) -> tuple[Exception]:
+	def exceptions(self) -> tuple[Exception, ...]:
 		"""Набор возникших во время выполнения запросов исключений."""
 
 		return tuple(self.__Exceptions)
@@ -598,6 +597,8 @@ class WebResponse:
 		try: return json.loads(string)
 		except: pass
 
+		return None
+
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
@@ -607,11 +608,11 @@ class WebResponse:
 
 		self.__GoodCodes = config.good_codes if config else WebConfig().good_codes
 
-		self.__StatusCode = None
-		self.__Content = None
-		self.__JSON = None
-		self.__Text = None
-		self.__Exceptions = list()
+		self.__StatusCode: int | None = None
+		self.__Content: bytes | None = None
+		self.__JSON: dict | None = None
+		self.__Text: str | None = None
+		self.__Exceptions: list[Exception] = list()
 
 	def __bool__(self) -> bool:
 		"""Интерпретирует ответ в логическое значение: успешен ли запрос."""
@@ -672,7 +673,7 @@ class WebResponse:
 
 		if text:
 			if parse_json: self.__JSON = self.__TryDeserialize(text)
-			self.__Content = bytes(text)
+			self.__Content = text.encode()
 
 #==========================================================================================#
 # >>>>> ОСНОВНОЙ КЛАСС <<<<< #
@@ -680,6 +681,9 @@ class WebResponse:
 
 class WebRequestor:
 	"""Оператор запросов."""
+
+	# Определение типов на уровне класса исключает ошибку [no-redef].
+	__Session: curl_cffi_requests.Session | requests.Session | httpx.Client | None
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА <<<<< #
@@ -695,14 +699,17 @@ class WebRequestor:
 	def cookies(self) -> dict | None:
 		"""Словарь установленных cookies."""
 
+		if self.__Session is None: return None
 		Cookies = None
-		if self.__Config.lib in (WebLibs.curl_cffi, WebLibs.requests): Cookies = self.__Session.cookies.get_dict()
+		if self.__Config.lib in (WebLibs.curl_cffi, WebLibs.requests):
+			CookiesSource = cast("curl_cffi_requests.cookies.Cookies | RequestsCookieJar", self.__Session.cookies)
+			Cookies = CookiesSource.get_dict()
 		elif self.__Config.lib == WebLibs.httpx: Cookies = dict(self.__Session.cookies)
 
 		return Cookies
 
 	#==========================================================================================#
-	# >>>>> ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ <<<<< #
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
 	def __Initialize(self):
@@ -724,20 +731,16 @@ class WebRequestor:
 		"""Объединяет заголовки конфигурации и параметров запроса."""
 
 		if self.__Config.headers:
-
-			if headers: 
-				headers = self.__Config.headers | headers
-				
-			else:
-				headers = self.__Config.headers
+			if headers: headers = self.__Config.headers | headers
+			else: headers = self.__Config.headers
 
 		return headers
 
 	#==========================================================================================#
-	# >>>>> МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ CURL_CFFI <<<<< #
+	# >>>>> ПРИАТНЫЕ МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ CURL_CFFI <<<<< #
 	#==========================================================================================#
 
-	def __curl_cffi_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> curl_cffi_requests.Response:
+	def __curl_cffi_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> WebResponse:
 		"""
 		Отправляет GET запрос через библиотеку **curl_cffi**.
 
@@ -747,30 +750,31 @@ class WebRequestor:
 		:type url: str
 		:param proxy: Данные прокси.
 		:type proxy: Proxy | None
-		:param params: Словарь параметров запроса. По умолчанию `None`.
+		:param params: Словарь параметров запроса.
 		:type params: dict | None
-		:param headers: Словарь заголовков. По умолчанию `None`.
+		:param headers: Словарь заголовков.
 		:type headers: dict | None
-		:param cookies: Словарь cookies. По умолчанию `None`.
+		:param cookies: Словарь cookies.
 		:type cookies: dict | None
-		:return: Контейнер ответа от библиотеки **requests**.
-		:rtype: requests.Response
+		:return: Контейнер ответа от библиотеки **curl_cffi**.
+		:rtype: WebResponse
 		"""
 
+		self.__Session = cast(curl_cffi_requests.Session, self.__Session)
 		headers = self.__MergeHeaders(headers)
-			
+
 		response.parse_response(self.__Session.get(
 			url = url,
 			params = params,
 			headers = headers,
 			cookies = cookies,
-			proxies = proxy.to_dict() if proxy else None,
+			proxies = cast(ProxySpec, proxy.to_dict()) if proxy else None,
 			verify = self.__Config.verify_ssl
 		))
 
 		return response
 
-	def __curl_cffi_POST(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> curl_cffi_requests.Response:
+	def __curl_cffi_POST(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> WebResponse:
 		"""
 		Отправляет POST запрос через библиотеку **curl_cffi**.
 
@@ -780,20 +784,21 @@ class WebRequestor:
 		:type url: str
 		:param proxy: Данные прокси.
 		:type proxy: Proxy | None
-		:param params: Словарь параметров запроса. По умолчанию `None`.
+		:param params: Словарь параметров запроса.
 		:type params: dict | None
-		:param headers: Словарь заголовков. По умолчанию `None`.
+		:param headers: Словарь заголовков.
 		:type headers: dict | None
-		:param cookies: Словарь cookies. По умолчанию `None`.
+		:param cookies: Словарь cookies.
 		:type cookies: dict | None
-		:param data: Данные запроса. По умолчанию `None`.
+		:param data: Данные запроса.
 		:type data: Any
-		:param json: Словарь для сериализации и передачи в качестве JSON. По умолчанию `None`.
+		:param json: Словарь для сериализации и передачи в качестве JSON.
 		:type json: dict | None
-		:return: Контейнер ответа от библиотеки **requests**.
-		:rtype: requests.Response
+		:return: Контейнер ответа от библиотеки **curl_cffi**.
+		:rtype: WebResponse
 		"""
 
+		self.__Session = cast(curl_cffi_requests.Session, self.__Session)
 		headers = self.__MergeHeaders(headers)
 
 		response.parse_response(self.__Session.post(
@@ -803,17 +808,17 @@ class WebRequestor:
 			cookies = cookies,
 			data = data,
 			json = json,
-			proxies = proxy.to_dict() if proxy else None,
+			proxies = cast(ProxySpec, proxy.to_dict()) if proxy else None,
 			verify = self.__Config.verify_ssl
 		))
 
 		return response
 	
 	#==========================================================================================#
-	# >>>>> МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ HTTPX <<<<< #
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ HTTPX <<<<< #
 	#==========================================================================================#
 
-	def __httpx_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> httpx.Response:
+	def __httpx_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> WebResponse:
 		"""
 		Отправляет GET запрос через библиотеку **httpx**.
 
@@ -823,14 +828,14 @@ class WebRequestor:
 		:type url: str
 		:param proxy: Данные прокси.
 		:type proxy: Proxy | None
-		:param params: Словарь параметров запроса. По умолчанию `None`.
+		:param params: Словарь параметров запроса.
 		:type params: dict | None
-		:param headers: Словарь заголовков. По умолчанию `None`.
+		:param headers: Словарь заголовков.
 		:type headers: dict | None
-		:param cookies: Словарь cookies. По умолчанию `None`.
+		:param cookies: Словарь cookies.
 		:type cookies: dict | None
-		:return: Контейнер ответа от библиотеки **requests**.
-		:rtype: requests.Response
+		:return: Контейнер ответа от библиотеки **httpx**.
+		:rtype: WebResponse
 		"""
 
 		headers = self.__MergeHeaders(headers)
@@ -851,7 +856,7 @@ class WebRequestor:
 
 		return response
 
-	def __httpx_POST(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> httpx.Response:
+	def __httpx_POST(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> WebResponse:
 		"""
 		Отправляет POST запрос через библиотеку **httpx**.
 
@@ -861,18 +866,18 @@ class WebRequestor:
 		:type url: str
 		:param proxy: Данные прокси.
 		:type proxy: Proxy | None
-		:param params: Словарь параметров запроса. По умолчанию `None`.
+		:param params: Словарь параметров запроса.
 		:type params: dict | None
-		:param headers: Словарь заголовков. По умолчанию `None`.
+		:param headers: Словарь заголовков.
 		:type headers: dict | None
-		:param cookies: Словарь cookies. По умолчанию `None`.
+		:param cookies: Словарь cookies.
 		:type cookies: dict | None
-		:param data: Данные запроса. По умолчанию `None`.
+		:param data: Данные запроса.
 		:type data: Any
-		:param json: Словарь для сериализации и передачи в качестве JSON. По умолчанию `None`.
+		:param json: Словарь для сериализации и передачи в качестве JSON.
 		:type json: dict | None
-		:return: Контейнер ответа от библиотеки **requests**.
-		:rtype: requests.Response
+		:return: Контейнер ответа от библиотеки **httpx**.
+		:rtype: WebResponse
 		"""
 
 		headers = self.__MergeHeaders(headers)
@@ -883,8 +888,6 @@ class WebRequestor:
 			params = params,
 			headers = headers,
 			cookies = CurrentCookies | cookies,
-			data = data,
-			json = json,
 			proxy = proxy.to_string() if proxy else None,
 			http2 = self.__Config.httpx.http2,
 			follow_redirects = self.__Config.redirecting,
@@ -896,10 +899,10 @@ class WebRequestor:
 		return response
 	
 	#==========================================================================================#
-	# >>>>> МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ REQUESTS <<<<< #
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ REQUESTS <<<<< #
 	#==========================================================================================#
 
-	def __requests_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> requests.Response:
+	def __requests_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> WebResponse:
 		"""
 		Отправляет GET запрос через библиотеку **requests**.
 
@@ -909,16 +912,17 @@ class WebRequestor:
 		:type url: str
 		:param proxy: Данные прокси.
 		:type proxy: Proxy | None
-		:param params: Словарь параметров запроса. По умолчанию `None`.
+		:param params: Словарь параметров запроса.
 		:type params: dict | None
-		:param headers: Словарь заголовков. По умолчанию `None`.
+		:param headers: Словарь заголовков.
 		:type headers: dict | None
-		:param cookies: Словарь cookies. По умолчанию `None`.
+		:param cookies: Словарь cookies.
 		:type cookies: dict | None
 		:return: Контейнер ответа от библиотеки **requests**.
-		:rtype: requests.Response
+		:rtype: WebResponse
 		"""
 		
+		self.__Session = cast(requests.Session, self.__Session)
 		headers = self.__MergeHeaders(headers)
 
 		response.parse_response(self.__Session.get(
@@ -933,7 +937,7 @@ class WebRequestor:
 
 		return response
 	
-	def __requests_POST(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> requests.Response:
+	def __requests_POST(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> WebResponse:
 		"""
 		Отправляет POST запрос через библиотеку **requests**.
 
@@ -943,20 +947,21 @@ class WebRequestor:
 		:type url: str
 		:param proxy: Данные прокси.
 		:type proxy: Proxy | None
-		:param params: Словарь параметров запроса. По умолчанию `None`.
+		:param params: Словарь параметров запроса.
 		:type params: dict | None
-		:param headers: Словарь заголовков. По умолчанию `None`.
+		:param headers: Словарь заголовков.
 		:type headers: dict | None
-		:param cookies: Словарь cookies. По умолчанию `None`.
+		:param cookies: Словарь cookies.
 		:type cookies: dict | None
-		:param data: Данные запроса. По умолчанию `None`.
+		:param data: Данные запроса.
 		:type data: Any
-		:param json: Словарь для сериализации и передачи в качестве JSON. По умолчанию `None`.
+		:param json: Словарь для сериализации и передачи в качестве JSON.
 		:type json: dict | None
 		:return: Контейнер ответа от библиотеки **requests**.
-		:rtype: requests.Response
+		:rtype: WebResponse
 		"""
 
+		self.__Session = cast(requests.Session, self.__Session)
 		headers = self.__MergeHeaders(headers)
 
 		response.parse_response(self.__Session.get(
@@ -974,9 +979,9 @@ class WebRequestor:
 		return response
 		
 	#==========================================================================================#
-	# >>>>> ОБЩИЕ МЕТОДЫ <<<<< #
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
-		
+
 	def __init__(self, config: WebConfig | None = None):
 		"""
 		Оператор запросов.
@@ -985,11 +990,11 @@ class WebRequestor:
 		:type config: WebConfig | None
 		"""
 
-		self.__Proxies: tuple[Proxy] = tuple()
+		self.__Proxies: tuple[Proxy, ...] = tuple()
 		self.__Config = config or WebConfig()
 		self.__Session = None
 
-		self.__RequestsMethods = {
+		self.__RequestsMethods: dict[RequestsTypes, dict[WebLibs, Callable]] = {
 			RequestsTypes.GET: {
 				WebLibs.curl_cffi: self.__curl_cffi_GET,
 				WebLibs.httpx: self.__httpx_GET,
@@ -1007,8 +1012,9 @@ class WebRequestor:
 	def close(self):
 		"""Закрывает менеджер запросов."""
 			
-		self.__Session.close()
-		self.__Session = None
+		if self.__Session is not None: 
+			self.__Session.close()
+			self.__Session = None
 			
 	def add_proxies(self, proxies: Iterable[Proxy] | Proxy):
 		"""
@@ -1077,20 +1083,20 @@ class WebRequestor:
 		return Response
 
 	#==========================================================================================#
-	# >>>>> ТИПЫ ЗАПРОСОВ <<<<< #
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ ВЫПОЛНЕНИЯ ЗАПРОСОВ <<<<< #
 	#==========================================================================================#	
-	
+
 	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> WebResponse:
 		"""
 		Отправляет GET-запрос.
 
 		:param url: Адрес запроса.
 		:type url: str
-		:param params: Словарь параметров запроса. По умолчанию `None`.
+		:param params: Словарь параметров запроса.
 		:type params: dict | None
-		:param headers: Словарь заголовков. По умолчанию `None`.
+		:param headers: Словарь заголовков.
 		:type headers: dict | None
-		:param cookies: Словарь cookies. По умолчанию `None`.
+		:param cookies: Словарь cookies.
 		:type cookies: dict | None
 		:return: Унифицированный контейнер ответа на веб-запросы.
 		:rtype: WebResponse
@@ -1104,15 +1110,15 @@ class WebRequestor:
 
 		:param url: Адрес запроса.
 		:type url: str
-		:param params: Словарь параметров запроса. По умолчанию `None`.
+		:param params: Словарь параметров запроса.
 		:type params: dict | None
-		:param headers: Словарь заголовков. По умолчанию `None`.
+		:param headers: Словарь заголовков.
 		:type headers: dict | None
-		:param cookies: Словарь cookies. По умолчанию `None`.
+		:param cookies: Словарь cookies.
 		:type cookies: dict | None
-		:param data: Данные запроса. По умолчанию `None`.
+		:param data: Данные запроса.
 		:type data: Any
-		:param json: Словарь для сериализации и передачи в качестве JSON. По умолчанию `None`.
+		:param json: Словарь для сериализации и передачи в качестве JSON.
 		:type json: dict | None
 		:return: Унифицированный контейнер ответа на веб-запросы.
 		:rtype: WebResponse

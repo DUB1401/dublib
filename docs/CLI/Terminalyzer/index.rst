@@ -1,10 +1,5 @@
 Terminalyzer
 ============
-.. automodule:: dublib.CLI.Terminalyzer
-	:members:
-.. toctree::
-	Command
-	Helper
 
 Описание
 --------
@@ -56,3 +51,6 @@ Terminalyzer
 			CommandData.get_position_parameter("TARGET").value
 			# Получение пути к файлу через индекс аргумента.
 			CommandData.arguments[0].value
+
+.. automodule:: dublib.CLI.Terminalyzer
+	:members:

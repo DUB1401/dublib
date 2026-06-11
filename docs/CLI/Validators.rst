@@ -51,5 +51,8 @@ Validators
 
 	# Дальнейшая обработка через Terminalyzer...
 
+Представленные типы
+-------------------
+
 .. automodule:: dublib.CLI.Validators
 	:members:
