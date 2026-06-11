@@ -55,6 +55,13 @@ dev = [
 	"sphinx-rtd-theme"
 ]
 
+[tool.mypy]
+check_untyped_defs = true
+follow_imports = "silent"
+files = [
+	"src/dublib/WebRequestor.py"
+]
+
 [project.urls]
 Documentation = "https://github.com/DUB1401/dublib/tree/main/docs"
 "Source Code" = "https://github.com/DUB1401/dublib"
