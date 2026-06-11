@@ -4,7 +4,7 @@ from .FastStyler import FastStyler
 from . import Codes, Escapes
 
 from types import MappingProxyType
-from typing import Iterable
+from typing import cast, Iterable
 
 #==========================================================================================#
 # >>>>> СТИЛИЗАЦИЯ ИЗ HTML <<<<< #
@@ -47,7 +47,7 @@ class TextStyler:
 	#==========================================================================================#
 
 	@property
-	def decorations(self) -> tuple[Codes.Decorations] | None:
+	def decorations(self) -> tuple[Codes.Decorations, ...] | None:
 		"""Набор кодов декораций."""
 
 		return self.__Decorations
@@ -94,7 +94,7 @@ class TextStyler:
 		:type autoreset: bool
 		"""
 
-		self.__Decorations = ToIterable(decorations) if decorations else None
+		self.__Decorations: tuple[Codes.Decorations, ...] | None = cast(tuple[Codes.Decorations, ...], ToIterable(decorations)) if decorations else None
 		self.__TextColor = text_color
 		self.__BackgroundColor = background_color
 		self.__Autoreset = autoreset
@@ -109,10 +109,10 @@ class TextStyler:
 		:rtype: str
 		"""
 
-		codes = tuple(str(Element.value) for Element in codes)
-		codes = ";".join(codes)
+		CodesStrings: tuple[str, ...] = tuple(str(Element.value) for Element in codes)
+		CodesString = ";".join(CodesStrings)
 
-		return f"\033[{codes}m"
+		return f"\033[{CodesString}m"
 
 	def get_styled_text(self, text: str) -> str:
 		"""
@@ -124,7 +124,7 @@ class TextStyler:
 		:rtype: str
 		"""
 
-		Codes = list()
+		Codes: list = list()
 		if self.__Decorations: Codes.extend(self.__Decorations)
 		if self.__TextColor: Codes.append(self.__TextColor)
 		if self.__BackgroundColor: Codes.append(self.__BackgroundColor)
@@ -146,7 +146,7 @@ class TextStyler:
 		:type decorations: Codes.Decorations | Iterable[Codes.Decorations] | None
 		"""
 
-		self.__Decorations = tuple(decorations) if decorations else None
+		self.__Decorations = cast(tuple[Codes.Decorations, ...], ToIterable(decorations)) if decorations else None
 
 	def set_text_color(self, text_color: Codes.Colors | None):
 		"""

@@ -1,4 +1,4 @@
-from ..Methods.Filesystem import NormalizePath, ReadTextFile, WriteTextFile
+from ..Methods.Filesystem import ReadTextFile, WriteTextFile
 
 import re
 
@@ -37,9 +37,7 @@ class Patch:
 			path – путь к файлу.
 		"""
 
-		#---> Генерация динамических атрибутов.
-		#==========================================================================================#
-		self.__Path = NormalizePath(path)
+		self.__Path = path
 		self.__Text = ReadTextFile(path)
 
 	def append_line(self, line: int, text: str):

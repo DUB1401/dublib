@@ -1,11 +1,12 @@
 from .... import Exceptions
 
-from typing import Iterable, TYPE_CHECKING
+from typing import cast, Sequence, TYPE_CHECKING
 from datetime import datetime
+from pathlib import Path
 
 if TYPE_CHECKING:
 	from .Definition import _Flag, _Key, Command
-
+	
 #==========================================================================================#
 # >>>>> ПРЕДСТАВЛЕНИЯ ОБРАБОТАННЫХ ПАРАМЕТРОВ <<<<< #
 #==========================================================================================#
@@ -14,17 +15,17 @@ class _ParsedArgument:
 	"""Представление обработанного аргумента."""
 
 	@property
-	def value(self) -> bool | float | int | str | datetime:
+	def value(self) -> bool | float | int | Path | str | datetime:
 		"""Значение ключа."""
 
 		return self.__Value
 
-	def __init__(self, value: bool | float | int | str | datetime):
+	def __init__(self, value: bool | float | int | Path | str | datetime):
 		"""
 		Представление обработанного аргумента.
 
 		:param value: Значение ключа.
-		:type value: bool | float | int | str | datetime
+		:type value: bool | float | int | Path | str | datetime
 		"""
 
 		self.__Value = value
@@ -36,7 +37,7 @@ class _ParsedFlag:
 	def aliases(self) -> list[str]:
 		"""Список псевдонимов."""
 
-		return self.__Flag.aliases
+		return self.__Flag.aliases.copy()
 
 	@property
 	def name(self) -> str:
@@ -61,7 +62,7 @@ class _ParsedKey:
 	def aliases(self) -> list[str]:
 		"""Список псевдонимов."""
 
-		return self.__Key.aliases
+		return self.__Key.aliases.copy()
 
 	@property
 	def name(self) -> str:
@@ -70,19 +71,19 @@ class _ParsedKey:
 		return self.__Key.name
 
 	@property
-	def value(self) -> bool | float | int | str | datetime:
+	def value(self) -> bool | float | int | Path | str | datetime:
 		"""Значение ключа."""
 
 		return self.__Value
 
-	def __init__(self, key: "_Key", value: bool | float | int | str | datetime):
+	def __init__(self, key: "_Key", value: bool | float | int | Path | str | datetime):
 		"""
 		Представление обработанного ключа.
 
 		:param key: Ключ.
 		:type key: _Key
 		:param value: Значение ключа.
-		:type value: bool | float | int | str | datetime
+		:type value: bool | float | int | Path | str | datetime
 		"""
 
 		self.__Key = key
@@ -95,19 +96,19 @@ class _ParsedCommandParameters:
 	#==========================================================================================#
 
 	@property
-	def arguments(self) -> tuple[_ParsedArgument]:
+	def arguments(self) -> tuple[_ParsedArgument, ...]:
 		"""Последовательность представлений аргументов."""
 
 		return self.__GetParametersType(_ParsedArgument)
 	
 	@property
-	def flags(self) -> tuple[_ParsedFlag]:
+	def flags(self) -> tuple[_ParsedFlag, ...]:
 		"""Последовательность представлений флагов."""
 
 		return self.__GetParametersType(_ParsedFlag)
 	
 	@property
-	def keys(self) -> tuple[_ParsedKey]:
+	def keys(self) -> tuple[_ParsedKey, ...]:
 		"""Последовательность представлений ключей."""
 
 		return self.__GetParametersType(_ParsedKey)
@@ -122,21 +123,21 @@ class _ParsedCommandParameters:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __GetParametersType(self, requred_type: _ParsedArgument | _ParsedFlag | _ParsedKey) -> tuple[type]:
+	def __GetParametersType(self, required_type: type[_ParsedArgument | _ParsedFlag | _ParsedKey]) -> tuple:
 		"""
 		Возвращает последовательность представлений параметров определённого типа.
 
 		:param requred_type: Требуемый тип.
-		:type requred_type: _ParsedArgument | _ParsedFlag | _ParsedKey
+		:type requred_type: type[_ParsedArgument | _ParsedFlag | _ParsedKey]
 		:return: Последовательность представлений параметров определённого типа.
-		:rtype: tuple[type]
+		:rtype: tuple
 		"""
 
 		Result = list()
 
 		for Sequence in (self.__Positions.values(), self.__BasePosition):
 			for Parameter in Sequence:
-				if type(Parameter) == requred_type: Result.append(Parameter)
+				if type(Parameter) == required_type: Result.append(Parameter)
 
 		return tuple(Result)
 
@@ -186,22 +187,22 @@ class ParsedCommandData:
 	#==========================================================================================#
 
 	@property
-	def arguments(self) -> tuple[bool | float | int | str | datetime]:
+	def arguments(self) -> tuple[bool | float | int | str | Path | datetime, ...]:
 		"""Последовательность значений аргументов."""
 
 		return tuple(Element.value for Element in self.__ParsedData.arguments)
 	
 	@property
-	def flags(self) -> tuple[_ParsedFlag]:
+	def flags(self) -> tuple[_ParsedFlag, ...]:
 		"""Последовательность активированных флагов."""
 
 		return self.__ParsedData.flags
 	
 	@property
-	def keys(self) -> tuple[str, bool | float | int | str | datetime]:
+	def keys(self) -> dict[str, bool | float | int | Path | str | datetime | None]:
 		"""Cловарь имён активированных ключей и их значений."""
 
-		return self.__ParsedData.keys
+		return {CurrentKey.name: CurrentKey.value for CurrentKey in self.__ParsedData.keys}
 	
 	@property
 	def name(self) -> str:
@@ -258,7 +259,7 @@ class ParsedCommandData:
 
 		return False
 	
-	def get_key_value(self, key: str, exception: bool = False) -> bool | float | int | str | datetime:
+	def get_key_value(self, key: str, exception: bool = False) -> bool | float | int | Path | str | datetime | None:
 		"""
 		Возвращает значение активированного ключа.
 
@@ -267,14 +268,16 @@ class ParsedCommandData:
 		:param exception: Указывает, нужно ли выбросить исключение при отсутствии ключа.
 		:type exception: bool
 		:raises KeyError: Выбрасывается в случае активации соответствующего параметра и запросе значения отсутствующего ключа.
-		:return: Значение ключа.
-		:rtype: Any
+		:return: Значение ключа или `None` при отсутствующем ключе.
+		:rtype: bool | float | int | Path | str | datetime | None
 		"""
 
 		for CurrentKey in self.__ParsedData.keys:
 			if key == CurrentKey.name or key in CurrentKey.aliases: return CurrentKey.value
 
 		if exception: raise KeyError(key)
+
+		return None
 
 	def get_position_parameter(self, position_name: str) -> _ParsedArgument | _ParsedFlag | _ParsedKey | None:
 		"""
@@ -289,29 +292,31 @@ class ParsedCommandData:
 
 		return self.__ParsedData.positions[position_name]
 	
-	def get_position_value(self, position_name: str) -> bool | float | int | str | datetime | None:
+	def get_position_value(self, position_name: str) -> bool | float | int | Path | str | datetime | None:
 		"""
 		Для аргументов и ключей на позиции возвращает значение, для флагов – `True` при активации.
 
 		:param position_name: Имя позиции.
 		:type position_name: str
 		:return: Параметр позиции или `None` при пустой позиции.
-		:rtype: bool | float | int | str | datetime | None
+		:rtype: bool | float | int | Path | str | datetime | None
 		:raises KeyError: Позиция не обнаружена.
 		"""
 
 		ParsedParameter = self.get_position_parameter(position_name)
-		if not ParsedParameter: return
+		if not ParsedParameter: return None
 
 		if type(ParsedParameter) == _ParsedFlag: return True
-		else: return ParsedParameter.value
+		else:
+			ParsedParameter = cast(_ParsedArgument | _ParsedKey, ParsedParameter)
+			return ParsedParameter.value
 
-	def to_dict(self) -> dict[str, list[bool | float | int | str | datetime] | str]:
+	def to_dict(self) -> dict:
 		"""
 		Возвращает словарное представление объекта.
 
 		:return: Словарное представление объекта.
-		:rtype: dict[str, list[bool | float | int | str | datetime] | str]
+		:rtype: dict
 		"""
 
 		return {
@@ -359,12 +364,12 @@ class _CommandParser:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ПАРСИНГА <<<<< #
 	#==========================================================================================#
 
-	def __CatchParameterForPositions(self, index: str):
+	def __CatchParameterForPositions(self, index: int):
 		"""
 		Поочерёдно проверяет позиции и пытается заполнить их параметрами соответствующего типа.
 
 		:param index: Индекс проверяемого параметра.
-		:type index: str
+		:type index: int
 		"""
 
 		Parameter = self.__Parameters[index]
@@ -412,12 +417,12 @@ class _CommandParser:
 
 		return bool(self.__PositionsLocks[position_name])
 
-	def __ParseBasePositionParameters(self, index: str):
+	def __ParseBasePositionParameters(self, index: int):
 		"""
 		Проверяет возможность заполнения базовой позиции остаточными параметрами.
 
 		:param index: Индекс проверяемого параметра.
-		:type index: str
+		:type index: int
 		"""
 
 		Parameter = self.__Parameters[index]
@@ -448,22 +453,22 @@ class _CommandParser:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, command: "Command", parameters: Iterable[str]):
+	def __init__(self, command: "Command", parameters: Sequence[str]):
 		"""
 		Парсер команды.
 
 		:param command: Данные команды.
 		:type command: Command
 		:param parameters: Последовательность строковых параметров команды (не включает имя самой команды).
-		:type parameters: Iterable[str]
+		:type parameters: Sequence[str]
 		"""
 
 		self.__Command = command
-		self.__Parameters = tuple(parameters)
+		self.__Parameters: tuple[str, ...] = tuple(parameters)
 
-		self.__ParametersLocks = [False for _ in self.__Parameters]
-		self.__PositionsLocks = {CurrentPosition.name: None for CurrentPosition in self.__Command.positions}
-		self.__BaseParameters = list()
+		self.__ParametersLocks: list[bool] = [False for _ in self.__Parameters]
+		self.__PositionsLocks: dict = {CurrentPosition.name: None for CurrentPosition in self.__Command.positions}
+		self.__BaseParameters: list = list()
 
 	def parse(self) -> ParsedCommandData:
 		"""

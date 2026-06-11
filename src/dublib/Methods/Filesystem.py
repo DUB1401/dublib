@@ -37,34 +37,37 @@ def AtomicWrite(path: PathLike, data: bytes):
 
 	os.replace(TempPath, path)
 
-def GetRandomFile(directory: PathLike) -> PathLike | None:
+def GetRandomFile(directory: PathLike) -> Path | None:
 	"""
-	Выбирает случайный файл из каталога.
+	Выбирает случайный файл из директории.
 
-	:param directory: Путь к каталогу.
+	:param directory: Путь к директории.
 	:type directory: PathLike
-	:raise FileNotFoundError: Выбрасывается, если каталог не существует.
-	:return: Путь к случайному файлу в каталоге по стандарту POSIX или `None`, если каталог пустой.
-	:rtype: PathLike
+	:return: Путь к случайному файлу в директории или `None`, если таковая пуста.
+	:rtype: Path
+	:raises FileNotFoundError: Директория не существует.
 	"""
 
-	directory = NormalizePath(directory)
+	DirectoryPath = Path(directory)
 	Files = ListDir(directory)
-	if not Files: return
+	if not Files: return None
+	FilePath = DirectoryPath / random.choice(Files)
 
-	return f"{directory}/" + random.choice(Files)
+	return FilePath
 
-def ListDir(path: PathLike | None = None) -> list[str]:
+def ListDir(directory: PathLike | None = None) -> list[str]:
 	"""
 	Основана на `os.scandir()`, более быстром и подробном варианте `os.listdir()`.
 
-	:param path: Путь для сканирования. Если передать `None`, будет возвращёт список элементов в текущем каталоге.
-	:type path: PathLike | None
+	:param directory: Путь для сканирования. Если передать `None`, будет возвращёт список элементов в текущей директории.
+	:type directory: PathLike | None
 	:return: Список названий каталогов и имён файлов по указанному пути
 	:rtype: list[str]
 	"""
 
-	return [Entry.name for Entry in os.scandir(path)]
+	TargetPath = Path(directory) if directory else Path(".")
+
+	return [Entry.name for Entry in os.scandir(TargetPath)]
 
 def MakeRootDirectories(directories: Iterable[str] | str):
 	"""
@@ -75,42 +78,19 @@ def MakeRootDirectories(directories: Iterable[str] | str):
 	"""
 
 	directories = ToIterable(directories)
-	
-	for Name in directories:
-		if not os.path.exists(Name): os.makedirs(Name)
+	for Name in directories: os.makedirs(Name, exist_ok = True)
 
-def NormalizePath(path: PathLike, strip: bool = True) -> PathLike:
+def RemoveDirectoryContent(directory: PathLike):
 	"""
-	Приводит путь к POSIX-стандарту.
+	Удлаляет содержимое директории.
 
-	:param path: Обрабатываемый путь.
-	:type path: PathLike
-	:param strip: Указывает, следует ли удалить наклонную черту из конца пути при наличии.
-	:type strip: bool
-	:return: Путь в POSIX-стандарте.
-	:rtype: PathLike
-	"""
-	
-	path: str = Path(path).as_posix()
-	if strip: path = path.rstrip("/")
-
-	return path
-
-def RemoveDirectoryContent(path: PathLike):
-	"""
-	Удлаляет содержимое каталога.
-
-	:param path: Путь к каталогу.
-	:type path: PathLike
+	:param directory: Путь к директории.
+	:type directory: PathLike
 	"""
 
-	FolderContent = ListDir(path)
-
-	for Item in FolderContent:
-		ItemPath = f"{path}/{Item}"
-
-		if os.path.isdir(ItemPath): shutil.rmtree(ItemPath)
-		else: os.remove(ItemPath)
+	DirectoryPath = Path(directory)
+	shutil.rmtree(DirectoryPath)
+	DirectoryPath.mkdir()
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С JSON <<<<< #
@@ -118,7 +98,7 @@ def RemoveDirectoryContent(path: PathLike):
 
 def ReadJSON(path: PathLike) -> dict:
 	"""
-	Считывает файл JSON и десириализует его в словарь.
+	Считывает файл JSON и десериализует его в словарь.
 
 	:param path: Путь к файлу.
 	:type path: PathLike
@@ -145,13 +125,12 @@ def WriteJSON(path: PathLike, data: dict, pretty: bool = True, atomic: bool = Fa
 	:raise TypeError: Выбрасывается при невозможности сериализации данных в JSON.
 	"""
 
-	Content = None
+	Content: bytes | None = None
 
-	if pretty: Content: str = json.dumps(data, ensure_ascii = False, indent = "\t", separators = (",", ": ")).encode()
-	else: Content: bytes = orjson.dumps(data)
+	if pretty: Content = json.dumps(data, ensure_ascii = False, indent = "\t", separators = (",", ": ")).encode()
+	else: Content = orjson.dumps(data)
 
-	if atomic:
-		AtomicWrite(path, Content)
+	if atomic: AtomicWrite(path, Content)
 	else:
 		with open(path, "wb") as FileWriter: FileWriter.write(Content)
 
@@ -184,18 +163,17 @@ def WriteYAML(path: PathLike, data: dict, atomic: bool = False):
 	:type atomic: bool
 	"""
 
-	data: str = yaml.dump(data, allow_unicode = True, sort_keys = False)
+	FileContent: bytes = yaml.dump(data, allow_unicode = True, sort_keys = False).encode()
 
-	if atomic:
-		AtomicWrite(path, data.encode())
+	if atomic: AtomicWrite(path, FileContent)
 	else:
-		with open(path, "w", encoding = "utf-8") as FileWrite: FileWrite.write(data)
+		with open(path, "wb") as FileWrite: FileWrite.write(FileContent)
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ТЕКСТОВЫМИ ФАЙЛАМИ <<<<< #
 #==========================================================================================#
 
-def ReadTextFile(path: PathLike, split: bool = False, strip: bool = False) -> str | tuple[str]:
+def ReadTextFile(path: PathLike, split: bool = False, strip: bool = False) -> str | tuple[str, ...]:
 	"""
 	Считывает текстовый файл.
 
@@ -210,15 +188,14 @@ def ReadTextFile(path: PathLike, split: bool = False, strip: bool = False) -> st
 	:raises FileNotFoundError: Выбрасывается при отсутствии файла.
 	"""
 
-	Text = None
+	Text: str | None = None
 	with open(path, encoding = "utf-8") as FileReader: Text = FileReader.read()
-	if split: Text = Text.split("\n")
+	TextLines: list[str] = Text.split("\n")
 
 	if strip:
-		if type(Text) == str: Text = Text.strip()
-		else: Text = tuple(Value.strip() for Value in Text)
+		for Index in range(len(TextLines)): TextLines[Index] = TextLines[Index].strip()
 
-	return Text
+	return tuple(TextLines) if split else "\n".join(TextLines)
 
 def WriteTextFile(path: PathLike, text: str | Iterable[str], atomic: bool = False):
 	"""
@@ -233,8 +210,8 @@ def WriteTextFile(path: PathLike, text: str | Iterable[str], atomic: bool = Fals
 	"""
 
 	if type(text) != str: text = "\n".join(text)
+	TextBytes: bytes = text.encode()
 
-	if atomic:
-		AtomicWrite(path, text.encode())
+	if atomic: AtomicWrite(path, TextBytes)
 	else:
-		with open(path, "w", encoding = "utf-8") as FileWrite: FileWrite.write(text)
+		with open(path, "wb") as FileWrite: FileWrite.write(TextBytes)

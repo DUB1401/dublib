@@ -1,4 +1,4 @@
-from ..Methods.Filesystem import NormalizePath, ReadJSON, WriteJSON
+from ..Methods.Filesystem import ReadJSON, WriteJSON
 
 from dataclasses import dataclass
 from os import PathLike
@@ -222,7 +222,6 @@ class TeleCache:
 		if not self.__Bot: raise RuntimeError("TeleBot not initialized.")
 		if not type: type = types.InputMediaDocument
 
-		path = NormalizePath(path)
 		Message: types.Message = None
 		FileID: str = None
 		
@@ -332,7 +331,6 @@ class TeleCache:
 		:rtype: RealCachedFile
 		"""
 
-		path = NormalizePath(path)
 		if not type: type = types.InputMediaDocument
 
 		if path not in self.__RealData.keys():
@@ -368,7 +366,6 @@ class TeleCache:
 		:rtype: RealCachedFile
 		"""
 
-		path = NormalizePath(path)
 		if not os.path.exists(path): raise FileNotFoundError(path)
 		if autoupload_type: self.cache_real_file(path, autoupload_type)
 
@@ -383,8 +380,6 @@ class TeleCache:
 		:return: Возвращает `True`, если указанный файл найден в кэше.
 		:rtype: bool
 		"""
-
-		path = NormalizePath(path)
 
 		return path in self.__RealData.keys()
 
@@ -423,7 +418,6 @@ class TeleCache:
 		:raise KeyError: Выбрасывается при отсутствии кэша файла по указанному пути.
 		"""
 
-		path = NormalizePath(path)
 		del self.__RealData[path]
 		self.save()
 
@@ -447,7 +441,6 @@ class TeleCache:
 		:rtype: VirtualCachedFile
 		"""
 
-		path = NormalizePath(path)
 		if not type: type = types.InputMediaDocument
 
 		if path not in self.__VirtualData.keys():

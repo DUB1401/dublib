@@ -47,18 +47,22 @@ telebot = [
 ]
 dev = [
 	"mypy",
-	"types-requests",
-
 	"pytest",
-	
 	"Sphinx",
 	"sphinx-rtd-theme"
 ]
 
 [tool.mypy]
 check_untyped_defs = true
+non_interactive = true
 follow_imports = "silent"
 files = [
+	"src/dublib/CLI",
+	"src/dublib/Exceptions",
+	"src/dublib/Methods",
+	"src/dublib/Polyglot",
+
+	"src/dublib/Core.py",
 	"src/dublib/WebRequestor.py"
 ]
 

@@ -2,7 +2,7 @@ from .Command.Definition import _Argument, _BasePosition, Command, _Flag, _Key, 
 from ..TextStyler import FastStyler
 
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, cast
 
 from prettytable import PLAIN_COLUMNS, PrettyTable
 
@@ -88,7 +88,7 @@ class Helper:
 
 		Indicator = "• "
 		Indent = "  "
-		Help = list()
+		Help: list = list()
 
 		if not base_position.parameters: return Help
 		Help.append(f"{Indicator}Other parameters:")
@@ -119,14 +119,17 @@ class Helper:
 		match parameter.__class__.__name__:
 
 			case "_Argument": 
+				parameter = cast(_Argument, parameter)
 				Typer = f"<{parameter.type.value}>" if typing else ""
 				return f"[argument{Typer}]"
 			
 			case "_Flag":
+				parameter = cast(_Flag, parameter)
 				Name = self.__GetParameterName(parameter.name, parameter.aliases)
 				return f"[flag {Name}]"
 			
 			case "_Key":
+				parameter = cast(_Key, parameter)
 				Typer = f"<{parameter.type.value}>" if typing else ""
 				Name = self.__GetParameterName(parameter.name, parameter.aliases)
 				return f"[key{Typer} {Name}]"
@@ -295,7 +298,7 @@ class Helper:
 		Tables = list()
 
 		for Category in CommandsCategories.keys():
-			HelpTable = {
+			HelpTable: dict[str, list] = {
 				"Commands": [],
 				"Descriptions": []
 			}

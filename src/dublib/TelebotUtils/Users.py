@@ -1,4 +1,4 @@
-from ..Methods.Filesystem import ListDir, NormalizePath, ReadJSON, WriteJSON
+from ..Methods.Filesystem import ListDir, ReadJSON, WriteJSON
 from ..Methods.Data import Copy, ToIterable
 from ..Exceptions.TelebotUtils import *
 from ..Core import LOGS_HANDLER
@@ -692,7 +692,7 @@ class UsersManager:
 		:type threads: int
 		"""
 
-		self.__StorageDirectory = NormalizePath(storage_directory)
+		self.__StorageDirectory = storage_directory
 
 		self.__Users: dict[int, UserData] = dict()
 

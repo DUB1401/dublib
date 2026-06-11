@@ -290,7 +290,7 @@ class _Position:
 	#==========================================================================================#
 
 	@property
-	def argument(self) -> _Argument:
+	def argument(self) -> _Argument | None:
 		"""Аргумент."""
 
 		return self.__Argument
@@ -348,7 +348,9 @@ class _Position:
 	def parameters(self) -> list[_Argument | _Flag | _Key]:
 		"""Список всех описанных параметров позиции."""
 
-		List = self.__Flags + self.__Keys
+		List: list[_Argument | _Flag | _Key] = list()
+		List += self.__Flags
+		List += self.__Keys
 		if self.__Argument: List.append(self.__Argument)
 
 		return List
@@ -443,7 +445,7 @@ class Command:
 		return self.__Category
 
 	@property
-	def description(self) -> str:
+	def description(self) -> str | None:
 		"""Описание команды."""
 
 		return self.__Description

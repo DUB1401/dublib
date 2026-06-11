@@ -19,4 +19,5 @@ jobs:
           pip install .[dev,telebot]
 
       - name: Run Mypy
-        run: mypy
+        run: mypy --install-types --non-interactive
+        

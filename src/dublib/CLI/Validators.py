@@ -1,7 +1,7 @@
 from ..Exceptions.CLI.Validators import ValidationError
 
+from typing import cast, TypeVar, Generic
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic
 from datetime import datetime
 from pathlib import Path
 from enum import Enum
@@ -13,7 +13,7 @@ import validators
 # >>>>> БАЗОВЫЙ КЛАСС <<<<< #
 #==========================================================================================#
 
-_PARSED_VALUE = TypeVar("PARSED_VALUE")
+_PARSED_VALUE = TypeVar("_PARSED_VALUE")
 
 class BaseValidator(ABC, Generic[_PARSED_VALUE]):
 	"""Базовый валидатор строки."""
@@ -147,8 +147,12 @@ class Validator_Base64(BaseValidator[str]):
 		:rtype: bool
 		"""
 
-		try: return validators.base64(value)
-		except validators.ValidationError: return False
+		try: 
+			Result = validators.base64(value)
+			if type(Result) == bool: return Result
+		except validators.ValidationError: pass
+
+		return False
 
 class Validator_Bool(BaseValidator[bool]):
 
@@ -196,7 +200,7 @@ class Validator_Datetime(BaseValidator[datetime]):
 		:rtype: datetime
 		"""
 
-		return dateparser.parse(value)
+		return cast(datetime, dateparser.parse(value))
 	
 	@staticmethod
 	def validate(value: str) -> bool:
@@ -242,8 +246,12 @@ class Validator_Email(BaseValidator[str]):
 		:rtype: bool
 		"""
 
-		try: return validators.email(value)
-		except validators.ValidationError: return False
+		try: 
+			Result = validators.email(value)
+			if type(Result) == bool: return Result
+		except validators.ValidationError: pass
+
+		return False
 
 class Validator_Float(BaseValidator[float]):
 
@@ -327,8 +335,12 @@ class Validator_IPv4(BaseValidator[str]):
 		:rtype: bool
 		"""
 
-		try: return validators.ipv4(value)
-		except validators.ValidationError: return False
+		try: 
+			Result = validators.ipv4(value)
+			if type(Result) == bool: return Result
+		except validators.ValidationError: pass
+
+		return False
 
 class Validator_IPv6(BaseValidator[str]):
 
@@ -356,8 +368,12 @@ class Validator_IPv6(BaseValidator[str]):
 		:rtype: bool
 		"""
 
-		try: return validators.ipv6(value)
-		except validators.ValidationError: return False
+		try: 
+			Result = validators.ipv6(value)
+			if type(Result) == bool: return Result
+		except validators.ValidationError: pass
+
+		return False
 
 class Validator_Number(BaseValidator[float | int]):
 
@@ -482,8 +498,12 @@ class Validator_URL(BaseValidator[str]):
 		:rtype: bool
 		"""
 
-		try: return validators.url(value)
-		except validators.ValidationError: return False
+		try: 
+			Result = validators.url(value)
+			if type(Result) == bool: return Result
+		except validators.ValidationError: pass
+
+		return False
 
 class Validator_ValidPath(BaseValidator[Path]):
 

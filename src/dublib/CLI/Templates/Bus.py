@@ -52,12 +52,12 @@ def PrintMessage(text: str, type: MessagesTypes | None = None, origin: str | Non
 	:type origin: str | None
 	"""
 
-	ColorsDict = {
+	ColorsDict: dict[MessagesTypes | None, Codes.Colors | None] = {
 		MessagesTypes.Info: Codes.Colors.White,
 		MessagesTypes.Error: Codes.Colors.Red,
 		MessagesTypes.Warning: Codes.Colors.Yellow,
 		MessagesTypes.Critical: Codes.Colors.Red,
-		None: Codes.Drops.DEFAULT_COLOR
+		None: None
 	}
 
 	print(TextStyler(text_color = ColorsDict[type]).get_styled_text(GenerateMessage(text, type, origin)))

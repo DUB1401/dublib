@@ -11,6 +11,6 @@ class ValidationError(Exception):
 		:type target_type: type
 		"""
 
-		target_type = target_type.__name__.split("_", maxsplit = 1)[-1]
+		TypeName = target_type.__name__.split("_", maxsplit = 1)[-1]
 
-		super().__init__(f"Unable convert \"{value}\" to \"{target_type}\" type.")
+		super().__init__(f"Unable convert \"{value}\" to \"{TypeName}\" type.")

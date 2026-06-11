@@ -6,7 +6,8 @@ from .Helper import Helper
 from ...Core import LOGS_HANDLER
 from ... import Exceptions
 
-from typing import Iterable
+from collections.abc import Sequence
+from typing import cast
 import logging
 import sys
 
@@ -94,12 +95,12 @@ class Terminalyzer:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, input: Iterable[str] | None = None):
+	def __init__(self, input: Sequence[str] | None = None):
 		"""
 		Обработчик консольных параметров.
 
 		:param input: Последовательность параметров команды, первым из которых является названия. По умолчанию берётся из *sys.argv* скрипта.
-		:type input: Iterable[str] | None
+		:type input: Sequence[str] | None
 		"""
 
 		self.set_input(input)
@@ -118,11 +119,11 @@ class Terminalyzer:
 		:raises Exceptions.CLI.Terminalyzer.MultipleCommandDefinition: Множественное определение команды.
 		"""
 		
-		if not self.__CommandName: return
+		if not self.__CommandName: return None
 
 		self.__ValidateCommandsDefinitions(commands)
 		if self.__Helper.is_enabled: commands.append(self.__Helper.command)
-		CommandData: ParsedCommandData = None
+		CommandData: ParsedCommandData | None = None
  
 		self.__CheckCommandsUniqueness(commands)
 
@@ -132,23 +133,24 @@ class Terminalyzer:
 				break
 
 		if self.__Helper.is_enabled and CommandData and CommandData.name == "help":
-			if CommandData.arguments: self.__Helper.generate_help_command(commands, CommandData.arguments[0], CommandData.check_flag("t"))
+			CommandName = cast(str, CommandData.arguments[0])
+			if CommandData.arguments: self.__Helper.generate_help_command(commands, CommandName, CommandData.check_flag("-t"))
 			else: self.__Helper.generate_help_list(commands)
 		
 		return CommandData
 
-	def set_input(self, input: Iterable[str]):
+	def set_input(self, input: Sequence[str] | None):
 		"""
 		Задаёт последовательность параметров, из которых будут парситься данные команды.
 
 		:param parameters: Последовательность параметров команды, первым из которых является названия. По умолчанию берётся из *sys.argv* скрипта.
-		:type parameters: Iterable[str]
+		:type parameters: Sequence[str] | None
 		"""
 
 		self.__Input = input or sys.argv[1:]
 
 		self.__CommandName = None
-		self.__Parameters = tuple()
+		self.__Parameters: tuple = tuple()
 
 		if self.__Input: self.__CommandName = self.__Input[0]
-		if len(self.__Input) > 1: self.__Parameters = self.__Input[1:]
+		if len(self.__Input) > 1: self.__Parameters = tuple(self.__Input[1:])

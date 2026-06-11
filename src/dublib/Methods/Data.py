@@ -1,4 +1,4 @@
-from typing import Any, Type, Iterable
+from typing import Any, Iterable
 import copy
 
 import orjson
@@ -57,23 +57,21 @@ def StringToBool(value: str, literals: Iterable[str] = ("false", "0")) -> bool:
 
 	return bool(value)
 
-def ToIterable(value: Any, iterable_type: Type[Iterable] = tuple, exclude: tuple[Type[Iterable], ...] = (bytes, str)) -> Iterable:
+def ToIterable(value: Any, target_type: type[list | set | tuple] = tuple) -> list | set | tuple:
 	"""
-	Преобразует значение в итерируемый тип.
+	Преобразует значение в итерируемый контейнерн целевого типа.
 
-	:param value: Обрабатываемое значение.
+	:param value: Обрабатываемое значение или итерируемый контейнер значений.
 	:type value: Any
-	:param iterable_type: Целевой тип итерируемого контейнера. По умолчанию `tuple`.
-	:type iterable_type: Type[Iterable]
-	:param exclude: Типы-исключения, условно считающиеся неитерируемыми. По умолчанию `bytes`, `str`.
-	:type exclude: tuple[Type[Iterable], ...]
-	:return: Приведённое к итерируемому типу значению.
-	:rtype: Iterable
+	:param target_type: Целевой тип итерируемого контейнера.
+	:type target_type: type[list | set | tuple]
+	:return: Приведённое к итерируемому контейнеру значение (единичные элементы упаковываются в контейнер, контейнеры преобразуются в целевой тип).
+	:rtype: list | set | tuple
 	"""
 
-	if isinstance(value, Iterable) and not isinstance(value, exclude): return value
+	if type(value) in (list, set, tuple): return value
 	
-	return iterable_type([value])
+	return target_type((value,))
 
 def Zerotify(value: Any) -> Any:
 	"""
