@@ -1,5 +1,5 @@
 from html.parser import HTMLParser
-from typing import Iterable
+from typing import Sequence
 import html
 import re
 
@@ -119,12 +119,12 @@ class HTML:
 
 		return len(re.findall(f"<{tag}[^>]*>", self.__Text))
 
-	def remove_tags(self, tags: Iterable[str] | None = None) -> str:
+	def remove_tags(self, tags: Sequence[str] | None = None) -> str:
 		"""
 		Удаляет теги из текста.
 
 		:param tags: Набор удаляемых тегов или `None` для удаления всех тегов.
-		:type tags: Iterable[str] | None
+		:type tags: Sequence[str] | None
 		:return: Строковое представление.
 		:rtype: str
 		"""

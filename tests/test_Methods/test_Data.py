@@ -19,10 +19,10 @@ def test_StringToBool():
 	assert Data.StringToBool("") == False
 
 
-def test_ToIterable():
-	assert Data.ToIterable("test") == ("test",)
-	assert Data.ToIterable(["test"]) == ["test"]
-	assert Data.ToIterable("test", target_type = list) == ["test"]
+def test_ToSequence():
+	assert Data.ToSequence("test") == ("test",)
+	assert Data.ToSequence(["test"]) == ("test",)
+	assert Data.ToSequence("test", target_type = list) == ["test"]
 
 def test_Zerotify():
 	assert Data.Zerotify(0) == None

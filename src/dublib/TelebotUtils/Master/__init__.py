@@ -1,9 +1,9 @@
 from .Decorators import ignore_frecuency_errors
-from ...Methods.Data import ToIterable
+from ...Methods.Data import ToSequence
 from ...Core import LOGS_HANDLER
 from ..Users import UserData
 
-from typing import Iterable
+from typing import Sequence
 import logging
 
 from urllib3.exceptions import ReadTimeoutError
@@ -49,7 +49,7 @@ class TeleMaster:
 
 		self.__Bot = TeleBot(bot) if type(bot) == str else bot
 
-	def check_user_subscriptions(self, user: UserData, chats: int | Iterable[int], max_tries: int = 3) -> bool | None:
+	def check_user_subscriptions(self, user: UserData, chats: int | Sequence[int], max_tries: int = 3) -> bool | None:
 		"""
 		Проверяет, состоит ли пользователь в указанных чатах. Бот должен иметь доступ ко всем проверяемым чатам.
 		
@@ -58,7 +58,7 @@ class TeleMaster:
 		:param user: Данные проверяемого пользователя.
 		:type user: UserData
 		:param chats: ID чата или набор ID чатов, для которых производится проверка.
-		:type chats: int | Iterable[int]
+		:type chats: int | Sequence[int]
 		:param max_tries: Количество попыток запросов. Повторные запросы отправляются только в случае превышения времени ожидания ответа. Не может быть меньше 1.
 		:type max_tries: int
 		:return: Возвращает `True`, если пользователь состоит во всех указанных чатах, или `None` при ошибке проверки.
@@ -68,7 +68,7 @@ class TeleMaster:
 		:raise requests.exceptions.ReadTimeout: Выбрасывается в случае превышения времени ожидания ответа от сервера.
 		"""
 
-		chats = ToIterable(chats)
+		chats = ToSequence(chats)
 		if max_tries < 1: raise ValueError("Max tries can't be less than 1.")
 
 		IsSubscripted = False
@@ -99,21 +99,21 @@ class TeleMaster:
 		
 		return IsSubscripted
 	
-	def safely_delete_messages(self, chat_id: int, messages: int | Iterable[int], complex: bool = False) -> Exception | None:
+	def safely_delete_messages(self, chat_id: int, messages: int | Sequence[int], complex: bool = False) -> Exception | None:
 		"""
 		Безопасно удаляет сообщения без выброса исключений.
 
 		:param chat_id: ID чата.
 		:type chat_id: int
 		:param messages: Последовательность ID сообщений или ID конкретного сообщения.
-		:type messages: int | Iterable[int]
+		:type messages: int | Sequence[int]
 		:param complex: При включении сообщения будут удалены одним запросом. По умолчанию `False`.
 		:type complex: bool
 		:return: Выброшенное во время работы исключение в случае наличия такового.
 		:rtype: Exception | None
 		"""
 
-		messages: tuple[int] = ToIterable(messages)
+		messages: tuple[int] = ToSequence(messages)
 		ExceptionObject: Exception | None = None
 
 		if complex:

@@ -1,8 +1,8 @@
 from .Exceptions.WebRequestor import *
-from .Methods.Data import ToIterable
+from .Methods.Data import ToSequence
 from .Core import LOGS_HANDLER
 
-from typing import Any, Callable, cast, get_args, Iterable, TYPE_CHECKING
+from typing import Any, Callable, cast, get_args, Sequence, TYPE_CHECKING
 from time import sleep
 import logging
 import random
@@ -410,12 +410,12 @@ class WebConfig:
 
 		self.__Delay = float(delay)
 
-	def set_good_codes(self, good_codes: Iterable[int | None]):
+	def set_good_codes(self, good_codes: Sequence[int | None]):
 		"""
 		Задаёт набор кодов HTTP, означающих успешное выполнение запроса.
 
 		:param good_codes: Набор кодов HTTP. Расширяется значением `None`, которое возникает при обработке внутреннего исключения.
-		:type good_codes: Iterable[int | None]
+		:type good_codes: Sequence[int | None]
 		"""
 
 		self.__GoodCodes = tuple(good_codes)
@@ -440,19 +440,19 @@ class WebConfig:
 
 	def generate_user_agent(
 		self,
-		os: Iterable[str] = ("Windows", "Linux", "Ubuntu", "Chrome OS", "Mac OS X", "Android", "iOS"),
-		browsers: Iterable[str] = ("Chrome", "Firefox", "Edge", "Opera"," Safari", "Android", "Yandex Browser", "Samsung Internet", "Opera Mobile", "Mobile Safari", "Firefox Mobile", "Firefox iOS", "Chrome Mobile", "Chrome Mobile iOS", "Mobile Safari UI/WKWebView", "Edge Mobile", "DuckDuckGo Mobile", "MiuiBrowser", "Whale", "Twitter", "Facebook", "Amazon Silk"),
-		platforms: Iterable[str] = ("desktop", "mobile", "tablet")
+		os: Sequence[str] = ("Windows", "Linux", "Ubuntu", "Chrome OS", "Mac OS X", "Android", "iOS"),
+		browsers: Sequence[str] = ("Chrome", "Firefox", "Edge", "Opera"," Safari", "Android", "Yandex Browser", "Samsung Internet", "Opera Mobile", "Mobile Safari", "Firefox Mobile", "Firefox iOS", "Chrome Mobile", "Chrome Mobile iOS", "Mobile Safari UI/WKWebView", "Edge Mobile", "DuckDuckGo Mobile", "MiuiBrowser", "Whale", "Twitter", "Facebook", "Amazon Silk"),
+		platforms: Sequence[str] = ("desktop", "mobile", "tablet")
 	):
 		"""
 		Генерирует случайное значение заголовка *User-Agent* при помощи библиотеки **fake_useragent**.
 
 		:param os: Операционные системы.
-		:type os: Iterable[str]
+		:type os: Sequence[str]
 		:param browsers: Браузеры.
-		:type browsers: Iterable[str]
+		:type browsers: Sequence[str]
 		:param platforms: Платформы.
-		:type platforms: Iterable[str]
+		:type platforms: Sequence[str]
 		"""
 
 		self.__UserAgent = UserAgent(
@@ -1016,18 +1016,18 @@ class WebRequestor:
 			self.__Session.close()
 			self.__Session = None
 			
-	def add_proxies(self, proxies: Iterable[Proxy] | Proxy):
+	def add_proxies(self, proxies: Sequence[Proxy] | Proxy):
 		"""
 		Добавляет прокси в систему ротации.
 
 		:param proxy: Набор данных прокси-серверов.
-		:type proxy: Iterable[Proxy] | Proxy
+		:type proxy: Sequence[Proxy] | Proxy
 		"""
 		
 		if proxies:
-			proxies = ToIterable(proxies, list)
+			ProxiesList = ToSequence(proxies, list)
 			Buffer = list(self.__Proxies)
-			Buffer += proxies
+			Buffer += ProxiesList
 			self.__Proxies = tuple(Buffer)
 	
 	def remove_proxies(self):

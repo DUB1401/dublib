@@ -1,7 +1,9 @@
-from typing import Any, Iterable
+from typing import Any, Sequence
 import copy
 
 import orjson
+
+from typing import Callable, Iterable, TypeVar
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ ПРЕОБРАЗОВАНИЯ ТИПОВ ДАННЫХ <<<<< #
@@ -39,7 +41,7 @@ def StringifyFloat(number: float, round_factor: int = 2) -> str:
 
 	return String
 
-def StringToBool(value: str, literals: Iterable[str] = ("false", "0")) -> bool:
+def StringToBool(value: str, literals: Sequence[str] = ("false", "0")) -> bool:
 	"""
 	Преобразует строку в логический тип, учитывая её содержимое.
 	
@@ -48,7 +50,7 @@ def StringToBool(value: str, literals: Iterable[str] = ("false", "0")) -> bool:
 	:param value: Преобразуемая строка.
 	:type value: str
 	:param literals: Набор строк, интерпретируемых как `False`.
-	:type literals: Iterable[str]
+	:type literals: Sequence[str]
 	:return: Результирующее значение.
 	:rtype: bool
 	"""
@@ -57,7 +59,7 @@ def StringToBool(value: str, literals: Iterable[str] = ("false", "0")) -> bool:
 
 	return bool(value)
 
-def ToIterable(value: Any, target_type: type[list | set | tuple] = tuple) -> list | set | tuple:
+def ToSequence(value: Any, target_type: type[list | set | tuple] = tuple) -> list | set | tuple:
 	"""
 	Преобразует значение в итерируемый контейнерн целевого типа.
 
@@ -69,7 +71,8 @@ def ToIterable(value: Any, target_type: type[list | set | tuple] = tuple) -> lis
 	:rtype: list | set | tuple
 	"""
 
-	if type(value) in (list, set, tuple): return value
+	if type(value) == target_type: return value
+	if type(value) in (list, set, tuple): return target_type(value)
 	
 	return target_type((value,))
 
@@ -89,14 +92,14 @@ def Zerotify(value: Any) -> Any:
 # >>>>> ФУНКЦИИ РАБОТЫ СО СТРОКАМИ <<<<< #
 #==========================================================================================#
 
-def MultipleReplace(string: str, values: Iterable[str], new_value: str) -> str:
+def MultipleReplace(string: str, values: Sequence[str], new_value: str) -> str:
 	"""
 	Поочердёно выполняет замену подстрок в строке на новое значение.
 
 	:param string: Обрабатываемая строка.
 	:type string: str
 	:param values: Последовательность заменяемых значений.
-	:type values: Iterable[str]
+	:type values: Sequence[str]
 	:param new_value: Новое значение для подстановки.
 	:type new_value: str
 	:return: Обработанная строка.

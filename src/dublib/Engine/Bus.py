@@ -2,7 +2,7 @@ from ..CLI.Templates.Bus import GenerateMessage, MessagesTypes, PrintMessage
 from ..Exceptions.Engine import Bus as BusExceptions
 from ..CLI.TextStyler import Codes, TextStyler
 
-from typing import Any, Iterable
+from typing import Any, Sequence
 
 #==========================================================================================#
 # >>>>> СИСТЕМА СООБЩЕНИЙ <<<<< #
@@ -279,14 +279,14 @@ class RulesContainer:
 		self.__ValueInitializationRule = LogicalRule()
 		self.__AllowedKeys = tuple()
 
-	def set_allowed_keys(self, keys: Iterable[Any]):
+	def set_allowed_keys(self, keys: Sequence[Any]):
 		"""
 		Задаёт последовательность ключей, для которых можно задавать значения в словаре дополнительных данных.
 
 		Если последовательность не указана, разрешаются любые варианты.
 
 		:param keys: Последовательность ключей.
-		:type keys: Iterable[Any]
+		:type keys: Sequence[Any]
 		"""
 
 		self.__AllowedKeys = tuple(keys)

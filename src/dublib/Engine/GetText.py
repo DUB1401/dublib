@@ -1,6 +1,6 @@
-from ..Methods.Data import ToIterable
+from ..Methods.Data import ToSequence
 
-from typing import Iterable
+from typing import Sequence
 
 import gettext
 import os
@@ -21,14 +21,14 @@ class GetText:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def initialize(domain: str, languages: Iterable[str] | str, path: str | None = None):
+	def initialize(domain: str, languages: Sequence[str] | str, path: str | None = None):
 		"""
 		Инициализирует подключение к файлам для обработки GNU gettext.
 
 		:param domain: Домен перевода.
 		:type domain: str
 		:param languages: Набор требуемых языков.
-		:type languages: Iterable[str] | str
+		:type languages: Sequence[str] | str
 		:param path: Путь к каталогу с PO файлами. По умолчанию _Locales_.
 		:type path: str | None
 		:raises FileNotFoundError: Не найден кастомный каталог с локализацией.
@@ -37,7 +37,7 @@ class GetText:
 		if path and not os.path.exists(path): raise FileNotFoundError(path)
 
 		GetText.DOMAIN = domain
-		GetText.LANGUAGES = ToIterable(languages)
+		GetText.LANGUAGES = ToSequence(languages)
 		GetText.PATH = path or "Locales"
 
 		try: GetText.METHOD = gettext.translation(GetText.DOMAIN, GetText.PATH, languages = GetText.LANGUAGES).gettext

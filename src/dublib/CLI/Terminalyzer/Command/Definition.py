@@ -1,6 +1,6 @@
 from ...Validators import ValidableTypes
 
-from typing import Iterable
+from typing import Sequence
 
 #==========================================================================================#
 # >>>>> ПАРАМЕТРЫ КОМАНДЫ <<<<< #
@@ -86,14 +86,14 @@ class _Flag:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, name: str, aliases: Iterable[str] | None, description: str | None, important: bool):
+	def __init__(self, name: str, aliases: Sequence[str] | None, description: str | None, important: bool):
 		"""
 		Флаг команды.
 
 		:param name: Название флага.
 		:type name: str
 		:param aliases: Список псевдонимов.
-		:type aliases: Iterable[str] | None
+		:type aliases: Sequence[str] | None
 		:param description: Описание флага.
 		:type description: str | None
 		:param important: Указывает, является ли флаг обязательным.
@@ -146,14 +146,14 @@ class _Key:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, name: str, aliases: Iterable[str] | None, type: ValidableTypes, description: str | None, important: bool):
+	def __init__(self, name: str, aliases: Sequence[str] | None, type: ValidableTypes, description: str | None, important: bool):
 		"""
 		Ключ команды.
 
 		:param name: Название ключа.
 		:type name: str
 		:param aliases: Список псевдонимов.
-		:type aliases: Iterable[str] | None
+		:type aliases: Sequence[str] | None
 		:param type: Тип значения ключа.
 		:type type: ValidableTypes
 		:param description: Описание ключа.
@@ -252,28 +252,28 @@ class _BasePosition:
 
 		self.__Arguments.append(_Argument(type, description, important = False))
 
-	def add_flag(self, name: str, aliases: Iterable[str] | None = None, description: str | None = None):
+	def add_flag(self, name: str, aliases: Sequence[str] | None = None, description: str | None = None):
 		"""
 		Добавляет флаг на позицию.
 
 		:param name: Название флага.
 		:type name: str
 		:param aliases: Список псевдонимов.
-		:type aliases: Iterable[str] | None
+		:type aliases: Sequence[str] | None
 		:param description: Описание флага.
 		:type description: str | None
 		"""
 
 		self.__Flags.append(_Flag(name, aliases, description, important = False))
 
-	def add_key(self, name: str, aliases: Iterable[str] | None = None, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
+	def add_key(self, name: str, aliases: Sequence[str] | None = None, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
 		Добавляет ключ на позицию.
 
 		:param name: Название ключа.
 		:type name: str
 		:param aliases: Список псевдонимов.
-		:type aliases: Iterable[str] | None
+		:type aliases: Sequence[str] | None
 		:param type: Тип значения ключа.
 		:type type: ValidableTypes
 		:param description: Описание ключа.
@@ -379,28 +379,28 @@ class _Position:
 		self.__Flags: list[_Flag] = list()
 		self.__Keys: list[_Key] = list()
 
-	def add_flag(self, name: str, aliases: Iterable[str] | None = None, description: str | None = None):
+	def add_flag(self, name: str, aliases: Sequence[str] | None = None, description: str | None = None):
 		"""
 		Добавляет флаг на позицию.
 
 		:param name: Название флага.
 		:type name: str
 		:param aliases: Список псевдонимов.
-		:type aliases: Iterable[str] | None
+		:type aliases: Sequence[str] | None
 		:param description: Описание флага.
 		:type description: str | None
 		"""
 
 		self.__Flags.append(_Flag(name, aliases, description, self.__IsImportant))
 
-	def add_key(self, name: str, aliases: Iterable[str] | None = None, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
+	def add_key(self, name: str, aliases: Sequence[str] | None = None, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
 		Добавляет ключ на позицию.
 
 		:param name: Название ключа.
 		:type name: str
 		:param aliases: Список псевдонимов.
-		:type aliases: Iterable[str] | None
+		:type aliases: Sequence[str] | None
 		:param type: Тип значения ключа.
 		:type type: ValidableTypes
 		:param description: Описание ключа.

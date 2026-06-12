@@ -1,6 +1,6 @@
-from .Data import ToIterable
+from .Data import ToSequence
 
-from typing import Iterable
+from typing import Sequence
 from pathlib import Path
 from os import PathLike
 import tempfile
@@ -69,16 +69,15 @@ def ListDir(directory: PathLike | None = None) -> list[str]:
 
 	return [Entry.name for Entry in os.scandir(TargetPath)]
 
-def MakeRootDirectories(directories: Iterable[str] | str):
+def MakeRootDirectories(directories: Sequence[str] | str):
 	"""
 	Создаёт наборы каталогов в текущей корневой директории скрипта.
 
 	:param directories: Последовательность названий директорий или название конкретной директории.
-	:type directories: Iterable[str]
+	:type directories: Sequence[str]
 	"""
 
-	directories = ToIterable(directories)
-	for Name in directories: os.makedirs(Name, exist_ok = True)
+	for Name in ToSequence(directories): os.makedirs(Name, exist_ok = True)
 
 def RemoveDirectoryContent(directory: PathLike):
 	"""
@@ -197,14 +196,14 @@ def ReadTextFile(path: PathLike, split: bool = False, strip: bool = False) -> st
 
 	return tuple(TextLines) if split else "\n".join(TextLines)
 
-def WriteTextFile(path: PathLike, text: str | Iterable[str], atomic: bool = False):
+def WriteTextFile(path: PathLike, text: str | Sequence[str], atomic: bool = False):
 	"""
 	Записывает текстовый файл.
 
 	:param path: Путь к файлу.
 	:type path: PathLike
 	:param text: Строка или последовательность строк, которые должны быть объединены через символ новой строки.
-	:type text: str | Iterable[str]
+	:type text: str | Sequence[str]
 	:param atomic: Переключает использование атомарной записи.
 	:type atomic: bool
 	"""

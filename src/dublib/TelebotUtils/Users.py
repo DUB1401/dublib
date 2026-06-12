@@ -1,12 +1,13 @@
 from ..Methods.Filesystem import ListDir, ReadJSON, WriteJSON
-from ..Methods.Data import Copy, ToIterable
+from ..Methods.Data import Copy, ToSequence
 from ..Exceptions.TelebotUtils import *
 from ..Core import LOGS_HANDLER
 
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Iterable, Literal
+from typing import Any, Sequence, Literal
 from datetime import datetime, timedelta
 from threading import Thread
+from pathlib import Path
 from os import PathLike
 import logging
 import hashlib
@@ -15,6 +16,7 @@ import os
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from more_itertools import divide
+from telebot import types
 import dateparser
 import telebot
 import orjson
@@ -109,7 +111,7 @@ class UserData:
 		return self.__Objects
 
 	@property
-	def path(self) -> PathLike:
+	def path(self) -> Path:
 		"""Путь к файлу пользователя."""
 
 		return self.__Path
@@ -118,20 +120,20 @@ class UserData:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __AddFlags(self, flags: Iterable[str] | str, key: str):
+	def __AddFlags(self, flags: Sequence[str] | str, key: str):
 		"""
 		Реализовывает добавление флаговых переключателей в данные пользователя.
 
 		:param flags: Набор флагов или конкретный флаг.
-		:type flags: Iterable[str] | str
+		:type flags: Sequence[str] | str
 		:param key: Ключ, под который в структуру данных пользователя заносятся флаги.
 		:type key: str
 		"""
 
-		flags = ToIterable(flags)
+		Flags = ToSequence(flags)
 		IsChanged = False
 
-		for Flag in flags:
+		for Flag in Flags:
 
 			if Flag not in self.__Data[key]:
 				self.__Data[key].append(Flag)
@@ -154,12 +156,12 @@ class UserData:
 
 		return hashlib.md5(Bytes).hexdigest()
 
-	def __RemoveFlags(self, flags: Iterable[str] | str, key: str):
+	def __RemoveFlags(self, flags: Sequence[str] | str, key: str):
 		"""
 		Реализовывает удаление флаговых переключателей из данных пользователя.
 
 		:param flags: Набор флагов или конкретный флаг.
-		:type flags: Iterable[str] | str
+		:type flags: Sequence[str] | str
 		:param key: Ключ, по которому из структуры данных пользователя удаляются флаги.
 		:type key: str
 		"""
@@ -195,6 +197,7 @@ class UserData:
 	def __ToSerializableDict(self) -> dict:
 		"""
 		Приводит объект к сериализуемому словарю.
+
 		:return: Сериализуемый словарь.
 		:rtype: dict
 		"""
@@ -221,7 +224,7 @@ class UserData:
 
 		self.__Manager = manager
 		self.__ID = user_id
-		self.__Data = {
+		self.__Data: dict = {
 			"username": None,
 			"language": None,
 			"is_chat_forbidden": False,
@@ -234,8 +237,8 @@ class UserData:
 			"temp": {}
 		}
 
-		self.__Objects = dict()
-		self.__Path = f"{self.__Manager.storage_directory}/{user_id}.json"
+		self.__Objects: dict[str, Any] = dict()
+		self.__Path = Path(f"{self.__Manager.storage_directory}/{user_id}.json")
 		self.__SuppressSaving = False
 		self.__DeltaHash: str | None = None
 
@@ -262,22 +265,22 @@ class UserData:
 
 		return f"User<{self.__ID}, {self.username}>"
 
-	def add_flags(self, flags: Iterable[str] | str):
+	def add_flags(self, flags: Sequence[str] | str):
 		"""
 		Добавляет флаги пользователю.
 
 		:param flags: Один или несколько флагов.
-		:type flags: Iterable[str] | str
+		:type flags: Sequence[str] | str
 		"""
 
 		self.__AddFlags(flags, "flags")
 
-	def add_permissions(self, permissions: Iterable[str] | str):
+	def add_permissions(self, permissions: Sequence[str] | str):
 		"""
 		Добавляет права пользователю.
 
 		:param permissions: Одно или несколько прав.
-		:type permissions: Iterable[str] | str
+		:type permissions: Sequence[str] | str
 		"""
 
 		self.__AddFlags(permissions, "permissions")
@@ -296,19 +299,19 @@ class UserData:
 		
 		if key not in self.__Objects or force: self.__Objects[key] = object
 
-	def check_flags(self, flags: Iterable[str] | str) -> bool:
+	def check_flags(self, flags: Sequence[str] | str) -> bool:
 		"""
 		Проверяет, активированы ли для пользователя указанные флаги.
 
 		:param flags: Один или несколько флагов.
-		:type flags: Iterable[str] | str
+		:type flags: Sequence[str] | str
 		:return: Возвращает `True`, если все флаги активированы.
 		:rtype: bool
 		"""
 
-		flags = ToIterable(flags)
+		Flags = ToSequence(flags)
 
-		for Flag in flags:
+		for Flag in Flags:
 			if Flag not in self.__Data["flags"]: return False
 
 		return True
@@ -355,19 +358,19 @@ class UserData:
 
 		return Data
 
-	def has_permissions(self, permissions: Iterable[str] | str) -> bool:
+	def has_permissions(self, permissions: Sequence[str] | str) -> bool:
 		"""
 		Проверяет, имеет ли пользователь все указанные права.
 
 		:param permissions: Одно или несколько прав.
-		:type permissions: Iterable[str] | str
+		:type permissions: Sequence[str] | str
 		:return: Возвращает `True`, если пользователь имеет все указанные права.
 		:rtype: bool
 		"""
 
-		permissions = ToIterable(permissions)
+		Permissions = ToSequence(permissions)
 
-		for Permission in permissions:
+		for Permission in Permissions:
 			if Permission not in self.__Data["permissions"]: return False
 
 		return True
@@ -411,7 +414,10 @@ class UserData:
 		for Key in self.__Data.keys():
 			if Key not in Data.keys(): Data[Key] = self.__Data[Key]
 
-		if Data.get("last_activity"): Data["last_activity"] = dateparser.parse(Data["last_activity"]).replace(tzinfo = None)
+		if Data.get("last_activity"):
+			Date = dateparser.parse(Data["last_activity"])
+			if Date: Date.replace(tzinfo = None)
+			Data["last_activity"] = Date
 		
 		self.__Data = Data
 
@@ -426,22 +432,22 @@ class UserData:
 
 		del self.__Objects[key]
 
-	def remove_flags(self, flags: Iterable[str] | str):
+	def remove_flags(self, flags: Sequence[str] | str):
 		"""
 		Удаляет флаги.
 
 		:param flags: Один или несколько флагов.
-		:type flags: Iterable[str] | str
+		:type flags: Sequence[str] | str
 		"""
 
 		self.__RemoveFlags(flags, "flags")
 
-	def remove_permissions(self, permissions: Iterable[str] | str):
+	def remove_permissions(self, permissions: Sequence[str] | str):
 		"""
 		Удаляет права.
 
 		:param permissions: Одно или несколько прав.
-		:type permissions: Iterable[str] | str
+		:type permissions: Sequence[str] | str
 		"""
 
 		self.__RemoveFlags(permissions, "permissions")
@@ -562,7 +568,7 @@ class UserData:
 		self.__SuppressSaving = status
 		if not status and save_on_disabling: self.save()
 
-	def update(self, user: telebot.types.User, is_chat_forbidden: bool | None = None):
+	def update(self, user: types.User, is_chat_forbidden: bool | None = None):
 		"""
 		Обновляет данные пользователя (язык, наличие подписки, ник) из его структуры Telegram.
 
@@ -592,6 +598,8 @@ class UserData:
 		self.__Data["last_activity"] = datetime.now()
 		self.save()
 
+		return self.__Data["last_activity"]
+
 class UsersManager:
 	"""Менеджер пользователей."""
 
@@ -600,7 +608,7 @@ class UsersManager:
 	#==========================================================================================#
 
 	@property
-	def premium_users(self) -> tuple[UserData]:
+	def premium_users(self) -> tuple[UserData, ...]:
 		"""Последовательность пользователей с Premium-подпиской из числа хранящихся в памяти."""
 
 		PremiumUsers = list()
@@ -611,19 +619,19 @@ class UsersManager:
 		return tuple(PremiumUsers)
 
 	@property
-	def storage_directory(self) -> PathLike:
+	def storage_directory(self) -> Path:
 		"""Путь к каталогу файлов пользователей."""
 
 		return self.__StorageDirectory
 
 	@property
-	def unloaded_users_id(self) -> tuple[int]:
+	def unloaded_users_id(self) -> tuple[int, ...]:
 		"""Последовательность ID выгруженных из памяти пользователей."""
 
 		return tuple(self.__UnloadedUsersID)
 
 	@property
-	def users(self) -> tuple[UserData]:
+	def users(self) -> tuple[UserData, ...]:
 		"""Последовательность хранящихся в памяти пользователей."""
 
 		return tuple(self.__Users.values())
@@ -654,12 +662,12 @@ class UsersManager:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __LoadUsers(self, users_id: Iterable[int]):
+	def __LoadUsers(self, users_id: Sequence[int]):
 		"""
 		Загружает данные пользователей для списка ID.
 
 		:param users_id: Последовательность ID пользователей.
-		:type users_id: Iterable[int]
+		:type users_id: Sequence[int]
 		"""
 
 		for UserID in users_id: self.__Users[UserID] = UserData(self, UserID)
@@ -692,7 +700,7 @@ class UsersManager:
 		:type threads: int
 		"""
 
-		self.__StorageDirectory = storage_directory
+		self.__StorageDirectory = Path(storage_directory)
 
 		self.__Users: dict[int, UserData] = dict()
 
@@ -723,7 +731,7 @@ class UsersManager:
 
 		return self.get_user(user_id)
 
-	def auth(self, user: telebot.types.User, update_activity: bool = True) -> UserData:
+	def auth(self, user: types.User, update_activity: bool = True) -> UserData:
 		"""
 		Выполняет авторизацию пользователя в системе.
 
@@ -736,7 +744,7 @@ class UsersManager:
 		:rtype: UserData
 		"""
 		
-		if type(user) != telebot.types.User: raise TypeError(f"telebot.types.User object expected, not {type(user)}.")
+		if type(user) != types.User: raise TypeError(f"telebot.types.User object expected, not {type(user)}.")
 
 		if user.id not in self.__Users: self.__Users[user.id] = UserData(self, user.id)
 		CurrentUser = self.__Users[user.id]
@@ -758,7 +766,7 @@ class UsersManager:
 		del self.__Users[user_id]
 		os.remove(f"{self.__StorageDirectory}/{user_id}.json")
 
-	def get_active_users(self, hours: int = 24) -> tuple[UserData]:
+	def get_active_users(self, hours: int = 24) -> tuple[UserData, ...]:
 		"""
 		Возвращает последовательность пользователей, для которых активных за последние N часов.
 
@@ -832,8 +840,8 @@ class UsersManager:
 		:type threads: int
 		"""
 
-		Files = ListDir(self.__StorageDirectory)
-		Files = tuple(filter(lambda List: List.endswith(".json"), Files))
+		DirectoryFiles = ListDir(self.__StorageDirectory)
+		Files = tuple(filter(lambda List: List.endswith(".json"), DirectoryFiles))
 		UsersID = tuple(int(File[:-5]) for File in Files)
 		Segments = tuple(tuple(Element) for Element in divide(threads, UsersID))
 		self.__Users = dict()
@@ -873,7 +881,7 @@ class UsersManager:
 		self.__Scheduler.remove_job(self.__UnloaderTaskID)
 		self.__Scheduler = None
 
-	def unload_users(self, days: int) -> tuple[int]:
+	def unload_users(self, days: int) -> tuple[int, ...]:
 		"""
 		Выгружает из оперативной памяти данные пользователей, чья последняя активность выходит за указанное значение.
 
@@ -941,12 +949,12 @@ class UsersManager:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ МАССОВОГО РЕДАКТИРОВАНИЯ ПОЛЬЗОВАТЕЛЕЙ <<<<< #
 	#==========================================================================================#
 
-	def add_flags(self, flags: Iterable[str] | str):
+	def add_flags(self, flags: Sequence[str] | str):
 		"""
 		Добавляет флаги для всех пользователей.
 
 		:param flags: Один или несколько флагов.
-		:type flags: Iterable[str] | str
+		:type flags: Sequence[str] | str
 		"""
 
 		for User in self.__Users.values(): User.add_flags(flags)
@@ -956,12 +964,12 @@ class UsersManager:
 
 		for User in self.__Users.values(): User.clear_temp_properties()
 
-	def remove_flags(self, flags: Iterable[str] | str):
+	def remove_flags(self, flags: Sequence[str] | str):
 		"""
 		Удаляет флаги у всех пользователей.
 
 		:param flags: Один или несколько флагов.
-		:type flags: Iterable[str] | str
+		:type flags: Sequence[str] | str
 		"""
 
 		for User in self.__Users.values(): User.remove_flags(flags)
@@ -971,7 +979,7 @@ class UsersManager:
 		Удаляет права у всех пользователей.
 
 		:param permissions: Одно или несколько прав.
-		:type permissions: Iterable[str] | str
+		:type permissions: Sequence[str] | str
 		"""
 
 		for User in self.__Users.values(): User.remove_permissions(permissions)
