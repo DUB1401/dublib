@@ -58,15 +58,7 @@ check_untyped_defs = true
 non_interactive = true
 follow_imports = "silent"
 files = [
-	"src/dublib/CLI",
-	"src/dublib/Exceptions",
-	"src/dublib/Methods",
-	"src/dublib/Polyglot",
-
-	"src/dublib/TelebotUtils/Users.py",
-
-	"src/dublib/Core.py",
-	"src/dublib/WebRequestor.py"
+	"src"
 ]
 
 [project.urls]

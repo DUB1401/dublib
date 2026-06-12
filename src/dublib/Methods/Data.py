@@ -1,9 +1,7 @@
-from typing import Any, Sequence
+from typing import Any, overload, Sequence
 import copy
 
 import orjson
-
-from typing import Callable, Iterable, TypeVar
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ ПРЕОБРАЗОВАНИЯ ТИПОВ ДАННЫХ <<<<< #
@@ -59,6 +57,13 @@ def StringToBool(value: str, literals: Sequence[str] = ("false", "0")) -> bool:
 
 	return bool(value)
 
+@overload
+def ToSequence(value: Any, target_type: type[list]) -> list: ...
+@overload
+def ToSequence(value: Any, target_type: type[set]) -> set: ...
+@overload
+def ToSequence(value: Any, target_type: type[tuple] = ...) -> tuple: ...
+
 def ToSequence(value: Any, target_type: type[list | set | tuple] = tuple) -> list | set | tuple:
 	"""
 	Преобразует значение в итерируемый контейнерн целевого типа.
@@ -91,6 +96,38 @@ def Zerotify(value: Any) -> Any:
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ СО СТРОКАМИ <<<<< #
 #==========================================================================================#
+
+def CheckForCyrillic(text: str) -> bool:
+	"""
+	Проверяет, имеются ли кирилические символы в строке.
+
+	:param text: Проверяемая строка.
+	:type text: str
+	:return: Возвращает `True`, если строка содержит хотя бы один кирилический символ.
+	:rtype: bool
+	"""
+	
+	Alphabet = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
+
+	for Char in text.lower():
+		if Char in Alphabet: return True
+	
+	return False
+
+def СontainsAlpha(text: str) -> bool:
+	"""
+	Проверяет, содержит ли строка хотя бы один буквенный символ.
+
+	:param text: Проверяемая строка.
+	:type text: str
+	:return: Возвращает `True` для строки, в которой хотя бы один символ проходит проверку `isalpha()`.
+	:rtype: bool
+	"""
+
+	for Char in text:
+		if Char.isalpha(): return True
+
+	return False
 
 def MultipleReplace(string: str, values: Sequence[str], new_value: str) -> str:
 	"""
@@ -141,32 +178,6 @@ def StripAlpha(text: str) -> str:
 	while End > Start and not text[End - 1].isalpha(): End -= 1
   
 	return text[Start:End]
-
-def CheckForCyrillic(text: str) -> bool:
-	"""
-	Проверяет, имеются ли кирилические символы в строке.
-
-	:param text: Проверяемая строка.
-	:type text: str
-	:return: Возвращает `True`, если строка содержит хотя бы один кирилический символ.
-	:rtype: bool
-	"""
-	
-	Alphabet = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
-	
-	return any(Char in Alphabet for Char in text.lower())
-
-def IsNotAlpha(text: str) -> bool:
-	"""
-	Проверяет, состоит ли строка целиком из небуквенных символов.
-
-	:param text: Проверяемая строка.
-	:type text: str
-	:return: Возвращает `True` для строки, каждый символ которой при проверке `isalpha()` считается небуквенным.
-	:rtype: bool
-	"""
-
-	return not any(Char.isalpha() for Char in text)
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ СО СЛОВАРЯМИ <<<<< #

@@ -258,7 +258,7 @@ class RulesContainer:
 	#==========================================================================================#
 
 	@property
-	def allowed_data_keys(self) -> tuple[Any]:
+	def allowed_data_keys(self) -> tuple:
 		"""Последовательность доступных для использования в качестве ключей значений."""
 
 		return self.__AllowedKeys
@@ -277,7 +277,7 @@ class RulesContainer:
 		"""Хранилище правил взаимодействия."""
 
 		self.__ValueInitializationRule = LogicalRule()
-		self.__AllowedKeys = tuple()
+		self.__AllowedKeys: tuple = tuple()
 
 	def set_allowed_keys(self, keys: Sequence[Any]):
 		"""
@@ -307,6 +307,12 @@ class ExecutionResult:
 		"""Целочисленный код."""
 
 		return self._Code
+	
+	@code.setter
+	def code(self, new_code: int | None):
+		"""Код выполнения."""
+
+		self._Code = new_code
 
 	@property
 	def data(self) -> dict:
@@ -344,16 +350,6 @@ class ExecutionResult:
 
 		return self._Value
 
-	#==========================================================================================#
-	# >>>>> МЕТОДЫ УСТАНОВКИ ЗНАЧЕНИЙ СВОЙСТВ <<<<< #
-	#==========================================================================================#
-
-	@code.setter
-	def code(self, new_code: int | None):
-		"""Код выполнения."""
-
-		self._Code = new_code
-	
 	@value.setter
 	def value(self, new_value: Any) -> Any:
 		"""Вложенное возвращаемое значение."""
@@ -449,7 +445,7 @@ class ExecutionResult:
 		if self._Data: Status += Bolder.get_styled_text("Data:") + "\n"
 		for Key in self._Data: Status += f"    {Key}: " + str(self._Data[Key]) + "\n"
 		if self._Messages: Status += Bolder.get_styled_text("Messages:") + "\n"
-		for Message in self._Messages: Status += f"    {Message}\n"
+		for Message in self._Messages.as_list(): Status += f"    {Message}\n"
 
 		return Status.rstrip()
 

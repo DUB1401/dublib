@@ -1,19 +1,17 @@
-from typing import Callable
+from functools import wraps
 from time import sleep
 
 from telebot import apihelper, types
 
-def ignore_frecuency_errors(function: Callable) -> Callable:
+def ignore_frecuency_errors(function):
 	"""
 	Декоратор. Игнорирует ошибки частоты запросов, автоматически выжидая необходимый интервал.
 
 	:param function: Функция или метод из библиотеки **pyTelegramBotAPI**.
-	:type function: Callable
-	:return: Декорированная функция или метод.
-	:rtype: Callable
 	"""
 
-	def new_function(*args, **kwargs) -> types.Message:
+	@wraps(function)
+	def Wrapper(*args, **kwargs):
 		Value = None
 			
 		try: Value = function(*args, **kwargs)
@@ -27,4 +25,4 @@ def ignore_frecuency_errors(function: Callable) -> Callable:
 
 		else: return Value
 	
-	return new_function
+	return Wrapper

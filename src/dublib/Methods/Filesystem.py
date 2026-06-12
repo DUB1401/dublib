@@ -1,6 +1,6 @@
 from .Data import ToSequence
 
-from typing import Sequence
+from typing import overload, Literal, Sequence
 from pathlib import Path
 from os import PathLike
 import tempfile
@@ -171,6 +171,11 @@ def WriteYAML(path: PathLike, data: dict, atomic: bool = False):
 #==========================================================================================#
 # >>>>> ФУНКЦИИ РАБОТЫ С ТЕКСТОВЫМИ ФАЙЛАМИ <<<<< #
 #==========================================================================================#
+
+@overload
+def ReadTextFile(path: PathLike, split: Literal[True], strip: bool = False) -> tuple[str, ...]: ...
+@overload
+def ReadTextFile(path: PathLike, split: Literal[False] = False, strip: bool = False) -> str: ...
 
 def ReadTextFile(path: PathLike, split: bool = False, strip: bool = False) -> str | tuple[str, ...]:
 	"""

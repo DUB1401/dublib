@@ -3,7 +3,7 @@ from ...Methods.Data import ToSequence
 from ...Core import LOGS_HANDLER
 from ..Users import UserData
 
-from typing import Sequence
+from typing import cast, Sequence
 import logging
 
 from urllib3.exceptions import ReadTimeoutError
@@ -47,7 +47,7 @@ class TeleMaster:
 		:type bot: str | TeleBot
 		"""
 
-		self.__Bot = TeleBot(bot) if type(bot) == str else bot
+		self.__Bot: TeleBot = TeleBot(bot) if type(bot) == str else cast(TeleBot, bot)
 
 	def check_user_subscriptions(self, user: UserData, chats: int | Sequence[int], max_tries: int = 3) -> bool | None:
 		"""
@@ -68,13 +68,13 @@ class TeleMaster:
 		:raise requests.exceptions.ReadTimeout: Выбрасывается в случае превышения времени ожидания ответа от сервера.
 		"""
 
-		chats = ToSequence(chats)
+		ChatsTuple = ToSequence(chats)
 		if max_tries < 1: raise ValueError("Max tries can't be less than 1.")
 
 		IsSubscripted = False
 		Subscriptions = 0
 			
-		for ChatID in chats:
+		for ChatID in ChatsTuple:
 			Try = 1
 
 			while Try <= max_tries:
@@ -90,11 +90,11 @@ class TeleMaster:
 				except Exception as ExceptionData:
 					if str(ExceptionData).endswith("chat not found"):
 						LOGGER.error(f"Chat {ChatID} not found. May be bot not a member.")
-						return
+						return None
 
 				else: break
 
-		if Subscriptions == len(chats): IsSubscripted = True
+		if Subscriptions == len(ChatsTuple): IsSubscripted = True
 		else: IsSubscripted = False
 		
 		return IsSubscripted
@@ -113,15 +113,15 @@ class TeleMaster:
 		:rtype: Exception | None
 		"""
 
-		messages: tuple[int] = ToSequence(messages)
+		MessagesList = ToSequence(messages, target_type = list)
 		ExceptionObject: Exception | None = None
 
 		if complex:
-			try: self.__Bot.delete_messages(chat_id, messages)
+			try: self.__Bot.delete_messages(chat_id, MessagesList)
 			except Exception as ExceptionData: ExceptionObject = ExceptionData
 
 		else:
-			for MessageID in messages:
+			for MessageID in MessagesList:
 				try: self.__Bot.delete_message(chat_id, MessageID)
 				except Exception as ExceptionData: ExceptionObject = ExceptionData
 

@@ -30,6 +30,14 @@ def test_Zerotify():
 	assert Data.Zerotify(-1) == -1
 	assert Data.Zerotify("1") == "1"
 
+def test_CheckForCyrillic():
+	assert Data.CheckForCyrillic("123qwe!") == False
+	assert Data.CheckForCyrillic("123йцу!") == True
+
+def test_СontainsAlpha():
+	assert Data.СontainsAlpha("123!@") == False
+	assert Data.СontainsAlpha("123q!@") == True
+
 def test_MultipleReplace():
 	assert Data.MultipleReplace("123_456_789", ("456", "789"), "0") == "123_0_0"
 
@@ -38,14 +46,6 @@ def test_RemoveRecurringSubstrings():
 
 def test_StripAlpha():
 	assert Data.StripAlpha("123qwe!") == "qwe"
-
-def test_CheckForCyrillic():
-	assert Data.CheckForCyrillic("123qwe!") == False
-	assert Data.CheckForCyrillic("123йцу!") == True
-
-def test_IsNotAlpha():
-	assert Data.IsNotAlpha("123!@") == True
-	assert Data.IsNotAlpha("123q!@") == False
 
 def test_MergeDictionaries():
 	assert Data.MergeDictionaries(

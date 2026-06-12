@@ -1,7 +1,7 @@
 from ..Methods.Filesystem import ReadJSON, ReadYAML, WriteJSON, WriteYAML
 from ..Methods.Data import Copy
 
-from typing import Any, Callable
+from typing import Any, Callable, Self
 from threading import Thread
 from pathlib import Path
 from os import PathLike
@@ -30,10 +30,10 @@ class Config:
 		return Copy(self.__Data)
 
 	@property
-	def path(self) -> PathLike:
+	def path(self) -> Path:
 		"""Путь к файлу параметров."""
 
-		return self.__Path.as_posix()
+		return self.__Path
 	
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
@@ -71,12 +71,12 @@ class Config:
 	# >>>>> СПЕЦИАЛЬНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __new__(cls: "Config", *args, **kwargs) -> "Config":
+	def __new__(cls: "type[Self]", *args, **kwargs) -> "Config":
 		"""
 		Инициализирует новый объект или возвращает уже существующий (поддерживает множественные конфигурации).
 
 		:param cls: Текущий экземпляр объекта.
-		:type cls: Config
+		:type cls: type[Self]
 		:return: Экземпляр объекта.
 		:rtype: Config
 		"""
@@ -100,16 +100,16 @@ class Config:
 
 		if self._IS_INITIALIZED: return
 
-		self.__Path = Path(path)
+		self.__Path: Path = Path(path)
 
 		self.__Data: dict  = dict()
-		self.__Model: BaseModel | None = None
+		self.__Model: type[BaseModel] | None = None
 
-		self.__IsSync = True
+		self.__IsSync: bool = True
 		self.__SyncThread = None
-		self.__OnChangesCallback = None
+		self.__OnChangesCallback: Callable | None = None
 
-		self._IS_INITIALIZED = True
+		self._IS_INITIALIZED: bool = True
 
 	def __getitem__(self, key: str) -> Any:
 		"""
@@ -235,12 +235,12 @@ class Config:
 		self.__Data = data
 		if self.__Model and validate: self.validate()
 
-	def set_model(self, model: BaseModel | None):
+	def set_model(self, model: type[BaseModel] | None):
 		"""
 		Задаёт модель валидации **pydantic**.
 
 		:param model: Модель для валидации.
-		:type model: BaseModel | None
+		:type model: type[BaseModel] | None
 		"""
 
 		self.__Model = model
@@ -250,7 +250,7 @@ class Config:
 
 		del self.__INSTANCES[self.path]
 
-	def validate(self, model: BaseModel | None = None):
+	def validate(self, model: type[BaseModel] | None = None):
 		"""
 		Проводит валидацию параметров согласно модели **pydantic**.
 
