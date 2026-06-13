@@ -9,7 +9,7 @@ import functools
 import enum
 import os
 
-from telebot import TeleBot, types
+from telebot import apihelper, TeleBot, types
 
 #==========================================================================================#
 # >>>>> ВСПОМОГАТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
@@ -346,13 +346,19 @@ class TeleCache:
 			bot = cast(str, bot)
 			self.__Bot = TeleBot(bot)
 
-	def set_chat_id(self, chat_id: int):
+	def set_chat_id(self, chat_id: int, check_chat_access: bool = True):
 		"""
-		Задаёт используемого для выгрузки бота Telegram.
+		Задаёт ID чата, в который будут выгружаться файлы.
 
-		:param chat_id: ID чата для отправки сообщений с файлами.
+		:param chat_id: ID чата, в который будут выгружаться файлы.
 		:type chat_id: int
+		:raises RuntimeError: Затребована проверка доступа к чату до инициализации бота.
+		:raises ApiTelegramException: Доступ к чату отсутствует.
 		"""
+
+		if check_chat_access:
+			if not self.__Bot: raise RuntimeError("TeleBot not initialized. Chat access check impossible.")
+			self.__Bot.get_chat(chat_id)
 
 		self.__ChatID = chat_id
 
