@@ -119,6 +119,7 @@ class Terminalyzer:
 		:raises Exceptions.CLI.Terminalyzer.MultipleCommandDefinition: Множественное определение команды.
 		"""
 		
+		commands = commands.copy()
 		if not self.__CommandName: return None
 
 		self.__ValidateCommandsDefinitions(commands)
@@ -133,8 +134,9 @@ class Terminalyzer:
 				break
 
 		if self.__Helper.is_enabled and CommandData and CommandData.name == "help":
-			CommandName = cast(str, CommandData.arguments[0])
-			if CommandData.arguments: self.__Helper.generate_help_command(commands, CommandName, CommandData.check_flag("-t"))
+			if CommandData.arguments:
+				CommandName = cast(str, CommandData.arguments[0])
+				self.__Helper.generate_help_command(commands, CommandName, CommandData.check_flag("-t"))
 			else: self.__Helper.generate_help_list(commands)
 		
 		return CommandData
