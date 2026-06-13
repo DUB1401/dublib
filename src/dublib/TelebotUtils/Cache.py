@@ -296,19 +296,21 @@ class TeleCache:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, cache_file_path: PathLike | None = None):
+	def __init__(self, cache_file_path: PathLike | None = None, bot: TeleBot | None = None):
 		"""
 		Менеджер кэша загружаемых в Telegram файлов.
 
 		:param storage_path: Путь к файлу JSON для хранения данных. По умолчанию `.telecache.json`.
 		:type storage_path: PathLike | None
+		:param bot: Бот Telegram.
+		:type bot: TeleBot | None
 		:raises IsADirectoryError: По переданному пути к файлу кэша находится директория.
 		"""
 
 		self.__StoragePath = Path(cache_file_path) if cache_file_path else Path(".telecache.json")
 		if self.__StoragePath.is_dir(): raise IsADirectoryError(self.__StoragePath)
 
-		self.__Bot: TeleBot | None = None
+		self.__Bot: TeleBot | None = bot
 		self.__ChatID: int | None = None
 
 		self.__RealData: dict[str, RealCachedFile] = dict()
