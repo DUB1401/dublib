@@ -1,2 +1,2 @@
-from . import Terminalyzer
-from . import Validators
+from . import Terminalyzer as Terminalyzer
+from . import Validators as Validators

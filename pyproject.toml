@@ -48,6 +48,7 @@ telebot = [
 dev = [
 	"mypy",
 	"pytest",
+	"ruff",
 	"Sphinx",
 	"sphinx-rtd-theme"
 ]

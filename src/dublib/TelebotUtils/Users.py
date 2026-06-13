@@ -18,7 +18,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from more_itertools import divide
 from telebot import types
 import dateparser
-import telebot
 import orjson
 
 #==========================================================================================#

@@ -1,5 +1,5 @@
 from ..TextStyler import Codes, TextStyler
-from .. import readline
+from .. import readline as readline
 
 import enum
 

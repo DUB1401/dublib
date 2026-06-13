@@ -9,7 +9,7 @@ import functools
 import enum
 import os
 
-from telebot import apihelper, TeleBot, types
+from telebot import TeleBot, types
 
 #==========================================================================================#
 # >>>>> ВСПОМОГАТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
@@ -296,21 +296,21 @@ class TeleCache:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, cache_file_path: PathLike | None = None, bot: TeleBot | None = None):
+	def __init__(self, bot: TeleBot, cache_file_path: PathLike | None = None,):
 		"""
 		Менеджер кэша загружаемых в Telegram файлов.
 
+		:param bot: Бот Telegram.
+		:type bot: TeleBot
 		:param storage_path: Путь к файлу JSON для хранения данных. По умолчанию `.telecache.json`.
 		:type storage_path: PathLike | None
-		:param bot: Бот Telegram.
-		:type bot: TeleBot | None
 		:raises IsADirectoryError: По переданному пути к файлу кэша находится директория.
 		"""
 
 		self.__StoragePath = Path(cache_file_path) if cache_file_path else Path(".telecache.json")
 		if self.__StoragePath.is_dir(): raise IsADirectoryError(self.__StoragePath)
 
-		self.__Bot: TeleBot | None = bot
+		self.__Bot: TeleBot = bot
 		self.__ChatID: int | None = None
 
 		self.__RealData: dict[str, RealCachedFile] = dict()

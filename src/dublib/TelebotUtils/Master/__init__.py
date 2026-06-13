@@ -1,4 +1,3 @@
-from .Decorators import ignore_frecuency_errors
 from ...Methods.Data import ToSequence
 from ...Core import LOGS_HANDLER
 from ..Users import UserData

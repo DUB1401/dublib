@@ -1,7 +1,7 @@
 from functools import wraps
 from time import sleep
 
-from telebot import apihelper, types
+from telebot import apihelper
 
 def ignore_frecuency_errors(function):
 	"""

@@ -1,5 +1,4 @@
 from ..Methods.Filesystem import ReadTextFile, WriteTextFile
-from ..Methods.Data import ToSequence
 
 from pathlib import Path
 from os import PathLike

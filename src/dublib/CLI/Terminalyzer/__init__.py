@@ -1,6 +1,6 @@
 from .Command.Parser import _CommandParser, ParsedCommandData
+from ..Validators import ValidableTypes as ValidableTypes
 from .Command.Definition import Command
-from ..Validators import ValidableTypes
 from .Helper import Helper
 
 from ...Core import LOGS_HANDLER

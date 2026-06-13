@@ -1,1 +1,1 @@
-from . import Bus
+from . import Bus as Bus

@@ -1,6 +1,6 @@
 from ...Methods.Data import ToSequence
 
-from .FastStyler import FastStyler
+from .FastStyler import FastStyler as FastStyler
 from . import Codes, Escapes
 
 from types import MappingProxyType

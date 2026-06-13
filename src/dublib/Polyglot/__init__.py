@@ -1,2 +1,2 @@
-from .Markdown import Markdown
-from .HTML import HTML
+from .Markdown import Markdown as Markdown
+from .HTML import HTML as HTML
