@@ -18,9 +18,9 @@ def Copy(data: Any) -> Any:
 	:return: Копия объекта.
 	:rtype: Any
 	"""
-
+	
 	try: return orjson.loads(orjson.dumps(data))
-	except: return copy.deepcopy(data)
+	except (orjson.JSONDecodeError, orjson.JSONEncodeError): return copy.deepcopy(data)
 
 def StringifyFloat(number: float, round_factor: int = 2) -> str:
 	"""
@@ -76,7 +76,7 @@ def ToSequence(value: Any, target_type: type[list | set | tuple] = tuple) -> lis
 	:rtype: list | set | tuple
 	"""
 
-	if type(value) == target_type: return value
+	if type(value) is target_type: return value
 	if type(value) in (list, set, tuple): return target_type(value)
 	
 	return target_type((value,))

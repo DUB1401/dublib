@@ -29,6 +29,6 @@ def Confirmation(text: str, question: str | None = None, yes: str | None = None,
 		InputLine = input(f"{text}\n{question} [{yes}/{no}]: ").strip().lower()
 		if InputLine == yes.lower(): Response = True
 		if InputLine == no.lower(): Response = False
-		if Response != None: break
+		if Response is not None: break
 
 	return Response

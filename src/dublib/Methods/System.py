@@ -16,12 +16,8 @@ def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = Tr
 	IsVersionCorrect = True
 	
 	if sys.version_info < (major, minor): 
-		
-		if raise_exception == True:
-			raise RuntimeError(f"Python {major}.{minor} or newer is required.")
-
-		else: 
-			IsVersionCorrect = False
+		if raise_exception: raise RuntimeError(f"Python {major}.{minor} or newer is required.")
+		else: IsVersionCorrect = False
 
 	return IsVersionCorrect
 

@@ -46,7 +46,7 @@ class TeleMaster:
 		:type bot: str | TeleBot
 		"""
 
-		self.__Bot: TeleBot = TeleBot(bot) if type(bot) == str else cast(TeleBot, bot)
+		self.__Bot: TeleBot = TeleBot(bot) if type(bot) is str else cast(TeleBot, bot)
 
 	def check_user_subscriptions(self, user: UserData, chats: int | Sequence[int], max_tries: int = 3) -> bool | None:
 		"""

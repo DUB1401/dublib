@@ -19,5 +19,5 @@ jobs:
           pip install .[dev,telebot]
 
       - name: Run Ruff
-        run: ruff check --select F401 src
+        run: ruff check .
         

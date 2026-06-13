@@ -92,7 +92,7 @@ class Patch:
 		:type count: int | None
 		"""
 
-		if count == None: count = -1
+		if count is None: count = -1
 		self.__TextLines = self.text.replace(old, new, count).split("\n")
 
 	def replace_by_regex(self, regex: str, text: str, count: int = 0):

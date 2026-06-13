@@ -135,9 +135,9 @@ class _ParsedCommandParameters:
 
 		Result = list()
 
-		for Sequence in (self.__Positions.values(), self.__BasePosition):
-			for Parameter in Sequence:
-				if type(Parameter) == required_type: Result.append(Parameter)
+		for CurrentSequence in (self.__Positions.values(), self.__BasePosition):
+			for Parameter in CurrentSequence:
+				if type(Parameter) is required_type: Result.append(Parameter)
 
 		return tuple(Result)
 
@@ -306,7 +306,7 @@ class ParsedCommandData:
 		ParsedParameter = self.get_position_parameter(position_name)
 		if not ParsedParameter: return None
 
-		if type(ParsedParameter) == _ParsedFlag: return True
+		if type(ParsedParameter) is _ParsedFlag: return True
 		else:
 			ParsedParameter = cast(_ParsedArgument | _ParsedKey, ParsedParameter)
 			return ParsedParameter.value

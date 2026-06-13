@@ -213,7 +213,8 @@ def WriteTextFile(path: PathLike, text: str | Sequence[str], atomic: bool = Fals
 	:type atomic: bool
 	"""
 
-	if type(text) != str: text = "\n".join(text)
+
+	if type(text) is not str: text = "\n".join(text)
 	TextBytes: bytes = text.encode()
 
 	if atomic: AtomicWrite(path, TextBytes)

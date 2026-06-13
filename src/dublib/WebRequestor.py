@@ -1,4 +1,4 @@
-from .Exceptions.WebRequestor import *
+from .Exceptions import WebRequestor as Exceptions
 from .Methods.Data import ToSequence
 from .Core import LOGS_HANDLER
 
@@ -435,7 +435,7 @@ class WebConfig:
 		:raises UserAgentRedefining: Выбрасывается при попытке переопределения заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
 		"""
 
-		if name.lower() == "user-agent": raise UserAgentRedefining()
+		if name.lower() == "user-agent": raise Exceptions.UserAgentRedefining()
 		self.__Headers[name] = value
 
 	def generate_user_agent(
@@ -470,7 +470,7 @@ class WebConfig:
 		:raises UserAgentRedefining: Выбрасывается при попытке удаления заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
 		"""
 
-		if name.lower() == "user-agent": raise UserAgentRedefining()
+		if name.lower() == "user-agent": raise Exceptions.UserAgentRedefining()
 		del self.__Headers[name]
 
 	def set_user_agent(self, user_agent: str | None):
@@ -595,7 +595,7 @@ class WebResponse:
 		"""
 
 		try: return json.loads(string)
-		except: pass
+		except json.JSONDecodeError: pass
 
 		return None
 

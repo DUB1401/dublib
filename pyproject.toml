@@ -20,6 +20,7 @@ dependencies = [
 	"orjson",
 	"prettytable",
 	"requests",
+	"pathvalidate",
 	"pyyaml",
 	"pydantic",
 	"validators",
@@ -58,9 +59,13 @@ ignore_missing_imports = true
 check_untyped_defs = true
 non_interactive = true
 follow_imports = "silent"
-files = [
-	"src"
-]
+files = ["src"]
+
+[tool.ruff]
+include = ["src/*"]
+
+[tool.ruff.lint]
+ignore = ["E701"]
 
 [project.urls]
 Documentation = "https://github.com/DUB1401/dublib/tree/main/docs"

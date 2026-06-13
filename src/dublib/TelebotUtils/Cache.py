@@ -343,7 +343,7 @@ class TeleCache:
 		:type bot: TeleBot | str
 		"""
 
-		if type(bot) == TeleBot: self.__Bot = bot 
+		if type(bot) is TeleBot: self.__Bot = bot 
 		else: 
 			bot = cast(str, bot)
 			self.__Bot = TeleBot(bot)
@@ -394,8 +394,8 @@ class TeleCache:
 	def clear_real_cache(self):
 		"""Удаляет данные кэшированных файлов, пути к которым более не являются валидными."""
 
-		for Path in list(self.__RealData.keys()):
-			if not os.path.exists(Path): del self.__RealData[Path]
+		for FilePath in list(self.__RealData.keys()):
+			if not os.path.exists(FilePath): del self.__RealData[FilePath]
 
 		self.save()
 

@@ -1,6 +1,6 @@
 from ..Methods.Filesystem import ListDir, ReadJSON, WriteJSON
+from ..Exceptions import TelebotUtils as Exceptions
 from ..Methods.Data import Copy, ToSequence
-from ..Exceptions.TelebotUtils import *
 from ..Core import LOGS_HANDLER
 
 from concurrent.futures import ThreadPoolExecutor
@@ -165,7 +165,7 @@ class UserData:
 		:type key: str
 		"""
 
-		if type(flags) == str: flags = (flags,)
+		if type(flags) is str: flags = (flags,)
 		IsChanged = False
 
 		for Flag in flags:
@@ -407,7 +407,7 @@ class UserData:
 		:raise RefreshingBlocked: Выбрасывается при попытке чтения файла пользователя во время подавления сохранений.
 		"""
 
-		if self.__SuppressSaving: raise RefreshingBlocked()
+		if self.__SuppressSaving: raise Exceptions.RefreshingBlocked()
 		Data = ReadJSON(self.__Path)
 
 		for Key in self.__Data.keys():
@@ -578,9 +578,9 @@ class UserData:
 		:raises IncorrectUserToUpdate: Выбрасывается при передаче несоответствующей по ID структуры пользователя.
 		"""
 
-		if user.id != self.__ID: raise IncorrectUserToUpdate(self.__ID, user.id)
+		if user.id != self.__ID: raise Exceptions.IncorrectUserToUpdate(self.__ID, user.id)
 
-		if is_chat_forbidden != None: self.__Data["is_chat_forbidden"] = is_chat_forbidden
+		if is_chat_forbidden is not None: self.__Data["is_chat_forbidden"] = is_chat_forbidden
 		self.__Data["is_premium"] = bool(user.is_premium)
 		self.__Data["language"] = user.language_code
 		self.__Data["username"] = user.username
@@ -743,7 +743,7 @@ class UsersManager:
 		:rtype: UserData
 		"""
 		
-		if type(user) != types.User: raise TypeError(f"telebot.types.User object expected, not {type(user)}.")
+		if type(user) is not types.User: raise TypeError(f"telebot.types.User object expected, not {type(user)}.")
 
 		if user.id not in self.__Users: self.__Users[user.id] = UserData(self, user.id)
 		CurrentUser = self.__Users[user.id]
@@ -820,7 +820,7 @@ class UsersManager:
 		:raise SavingQueueBlocked: Выбрасывается при отключённой очереди сохранений.
 		"""
 
-		if not self.__IsSavingQueue: raise SavingQueueBlocked()
+		if not self.__IsSavingQueue: raise Exceptions.SavingQueueBlocked()
 
 		if user.id not in self.__SavingQueue:
 			self.__SavingQueue.append(user.id)

@@ -58,7 +58,7 @@ class GetText:
 		"""
 		
 		if languages:
-			if type(languages) == str: languages = [languages]
+			if type(languages) is str: languages = [languages]
 
 			try: return gettext.translation(GetText._DOMAIN, GetText._PATH, languages = languages).gettext(message)
 			except FileNotFoundError: return GetText.gettext(message)

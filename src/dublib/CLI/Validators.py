@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from enum import Enum
 
+from pathvalidate import is_valid_filepath
 import dateparser
 import validators
 
@@ -149,7 +150,7 @@ class Validator_Base64(BaseValidator[str]):
 
 		try: 
 			Result = validators.base64(value)
-			if type(Result) == bool: return Result
+			if type(Result) is bool: return Result
 		except validators.ValidationError: pass
 
 		return False
@@ -216,7 +217,7 @@ class Validator_Datetime(BaseValidator[datetime]):
 		try: 
 			dateparser.parse(value)
 			return True
-		except: pass
+		except (ValueError, TypeError): pass
 
 		return False
 
@@ -248,7 +249,7 @@ class Validator_Email(BaseValidator[str]):
 
 		try: 
 			Result = validators.email(value)
-			if type(Result) == bool: return Result
+			if type(Result) is bool: return Result
 		except validators.ValidationError: pass
 
 		return False
@@ -337,7 +338,7 @@ class Validator_IPv4(BaseValidator[str]):
 
 		try: 
 			Result = validators.ipv4(value)
-			if type(Result) == bool: return Result
+			if type(Result) is bool: return Result
 		except validators.ValidationError: pass
 
 		return False
@@ -370,7 +371,7 @@ class Validator_IPv6(BaseValidator[str]):
 
 		try: 
 			Result = validators.ipv6(value)
-			if type(Result) == bool: return Result
+			if type(Result) is bool: return Result
 		except validators.ValidationError: pass
 
 		return False
@@ -439,10 +440,7 @@ class Validator_Path(BaseValidator[Path]):
 		:rtype: bool
 		"""
 
-		try: 
-			Path(value)
-			return True
-		except: return False
+		return is_valid_filepath(value)
 
 class Validator_UnsignedInteger(BaseValidator[int]):
 
@@ -500,7 +498,7 @@ class Validator_URL(BaseValidator[str]):
 
 		try: 
 			Result = validators.url(value)
-			if type(Result) == bool: return Result
+			if type(Result) is bool: return Result
 		except validators.ValidationError: pass
 
 		return False
@@ -531,8 +529,7 @@ class Validator_ValidPath(BaseValidator[Path]):
 		:rtype: bool
 		"""
 
-		try: return Path(value).exists()
-		except: return False
+		return Path(value).exists()
 
 #==========================================================================================#
 # >>>>> ПЕРЕЧИСЛЕНИЕ ВАЛИДАТОРОВ <<<<< #
