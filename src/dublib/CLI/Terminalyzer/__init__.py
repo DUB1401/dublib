@@ -149,7 +149,7 @@ class Terminalyzer:
 		:type parameters: Sequence[str] | None
 		"""
 
-		self.__Input = input or sys.argv[1:]
+		self.__Input = list(input) if input else sys.argv[1:]
 
 		self.__CommandName = None
 		self.__Parameters: tuple = tuple()

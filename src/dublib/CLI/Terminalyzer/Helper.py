@@ -296,8 +296,9 @@ class Helper:
 		#---> Генерация таблицы.
 		#==========================================================================================#
 		Tables = list()
+		Categories: list[str | None] = list(CommandsCategories.keys())
 
-		for Category in CommandsCategories.keys():
+		for Category in Categories:
 			HelpTable: dict[str, list] = {
 				"Commands": [],
 				"Descriptions": []
@@ -320,7 +321,7 @@ class Helper:
 
 			TableObject.align = "l"
 			TableString = TableObject.get_string()
-			if TableObject.header: TableString = " " * 8 + TableString.lstrip()
+			if len(Categories) > 1: TableString = " " * 8 + TableString.lstrip()
 			Tables.append(TableString)
 
 		self.__Callback("\n\n".join(Tables))
