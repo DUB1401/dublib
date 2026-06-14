@@ -689,12 +689,12 @@ class UsersManager:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, storage_directory: PathLike, threads: int = 1):
+	def __init__(self, storage_directory: str | PathLike[str], threads: int = 1):
 		"""
 		Менеджер пользователей.
 
 		:param storage_directory: Путь к каталог файлов пользователей. Директория создаётся автоматически.
-		:type storage_directory: PathLike
+		:type storage_directory: str | PathLike[str]
 		:param threads: Число потоков, использующихся для операций чтения при инициализации менеджера. По умолчанию 1.
 		:type threads: int
 		"""

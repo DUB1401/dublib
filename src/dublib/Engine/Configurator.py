@@ -17,7 +17,7 @@ class Config:
 	#==========================================================================================#
 
 	__EXCEPTION_DISABLED = object()
-	__INSTANCES: "dict[PathLike, Config]" = dict()
+	__INSTANCES: "dict[str, Config]" = dict()
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА <<<<< #
@@ -84,18 +84,19 @@ class Config:
 		if args[0] not in cls.__INSTANCES:
 			Instance = super().__new__(cls)
 			Instance._IS_INITIALIZED = False
-			cls.__INSTANCES[args[0]] = Instance
+			ConfigPath = Path(args[0])
+			cls.__INSTANCES[ConfigPath.as_posix()] = Instance
 
 		return cls.__INSTANCES[args[0]]
 	
-	def __init__(self, path: PathLike):
+	def __init__(self, path: str | PathLike[str]):
 		"""
 		Контейнер конфигурации.
 
 		Может работать с файлами JSON и YAML. Определение происходит по расширению файла, в противном случае предпочтение отдаётся JSON.
 
 		:param path: Путь к файлу параметров. На данный момент поддерживается только JSON.
-		:type path: PathLike
+		:type path: str | PathLike[str]
 		"""
 
 		if self._IS_INITIALIZED: return
@@ -248,7 +249,7 @@ class Config:
 	def unload(self):
 		"""Выгружает контейнер из памяти."""
 
-		del self.__INSTANCES[self.path]
+		del self.__INSTANCES[self.path.as_posix()]
 
 	def validate(self, model: type[BaseModel] | None = None):
 		"""
