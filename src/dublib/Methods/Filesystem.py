@@ -180,11 +180,12 @@ def WriteYAML(path: str | PathLike[str], data: dict, atomic: bool = False):
 #==========================================================================================#
 
 @overload
-def ReadTextFile(path: str | PathLike[str], split: Literal[True], strip: bool = False) -> tuple[str, ...]: ...
+def ReadTextFile(path: str | PathLike[str], split: Literal[True], strip: bool = False) -> list[str]: ...
+
 @overload
 def ReadTextFile(path: str | PathLike[str], split: Literal[False] = False, strip: bool = False) -> str: ...
 
-def ReadTextFile(path: str | PathLike[str], split: bool = False, strip: bool = False) -> str | tuple[str, ...]:
+def ReadTextFile(path: str | PathLike[str], split: bool = False, strip: bool = False) -> str | list[str]:
 	"""
 	Считывает текстовый файл.
 
@@ -210,7 +211,7 @@ def ReadTextFile(path: str | PathLike[str], split: bool = False, strip: bool = F
 		for Index in range(len(TextLines)):
 			TextLines[Index] = TextLines[Index].strip()
 
-	return tuple(TextLines) if split else "\n".join(TextLines)
+	return TextLines if split else "\n".join(TextLines)
 
 def WriteTextFile(path: str | PathLike[str] , text: str | Sequence[str], atomic: bool = False):
 	"""

@@ -59,8 +59,10 @@ def StringToBool(value: str, literals: Sequence[str] = ("false", "0")) -> bool:
 
 @overload
 def ToSequence(value: Any, target_type: type[list]) -> list: ...
+
 @overload
 def ToSequence(value: Any, target_type: type[set]) -> set: ...
+
 @overload
 def ToSequence(value: Any, target_type: type[tuple] = ...) -> tuple: ...
 

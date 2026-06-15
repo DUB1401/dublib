@@ -1,12 +1,18 @@
 from .... import Exceptions
 
-from typing import cast, Sequence, TYPE_CHECKING
+from typing import cast, overload, Sequence, TypeVar, TYPE_CHECKING
 from datetime import datetime
 from pathlib import Path
 
 if TYPE_CHECKING:
 	from .Definition import _Flag, _Key, Command
 	
+#==========================================================================================#
+# >>>>> ПЕРЕМЕННЫЕ ТИПОВ <<<<< #
+#==========================================================================================#
+
+_EXPECTED_TYPE = TypeVar("_EXPECTED_TYPE", bool, float, int, Path, str, datetime)
+
 #==========================================================================================#
 # >>>>> ПРЕДСТАВЛЕНИЯ ОБРАБОТАННЫХ ПАРАМЕТРОВ <<<<< #
 #==========================================================================================#
@@ -259,25 +265,49 @@ class ParsedCommandData:
 
 		return False
 	
-	def get_key_value(self, key: str, exception: bool = False) -> bool | float | int | Path | str | datetime | None:
+	@overload
+	def get_key_value(self, key: str, expected_type: type[_EXPECTED_TYPE], exception: bool = False) -> _EXPECTED_TYPE | None: ...
+
+	@overload
+	def get_key_value(self, key: str, expected_type: None = None, exception: bool = False) -> bool | float | int | Path | str | datetime | None: ...
+
+	def get_key_value(self, key: str, expected_type: type | None = None, exception: bool = False) -> bool | float | int | Path | str | datetime | None:
 		"""
 		Возвращает значение активированного ключа.
 
 		:param key: Название ключа.
 		:type key: str
-		:param exception: Указывает, нужно ли выбросить исключение при отсутствии ключа.
+		:param expected_type: Ожидаемый тип значения. Для отсутствующих ключей возвращается `None`.
+		:type expected_type: type[bool | float | int | Path | str | datetime]
+		:param exception: Указывает, нужно ли выбрасывать исключение.
 		:type exception: bool
-		:raises KeyError: Выбрасывается в случае активации соответствующего параметра и запросе значения отсутствующего ключа.
 		:return: Значение ключа или `None` при отсутствующем ключе.
 		:rtype: bool | float | int | Path | str | datetime | None
+		:raises KeyError: Ключ не найден. Отключается параметром `exception`.
+		:raises TypeError: Ожидается другой тип данных. Отключается параметром `exception`.
 		"""
 
+		ValueToReturn: bool | float | int | Path | str | datetime | None = None
+		IsKeyFound: bool = False
+
 		for CurrentKey in self.__ParsedData.keys:
-			if key == CurrentKey.name or key in CurrentKey.aliases: return CurrentKey.value
+			if key == CurrentKey.name or key in CurrentKey.aliases:
+				ValueToReturn = CurrentKey.value
+				IsKeyFound = True
+				break
 
-		if exception: raise KeyError(key)
+		if not IsKeyFound:
+			if exception:
+				raise KeyError(key)
+			else: 
+				return None
+		
+		if expected_type:
+			ReturnedType = type(ValueToReturn)
+			if ReturnedType is not expected_type and exception:
+				raise TypeError(f"Expected \"{expected_type}\", but on key {ReturnedType}.")
 
-		return None
+		return ValueToReturn
 
 	def get_position_parameter(self, position_name: str) -> _ParsedArgument | _ParsedFlag | _ParsedKey | None:
 		"""
@@ -291,25 +321,44 @@ class ParsedCommandData:
 		"""
 
 		return self.__ParsedData.positions[position_name]
-	
-	def get_position_value(self, position_name: str) -> bool | float | int | Path | str | datetime | None:
+
+	@overload
+	def get_position_value(self, position_name: str, expected_type: type[_EXPECTED_TYPE]) -> _EXPECTED_TYPE: ...
+
+	@overload
+	def get_position_value(self, position_name: str, expected_type: None = None) -> bool | float | int | Path | str | datetime | None: ...
+
+	def get_position_value(self, position_name: str, expected_type: type | None = None) -> bool | float | int | Path | str | datetime | None:
 		"""
 		Для аргументов и ключей на позиции возвращает значение, для флагов – `True` при активации.
 
 		:param position_name: Имя позиции.
 		:type position_name: str
-		:return: Параметр позиции или `None` при пустой позиции.
+		:param expected_type: Ожидаемый тип значения. Если тип не соответствует, будет выбрашено исключение `TypeError`.
+		:type expected_type: type[bool | float | int | Path | str | datetime]
+		:return: Параметр позиции или `None` при пустой позиции. Для флага возвращает основное имя флага.
 		:rtype: bool | float | int | Path | str | datetime | None
 		:raises KeyError: Позиция не обнаружена.
+		:raises TypeError: Ожидается другой тип данных.
 		"""
 
 		ParsedParameter = self.get_position_parameter(position_name)
-		if not ParsedParameter: return None
+		ValueToReturn: bool | float | int | Path | str | datetime | None = None
 
-		if type(ParsedParameter) is _ParsedFlag: return True
+		if not ParsedParameter:
+			ValueToReturn = None
+		elif type(ParsedParameter) is _ParsedFlag:
+			ValueToReturn = ParsedParameter.name
 		else:
 			ParsedParameter = cast(_ParsedArgument | _ParsedKey, ParsedParameter)
-			return ParsedParameter.value
+			ValueToReturn = ParsedParameter.value
+
+		if expected_type:
+			ReturnedType = type(ValueToReturn)
+			if ReturnedType is not expected_type:
+				raise TypeError(f"Expected \"{expected_type}\", but on position {ReturnedType}.")
+			
+		return ValueToReturn
 
 	def to_dict(self) -> dict:
 		"""
