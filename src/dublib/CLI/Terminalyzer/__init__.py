@@ -46,7 +46,7 @@ class Terminalyzer:
 
 		for CurrentPosition in command.positions:
 			if CurrentPosition.description and len(CurrentPosition.parameters) == 1 and CurrentPosition.parameters[0].description:
-				LOGGER.warning(f"Command: \"{command.name}\". Parametr description suppressed by position description on \"{CurrentPosition.name}\".")
+				LOGGER.warning(f"Command: \"{command.name}\". Parameter description suppressed by position description on \"{CurrentPosition.name}\".")
 
 	def __CheckCommandForEmptyPositions(self, command: Command):
 		"""

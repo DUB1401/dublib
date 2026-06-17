@@ -277,14 +277,14 @@ class ParsedCommandData:
 
 		:param key: Название ключа.
 		:type key: str
-		:param expected_type: Ожидаемый тип значения. Для отсутствующих ключей возвращается `None`.
+		:param expected_type: Ожидаемый тип значения. Если тип не соответствует, будет выброшено исключение `TypeError`. Проверяются только значения, отличные от `None`.
 		:type expected_type: type[bool | float | int | Path | str | datetime]
-		:param exception: Указывает, нужно ли выбрасывать исключение.
+		:param exception: Указывает, нужно ли выбрасывать исключение при отсутствии ключа.
 		:type exception: bool
 		:return: Значение ключа или `None` при отсутствующем ключе.
 		:rtype: bool | float | int | Path | str | datetime | None
 		:raises KeyError: Ключ не найден. Отключается параметром `exception`.
-		:raises TypeError: Ожидается другой тип данных. Отключается параметром `exception`.
+		:raises TypeError: Ожидается другой тип данных.
 		"""
 
 		ValueToReturn: bool | float | int | Path | str | datetime | None = None
@@ -302,9 +302,9 @@ class ParsedCommandData:
 			else: 
 				return None
 		
-		if expected_type:
+		if expected_type and ValueToReturn is not None:
 			ReturnedType = type(ValueToReturn)
-			if ReturnedType is not expected_type and exception:
+			if ReturnedType is not expected_type:
 				raise TypeError(f"Expected \"{expected_type}\", but on key {ReturnedType}.")
 
 		return ValueToReturn

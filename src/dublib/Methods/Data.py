@@ -47,7 +47,7 @@ def StringToBool(value: str, literals: Sequence[str] = ("false", "0")) -> bool:
 
 	:param value: Преобразуемая строка.
 	:type value: str
-	:param literals: Набор строк, интерпретируемых как `False`.
+	:param literals: Набор строк, интерпретируемых как `False`. Нечувствителен к регистру.
 	:type literals: Sequence[str]
 	:return: Результирующее значение.
 	:rtype: bool
