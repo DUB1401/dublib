@@ -19,7 +19,7 @@ class MessagesTypes(enum.Enum):
 # >>>>> ФУНКЦИИ ГЕНЕРАЦИИ И ВЫВОДА СООБЩЕНИЙ <<<<< #
 #==========================================================================================#
 
-def GenerateMessage(text: str, type: MessagesTypes | None = None, origin: str | None = None) -> str:
+def GenerateMessage(text: str, type: MessagesTypes | None = None, origin: str | None = None, colorize: bool = True) -> str:
 	"""
 	Генерирует сообщение на основе переданных параметров.
 
@@ -35,10 +35,24 @@ def GenerateMessage(text: str, type: MessagesTypes | None = None, origin: str | 
 
 	OriginPart = ""
 	TypePart = ""
-	if origin: OriginPart = f"{origin}:"
-	if type: TypePart = f"[{OriginPart}{type.name.upper()}] "
+	if origin:
+		OriginPart = f"{origin}:"
+	if type:
+		TypePart = f"[{OriginPart}{type.name.upper()}] "
 
-	return f"{TypePart}{text}"
+	Message = f"{TypePart}{text}"
+
+	if colorize:
+		ColorsDict: dict[MessagesTypes | None, Codes.Colors | None] = {
+			MessagesTypes.Info: Codes.Colors.White,
+			MessagesTypes.Error: Codes.Colors.Red,
+			MessagesTypes.Warning: Codes.Colors.Yellow,
+			MessagesTypes.Critical: Codes.Colors.Red,
+			None: None
+		}
+		Message = TextStyler(text_color = ColorsDict[type]).get_styled_text(Message)
+
+	return Message
 
 def PrintMessage(text: str, type: MessagesTypes | None = None, origin: str | None = None):
 	"""
@@ -52,15 +66,7 @@ def PrintMessage(text: str, type: MessagesTypes | None = None, origin: str | Non
 	:type origin: str | None
 	"""
 
-	ColorsDict: dict[MessagesTypes | None, Codes.Colors | None] = {
-		MessagesTypes.Info: Codes.Colors.White,
-		MessagesTypes.Error: Codes.Colors.Red,
-		MessagesTypes.Warning: Codes.Colors.Yellow,
-		MessagesTypes.Critical: Codes.Colors.Red,
-		None: None
-	}
-
-	print(TextStyler(text_color = ColorsDict[type]).get_styled_text(GenerateMessage(text, type, origin)))
+	print(GenerateMessage(text, type, origin))
 
 #==========================================================================================#
 # >>>>> ШАБЛОНЫ ТИПОВ СООБЩЕНИЙ <<<<< #
