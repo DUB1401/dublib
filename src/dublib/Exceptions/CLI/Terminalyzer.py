@@ -34,6 +34,19 @@ class MultipleCommandDefinition(Exception):
 # >>>>> ИСКЛЮЧЕНИЯ ВРЕМЕНИ ВЫПОЛНЕНИЯ <<<<< #
 #==========================================================================================#
 
+class PositionOptional(Exception):
+	"""Исключение: позиция является необязательной."""
+
+	def __init__(self, position: str):
+		"""
+		Исключение: позиция является необязательной.
+
+		:param position: Имя позиции.
+		:type position: str
+		"""
+
+		super().__init__(position) 
+
 class ImportantPositionEmpty(Exception):
 	"""Исключение: для обязательной позиции не задан параметр."""
 

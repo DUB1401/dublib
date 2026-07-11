@@ -469,10 +469,10 @@ class Command:
 		return self.__Name
 
 	@property
-	def positions(self) -> list[_Position]:
+	def positions(self) -> tuple[_Position, ...]:
 		"""Список позиций."""
 
-		return self.__Positions.copy()
+		return tuple(self.__Positions.values())
 
 	#==========================================================================================#
 	# >>>>> МЕТОДЫ <<<<< #
@@ -495,7 +495,7 @@ class Command:
 		self.__Category = category
 
 		self.__BasePosition = _BasePosition()
-		self.__Positions: list[_Position] = list()
+		self.__Positions: dict[str, _Position] = dict()
 
 	def create_position(self, name: str, description: str | None = None, important: bool = False) -> _Position:
 		"""
@@ -512,10 +512,23 @@ class Command:
 		"""
 
 		NewPosition = _Position(name, description, important)
-		self.__Positions.append(NewPosition)
+		self.__Positions[name] = NewPosition
 
-		return self.__Positions[-1]
+		return NewPosition
 	
+	def get_position(self, name: str) -> _Position:
+		"""
+		Возвращает позицию.
+
+		:param name: Имя позиции.
+		:type name: str
+		:return: Позиция.
+		:rtype: _Position
+		:raises KeyError: Позиция не найдена.
+		"""
+
+		return self.__Positions[name]
+
 	def set_category(self, category: str | None):
 		"""
 		Задаёт категорию, в которой будет отображаться команда при выводе помощи.

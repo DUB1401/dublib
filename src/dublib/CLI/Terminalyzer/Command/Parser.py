@@ -155,6 +155,7 @@ class _ParsedCommandParameters:
 		"""Данные о спаршенных параметрах команды."""
 
 		self.__Positions: dict[str, _ParsedArgument | _ParsedFlag | _ParsedKey | None] = dict()
+		self.__ImportantPositions: list[str] = list()
 		self.__BasePosition: list[_ParsedArgument | _ParsedFlag | _ParsedKey] = list()
 
 	def add_base_parameter(self, parameter: _ParsedArgument | _ParsedFlag | _ParsedKey):
@@ -167,7 +168,20 @@ class _ParsedCommandParameters:
 
 		self.__BasePosition.append(parameter)
 
-	def set_positional_parameter(self, position_name: str, parameter: _ParsedArgument | _ParsedFlag | _ParsedKey):
+	def is_position_important(self, position_name: str) -> bool:
+		"""
+		Проверяет, описана ли позиция как обязательная.
+
+		:param position_name: Имя позиции.
+		:type position_name: str
+		:return: Возвращает `True`, если позиция обязательна для заполнения.
+		:rtype: bool
+		:raises KeyError: Позиция не найдена.
+		"""
+
+		return position_name in self.__ImportantPositions
+
+	def set_positional_parameter(self, position_name: str, parameter: _ParsedArgument | _ParsedFlag | _ParsedKey, is_important: bool):
 		"""
 		Устанавливает представление параметра на позицию.
 
@@ -175,11 +189,18 @@ class _ParsedCommandParameters:
 		:type position_name: str
 		:param parameter: Представление параметра.
 		:type parameter: _ParsedArgument | _ParsedFlag | _ParsedKey
+		:param is_important: Состояние: обязательная ли позиция.
+		:type is_important: bool
 		:raises Exceptions.CLI.Terminalyzer.MultipleParametersOnPosition: Попытка установки нескольких параметров для одной позиции.
 		"""
 
-		if position_name in self.__Positions: raise Exceptions.CLI.Terminalyzer.MultipleParametersOnPosition(position_name)
+		if position_name in self.__Positions:
+			raise Exceptions.CLI.Terminalyzer.MultipleParametersOnPosition(position_name)
+		
 		self.__Positions[position_name] = parameter
+
+		if is_important:
+			self.__ImportantPositions.append(position_name)
 
 #==========================================================================================#
 # >>>>> ДАННЫЕ ОБРАБОТАННОЙ КОМАНДЫ <<<<< #
@@ -222,8 +243,8 @@ class ParsedCommandData:
 
 	def __init__(self, name: str, parsed_data: _ParsedCommandParameters):
 
-		self.__Name = name
-		self.__ParsedData = parsed_data
+		self.__Name: str = name
+		self.__ParsedData: _ParsedCommandParameters = parsed_data
 
 	def __str__(self) -> str:
 		"""
@@ -323,23 +344,53 @@ class ParsedCommandData:
 		return self.__ParsedData.positions[position_name]
 
 	@overload
-	def get_position_value(self, position_name: str, expected_type: type[_EXPECTED_TYPE]) -> _EXPECTED_TYPE: ...
+	def get_important_position_value(self, position_name: str, expected_type: type[_EXPECTED_TYPE]) -> _EXPECTED_TYPE: ...
+
+	@overload
+	def get_important_position_value(self, position_name: str, expected_type: None = None) -> bool | float | int | Path | str | datetime: ...
+
+	def get_important_position_value(self, position_name: str, expected_type: type[_EXPECTED_TYPE] | None = None) -> bool | float | int | Path | str | datetime:
+		"""
+		Для аргументов и ключей на позиции возвращает значение, для флагов – основое имя флага. Позиция не может быть пустой.
+
+		:param position_name: Имя позиции.
+		:type position_name: str
+		:param expected_type: Ожидаемый тип значения.
+		:type expected_type: type[_EXPECTED_TYPE]
+		:return: Значение позиции или основное имя флага.
+		:rtype: bool | float | int | Path | str | datetime
+		:raises Exceptions.CLI.Terminalyzer.ImportantPositionEmpty: Обязательная позиция пуста.
+		:raises Exceptions.CLI.Terminalyzer.PositionOptional: Позиция не обязательна.
+		"""
+
+		if not self.__ParsedData.is_position_important(position_name):
+			raise Exceptions.CLI.Terminalyzer.PositionOptional(position_name)
+
+		ValueToReturn = self.get_position_value(position_name, expected_type)
+
+		if ValueToReturn is None:
+			raise Exceptions.CLI.Terminalyzer.ImportantPositionEmpty(position_name)
+
+		return ValueToReturn
+
+	@overload
+	def get_position_value(self, position_name: str, expected_type: type[_EXPECTED_TYPE]) -> _EXPECTED_TYPE | None: ...
 
 	@overload
 	def get_position_value(self, position_name: str, expected_type: None = None) -> bool | float | int | Path | str | datetime | None: ...
 
 	def get_position_value(self, position_name: str, expected_type: type | None = None) -> bool | float | int | Path | str | datetime | None:
 		"""
-		Для аргументов и ключей на позиции возвращает значение, для флагов – `True` при активации.
+		Для аргументов и ключей на позиции возвращает значение, для флагов – основное название флага.
 
 		:param position_name: Имя позиции.
 		:type position_name: str
-		:param expected_type: Ожидаемый тип значения. Если тип не соответствует, будет выбрашено исключение `TypeError`.
-		:type expected_type: type[bool | float | int | Path | str | datetime]
+		:param expected_type: Ожидаемый тип значения.
+		:type expected_type: type[bool | float | int | Path | str | datetime] | None
 		:return: Параметр позиции или `None` при пустой позиции. Для флага возвращает основное имя флага.
 		:rtype: bool | float | int | Path | str | datetime | None
 		:raises KeyError: Позиция не обнаружена.
-		:raises TypeError: Ожидается другой тип данных.
+		:raises TypeError: Позиция не пуста и ожидается другой тип данных.
 		"""
 
 		ParsedParameter = self.get_position_parameter(position_name)
@@ -355,7 +406,7 @@ class ParsedCommandData:
 
 		if expected_type:
 			ReturnedType = type(ValueToReturn)
-			if ReturnedType is not expected_type:
+			if ReturnedType is not expected_type and ReturnedType is not None:
 				raise TypeError(f"Expected \"{expected_type}\", but on position {ReturnedType}.")
 			
 		return ValueToReturn
@@ -537,8 +588,11 @@ class _CommandParser:
 			if self.__ParametersLocks[Index]: continue
 			self.__ParseBasePositionParameters(Index)
 
-		for PositionName in self.__PositionsLocks: ParsedData.set_positional_parameter(PositionName, self.__PositionsLocks[PositionName])
-		for Parameter in self.__BaseParameters: ParsedData.add_base_parameter(Parameter)
+		for PositionName in self.__PositionsLocks:
+			ParsedData.set_positional_parameter(PositionName, self.__PositionsLocks[PositionName], self.__Command.get_position(PositionName).is_important)
+
+		for Parameter in self.__BaseParameters:
+			ParsedData.add_base_parameter(Parameter)
 
 		self.__CheckImportantPositionsLocks()
 		self.__CheckParametersCount()
