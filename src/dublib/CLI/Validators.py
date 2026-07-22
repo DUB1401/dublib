@@ -221,6 +221,39 @@ class Validator_Datetime(BaseValidator[datetime]):
 
 		return False
 
+class Validator_Domain(BaseValidator[str]):
+
+	@staticmethod
+	def convert(value: str) -> str:
+		"""
+		Конвертирует строку в значение определённого типа.
+
+		:param value: Конвертируемая строка.
+		:type value: str
+		:return: Конвертированное значение.
+		:rtype: str
+		"""
+
+		return value
+	
+	@staticmethod
+	def validate(value: str) -> bool:
+		"""
+		Проверяет, соответствует ли строка критериям валидируемого типа.
+
+		:param value: Проверяемая строка.
+		:type value: str
+		:return: Возвращает `True`, если строка является валидным значением типа.
+		:rtype: bool
+		"""
+
+		try: 
+			Result = validators.domain(value)
+			if type(Result) is bool: return Result
+		except validators.ValidationError: pass
+
+		return False
+
 class Validator_Email(BaseValidator[str]):
 
 	@staticmethod
