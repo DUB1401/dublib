@@ -1,5 +1,6 @@
+from ...Validators import ValidableTypes as ValidableTypes
+
 from .Command.Parser import _CommandParser, ParsedCommandData
-from ..Validators import ValidableTypes as ValidableTypes
 from .Command.Definition import Command
 from .Helper import Helper
 

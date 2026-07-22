@@ -1,6 +1,12 @@
 Terminalyzer
 ============
-
+.. automodule:: dublib.CLI.Terminalyzer
+	:members:
+.. automodule:: dublib.CLI.Terminalyzer.Command.Definition
+	:members:
+.. automodule:: dublib.CLI.Terminalyzer.Helper
+	:members:
+	
 Описание
 --------
 Модуль ``Terminalyzer`` предназначен для расширенного, типизированного и защищённого анализа текстовых команд в стиле **Shell**.
@@ -51,6 +57,3 @@ Terminalyzer
 			CommandData.get_position_parameter("TARGET").value
 			# Получение пути к файлу через индекс аргумента.
 			CommandData.arguments[0].value
-
-.. automodule:: dublib.CLI.Terminalyzer
-	:members:

@@ -1,18 +1,33 @@
 Validators
 ==========
 
+Данный модуль содержит набор валидаторов строк для их проверки и преобразования в иные типы данных.
+
+Использование
+-------------
+
+.. code-block:: python
+
+	from dublib.Validators import Validator_UnsignedInteger
+
+	Validator_UnsignedInteger.validate("123") # True
+	Validator_UnsignedInteger.validate("-123") # False
+
+	Validator_UnsignedInteger.convert("123") # 123
+	Validator_UnsignedInteger.convert("-123") # ValidationError
+
+Создание валидатора
+-------------------
+
 Для создания собственного валидатора необходимо унаследовать класс от ``BaseValidator`` и указать целевой тип данных в квадратных скобках при наследовании, а также переопределить два статических метода: ``validate()`` и ``convert()``.
 
 В качестве имени кастомного валидатора рекомендуется использовать ``CustomValidator_{TYPE}``, что позволяет извлекать тип при генерации исключений.
 
 Любой валидатор наследует также метод ``parse()``, автоматически валидирующий и приводящий значение к нужному типу, а в случае ошибки выбрасывающий исключение типа ``ValidationError``.
 
-Создание
---------
-
 .. code-block:: python
 
-	from dublib.CLI.Validators import BaseValidator
+	from dublib.Validators import BaseValidator
 
 	class CustomValidator_ExampleBool(BaseValidator[bool]):
 
@@ -29,12 +44,7 @@ Validators
 
 			return Buffer in ("true", "false")
 
-Использование
--------------
-
-После создания кастомного валидатора его можно использовать в ``Terminalyzer`` как указатель ожидаемого типа параметра.
-
-.. code-block:: python
+	# После создания собственного валидатора его можно использовать в Terminalyzer.
 
 	from dublib.CLI.Terminalyzer import Terminalyzer, Command, ValidableTypes
 
@@ -49,10 +59,8 @@ Validators
 	Com.base.add_argument(CustomValidableTypes.ExampleBool)
 	Commands.append(Com)
 
-	# Дальнейшая обработка через Terminalyzer...
+Предоставленные типы
+--------------------
 
-Представленные типы
--------------------
-
-.. automodule:: dublib.CLI.Validators
+.. automodule:: dublib.Validators
 	:members:

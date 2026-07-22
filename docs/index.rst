@@ -6,3 +6,4 @@ dublib
 	Methods/index
 	TelebotUtils/index
 	WebRequestor
+	Validators

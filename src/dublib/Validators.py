@@ -1,4 +1,4 @@
-from ..Exceptions.CLI.Validators import ValidationError
+from .Exceptions.Validators import ValidationError
 
 from typing import cast, TypeVar, Generic
 from abc import ABC, abstractmethod
@@ -576,6 +576,7 @@ class ValidableTypes(Enum):
 	Base64 = Validator_Base64
 	Bool = Validator_Bool
 	Datetime = Validator_Datetime
+	Domain = Validator_Domain
 	Email = Validator_Email
 	Float = Validator_Float
 	Integer = Validator_Integer
