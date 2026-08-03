@@ -1,6 +1,7 @@
 from typing import Any, overload, Sequence
 import copy
 
+import more_itertools
 import orjson
 
 #==========================================================================================#
@@ -185,6 +186,43 @@ def StripAlpha(text: str) -> str:
 # >>>>> ФУНКЦИИ РАБОТЫ СО СЛОВАРЯМИ <<<<< #
 #==========================================================================================#
 
+def InsertDictionaryAfterKey(base_dictionary: dict, insertable_dictionary: dict, target_key: Any, overwrite: bool = False) -> dict:
+	"""
+	Вставляет словарь после определённого ключа. При конфликте ключей приоритет расположения отдаётся порядку ключей из вставляемого словаря.
+
+	:param base_dictionary: Исходный словарь. Не изменяется.
+	:type base_dictionary: dict
+	:param insertable_dictionary: Вставляемый словарь.
+	:type insertable_dictionary: dict
+	:param target_key: Целевой ключ, после которого производится вставка.
+	:type target_key: Any
+	:param overwrite: Указывает, нужно ли перезаписать значения при конфликте ключей.
+	:type overwrite: bool
+	:return: Объединённые словари.
+	:rtype: dict
+	:raises KeyError: Целевой ключ не найден.
+	"""
+
+	BaseKeys: list = list(base_dictionary.keys())
+
+	if target_key not in BaseKeys:
+		raise KeyError(target_key)
+
+	FirstPart, SecondPart = more_itertools.split_after(BaseKeys, lambda Element: Element == target_key, maxsplit = 1)
+	Result: dict = dict()
+
+	for FirstPartKey in FirstPart: Result[FirstPartKey] = base_dictionary[FirstPartKey]
+	for InsertableKey in insertable_dictionary.keys(): Result[InsertableKey] = insertable_dictionary[InsertableKey]
+
+	for SecondPartKey in SecondPart:
+
+		if SecondPartKey in Result:
+			if not overwrite: Result[SecondPartKey] = base_dictionary[SecondPartKey]
+
+		else: Result[SecondPartKey] = base_dictionary[SecondPartKey]
+
+	return Result
+
 def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwrite: bool = False) -> dict:
 	"""
 	Объединяет словари.
@@ -221,7 +259,8 @@ def ReplaceDictionaryKey(dictionary: dict, old_key: Any, new_key: Any) -> dict:
 	"""
 	
 	Result = dict()
-	if old_key not in dictionary.keys(): raise KeyError(old_key)
+	if old_key not in dictionary:
+		raise KeyError(old_key)
 
 	for Key in dictionary.keys():
 		if Key == old_key: Result[new_key] = dictionary[old_key]

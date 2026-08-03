@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+#### Methods.Data
+- Добавлена функция `InsertDictionaryAfterKey()` для вставки одного словаря внутрь другого после определённого ключа.
 #### Methods.System
 - Функция `Clear()` теперь может сохранять буфер прокрутки сессии терминала через соответствующий параметр.
 #### WebRequestor

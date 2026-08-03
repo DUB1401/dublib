@@ -23,7 +23,7 @@ class BaseValidator(ABC, Generic[_PARSED_VALUE]):
 	@abstractmethod
 	def convert(value: str) -> _PARSED_VALUE:
 		"""
-		Конвертирует строку в значение определённого типа.
+		Конвертирует строку в значение определённого типа без проведения валидации.
 
 		:param value: Конвертируемая строка.
 		:type value: str
@@ -42,6 +42,7 @@ class BaseValidator(ABC, Generic[_PARSED_VALUE]):
 		:type value: str
 		:return: Результат преобразования.
 		:rtype: Any
+		:raises ValidationError: Ошибка валидации.
 		"""
 
 		if not cls.validate(value): raise ValidationError(value, cls)
