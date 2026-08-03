@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Функция `Clear()` теперь использует ANSI-коды вместо вызова системных утилит.
 #### WebRequestor
 - Заголовки внутри `WebConfig` теперь всегда хранятся в нижнем регистре.
+- Метод `remove_header()` теперь может быть настроен для игнорирования попытки удаления несуществующего заголовка.
+
+### Fixed
+- Невозможно импортировать исключения модуля `Validators`.
 
 ### Security
 - Заменены устаревшие вызовы `os.system()` на `subprocess.run()`.

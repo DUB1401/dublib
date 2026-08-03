@@ -484,21 +484,27 @@ class WebConfig:
 			platforms = platforms
 		).random
 
-	def remove_header(self, name: str):
+	def remove_header(self, name: str, exception: bool = False):
 		"""
 		Удаляет постоянный заголовок.
 
 		:param name: Имя заголовка.
 		:type name: str
+		:param exception: Указывает, нужно ли выбрасывать исключение при попытке удаления несуществующего заголовка.
+		:type exception: bool
 		:raises UserAgentRedefining: Выбрасывается при попытке удаления заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
+		:raises KeyError: Заголовк не существует.
 		"""
 
 		name = name.lower()
 
 		if name == "user-agent":
 			raise Exceptions.UserAgentRedefining()
-		
-		del self.__Headers[name]
+
+		if name in self.__Headers:
+			del self.__Headers[name]
+		elif exception:
+			raise KeyError(name)
 
 	def set_user_agent(self, user_agent: str | None):
 		"""
