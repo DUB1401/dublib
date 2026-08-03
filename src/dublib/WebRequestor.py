@@ -10,7 +10,8 @@ import enum
 import json
 
 from curl_cffi import BrowserTypeLiteral, CurlHttpVersion, ProxySpec, requests as curl_cffi_requests
-from fake_useragent import UserAgent
+from ua_generator.user_agent import UserAgent
+import ua_generator
 import requests
 import httpx
 
@@ -337,13 +338,13 @@ class WebConfig:
 		return self.__Delay
 
 	@property
-	def headers(self) -> dict | None:
-		"""Словарь заголвоков, приоритетно применяемых ко всем запросам, или `None` при отсутствии заголовков."""
+	def headers(self) -> dict:
+		"""Словарь заголвоков, приоритетно применяемых ко всем запросам."""
 
 		Headers = self.__Headers.copy()
-		if self.__UserAgent: Headers["user-agent"] = self.__UserAgent
+		if self.__UserAgent: Headers |= self.__UserAgent.headers.get()
 
-		return Headers or None
+		return Headers
 
 	@property
 	def lib(self) -> WebLibs:
@@ -359,9 +360,9 @@ class WebConfig:
 
 	@property
 	def user_agent(self) -> str | None:
-		"""Значение заголовка User-Agent."""
+		"""Значение заголовка *User-Agent*."""
 
-		return self.__UserAgent
+		return self.__UserAgent.text if self.__UserAgent else None
 
 	@property
 	def good_codes(self) -> tuple[int | None, ...]:
@@ -380,7 +381,7 @@ class WebConfig:
 		self.__UsedLib = WebLibs.requests
 		self.__EnableRedirecting = True
 		self.__EnableLogging = True
-		self.__UserAgent = None
+		self.__UserAgent: UserAgent | None = None
 		self.__Headers = dict()
 		self.__Retries = 0
 		self.__GoodCodes: tuple[int | None, ...] = (200, 404)
@@ -424,6 +425,20 @@ class WebConfig:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ УПРАВЛЕНИЯ ЗАГОЛОВКАМИ <<<<< #
 	#==========================================================================================#
 	
+	def accept_client_hints(self, hints: str):
+		"""
+		Добавляет в заголовки запроса данные, запрашиваемые **Client Hints**.
+
+		:param hits: Строка, содержащая **Client Hints**, разделённые запятой.
+		:type hits: str
+		"""
+
+		if not self.__UserAgent:
+			self.generate_user_agent()
+			self.__UserAgent = cast(UserAgent, self.__UserAgent)
+
+		self.__UserAgent.headers.accept_ch(hints)
+
 	def add_header(self, name: str, value: str | int):
 		"""
 		Добавляет постоянный заголовок ко всем производимым запросам. Запрещает переопределение заголовков.
@@ -432,7 +447,7 @@ class WebConfig:
 		:type name: str
 		:param value: Значение заголовка.
 		:type value: str | int
-		:raises UserAgentRedefining: Переопределение заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
+		:raises UserAgentRedefining: Переопределение заголовка *User-Agent*. Используйте `generate_user_agent()` вместо этого метода.
 		:raises HeaderRedefining: Переопределение заголовка.
 		"""
 
@@ -451,38 +466,35 @@ class WebConfig:
 		:type name: str
 		:param value: Значение заголовка.
 		:type value: str | int
-		:raises UserAgentRedefining: Переопределение заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
+		:raises UserAgentRedefining: Переопределение заголовка *User-Agent*. Используйте `generate_user_agent()` вместо этого метода.
 		"""
 
 		name = name.lower()
 
-		if name == "user-agent":
+		if name == "user-agent" or name.startswith("sec-ch"):
 			raise Exceptions.UserAgentRedefining()
 		
-		self.__Headers[name] = value
+		self.__Headers[name] = str(value) if type(value) is int else value
 
-	def generate_user_agent(
-		self,
-		os: Sequence[str] = ("Windows", "Linux", "Ubuntu", "Chrome OS", "Mac OS X", "Android", "iOS"),
-		browsers: Sequence[str] = ("Chrome", "Firefox", "Edge", "Opera"," Safari", "Android", "Yandex Browser", "Samsung Internet", "Opera Mobile", "Mobile Safari", "Firefox Mobile", "Firefox iOS", "Chrome Mobile", "Chrome Mobile iOS", "Mobile Safari UI/WKWebView", "Edge Mobile", "DuckDuckGo Mobile", "MiuiBrowser", "Whale", "Twitter", "Facebook", "Amazon Silk"),
-		platforms: Sequence[str] = ("desktop", "mobile", "tablet")
-	):
+	def generate_user_agent(self, device: Sequence[str] | None = None, platform: Sequence[str] | None = None, browsers: Sequence[str] | None = None):
 		"""
-		Генерирует случайное значение заголовка *User-Agent* при помощи библиотеки **fake_useragent**.
+		Генерирует случайное значение заголовка *User-Agent* и данные **Client Hints** при помощи библиотеки [ua-generator](https://github.com/iamdual/ua-generator).
 
-		:param os: Операционные системы.
-		:type os: Sequence[str]
+		Фильтры для спецификации параметров заголовка доступны в документации используемой библиотеки.
+
+		:param device: Типы устройств.
+		:type device: Sequence[str] | None
+		:param platform: Платформы.
+		:type platform: Sequence[str] | None
 		:param browsers: Браузеры.
-		:type browsers: Sequence[str]
-		:param platforms: Платформы.
-		:type platforms: Sequence[str]
+		:type browsers: Sequence[str] | None
 		"""
 
-		self.__UserAgent = UserAgent(
-			os = os,
-			browsers = browsers,
-			platforms = platforms
-		).random
+		self.__UserAgent = ua_generator.generate(
+			tuple(device) if device else None,
+			tuple(platform) if platform else None,
+			tuple(browsers) if browsers else None,
+		)
 
 	def remove_header(self, name: str, exception: bool = False):
 		"""
@@ -505,16 +517,6 @@ class WebConfig:
 			del self.__Headers[name]
 		elif exception:
 			raise KeyError(name)
-
-	def set_user_agent(self, user_agent: str | None):
-		"""
-		Задаёт значение заголовка *User-Agent*.
-
-		:param user_agent: Значение заголовка или `None` для удаления.
-		:type user_agent: str | None
-		"""
-
-		self.__UserAgent = user_agent
 
 	def set_retries_count(self, retries: int):
 		"""
@@ -667,10 +669,12 @@ class WebResponse:
 		:type parse_json: bool
 		"""
 
-		self.__StatusCode = response.status_code
-		self.__Text = response.text
-		self.__Content = response.content
-		self.__JSON = self.__TryDeserialize(response.text)
+		self.__StatusCode: int | None = response.status_code
+		self.__Text: str | None = response.text
+		self.__Content: bytes | None = response.content
+		self.__JSON: dict | None = None
+		
+		if parse_json: self.__JSON = self.__TryDeserialize(response.text)
 
 	def push_exception(self, exception: Exception):
 		"""
@@ -1112,7 +1116,7 @@ class WebRequestor:
 			except Exception as ExceptionData:
 				Response.push_exception(ExceptionData)
 				if self.__Config.logging: LOGGER.error(f"[{LibName}-{request_type.name}] {ExceptionData}")
-		
+
 		return Response
 
 	#==========================================================================================#

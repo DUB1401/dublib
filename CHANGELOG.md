@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Функция `Clear()` теперь может сохранять буфер прокрутки сессии терминала через соответствующий параметр.
 #### WebRequestor
 - Для `WebConfig` добавлен метод `set_header()`, а метод `add_header()` теперь запрещает переопределение заголовка. Также реализовано соответствующее исключение `HeaderRedefining`.
+- В `WebResponse` реализовано хранилище заголовков ответа.
+- Добавлен метод для разрешения запросов **Client Hints**, а также режим их автоматическоро разрешения при выполнении запросов.
 
 ### Changed
 #### Methods.System
@@ -21,9 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### WebRequestor
 - Заголовки внутри `WebConfig` теперь всегда хранятся в нижнем регистре.
 - Метод `remove_header()` теперь может быть настроен для игнорирования попытки удаления несуществующего заголовка.
+- Для генерации заголовка _User-Agent_ и **Client Hints** применена библиотека [ua-generator](https://github.com/iamdual/ua-generator).
 
 ### Fixed
+#### Validators
 - Невозможно импортировать исключения модуля `Validators`.
+#### WebRequestor
+- Установка целочисленных значений в заголовок запроса приводила к сбою.
 
 ### Security
 - Заменены устаревшие вызовы `os.system()` на `subprocess.run()`.
