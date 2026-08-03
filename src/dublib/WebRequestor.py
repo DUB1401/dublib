@@ -89,20 +89,20 @@ class _curl_cffi_config:
 		"""
 		Указывает используемую версию протокола HTTP.
 		
-  		:param version: Версия протокола HTTP.
-    	:type version: CurlHttpVersion
+		:param version: Версия протокола HTTP.
+		:type version: CurlHttpVersion
 		"""
 
 		self.__HttpVersion = version
 
 	def select_fingerprint(self, fingerprint: str | None):
 		"""
-  		Выбирает используемый отпечаток браузера.
+		Выбирает используемый отпечаток браузера.
 
 		:param fingerprint: Строковый идентификатор отпечатка браузера или `None` для удаления. Список идентификаторов можно получить на [странице](https://github.com/lexiforest/curl_cffi?tab=readme-ov-file#supported-impersonate-browsers) библиотеки.
 		:type fingerprint: str | None
 		:raises ValueError: 
-   		"""
+		"""
 
 		if fingerprint not in get_args(BrowserTypeLiteral): raise ValueError(fingerprint)
 		self.__Fingerprint = cast(BrowserTypeLiteral | None, fingerprint)
@@ -341,7 +341,7 @@ class WebConfig:
 		"""Словарь заголвоков, приоритетно применяемых ко всем запросам, или `None` при отсутствии заголовков."""
 
 		Headers = self.__Headers.copy()
-		if self.__UserAgent: Headers["User-Agent"] = self.__UserAgent
+		if self.__UserAgent: Headers["user-agent"] = self.__UserAgent
 
 		return Headers or None
 
@@ -426,16 +426,39 @@ class WebConfig:
 	
 	def add_header(self, name: str, value: str | int):
 		"""
-		Добавляет постоянный заголовок ко всем производимым запросам.
+		Добавляет постоянный заголовок ко всем производимым запросам. Запрещает переопределение заголовков.
 
 		:param name: Имя заголовка.
 		:type name: str
 		:param value: Значение заголовка.
 		:type value: str | int
-		:raises UserAgentRedefining: Выбрасывается при попытке переопределения заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
+		:raises UserAgentRedefining: Переопределение заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
+		:raises HeaderRedefining: Переопределение заголовка.
 		"""
 
-		if name.lower() == "user-agent": raise Exceptions.UserAgentRedefining()
+		name = name.lower()
+
+		if name in self.__Headers:
+			raise Exceptions.HeaderRedefining(name)
+		
+		self.set_header(name, value)
+
+	def set_header(self, name: str, value: str | int):
+		"""
+		Задаёт постоянный заголовок ко всем производимым запросам.
+
+		:param name: Имя заголовка.
+		:type name: str
+		:param value: Значение заголовка.
+		:type value: str | int
+		:raises UserAgentRedefining: Переопределение заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
+		"""
+
+		name = name.lower()
+
+		if name == "user-agent":
+			raise Exceptions.UserAgentRedefining()
+		
 		self.__Headers[name] = value
 
 	def generate_user_agent(
@@ -470,7 +493,11 @@ class WebConfig:
 		:raises UserAgentRedefining: Выбрасывается при попытке удаления заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
 		"""
 
-		if name.lower() == "user-agent": raise Exceptions.UserAgentRedefining()
+		name = name.lower()
+
+		if name == "user-agent":
+			raise Exceptions.UserAgentRedefining()
+		
 		del self.__Headers[name]
 
 	def set_user_agent(self, user_agent: str | None):
@@ -682,7 +709,7 @@ class WebResponse:
 class WebRequestor:
 	"""Оператор запросов."""
 
-	# Определение типов на уровне класса исключает ошибку [no-redef].
+	# Определение типов на уровне класса исключает ошибку типизации [no-redef].
 	__Session: curl_cffi_requests.Session | requests.Session | httpx.Client | None
 
 	#==========================================================================================#

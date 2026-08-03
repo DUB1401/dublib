@@ -65,7 +65,8 @@ files = ["src"]
 include = ["src/*"]
 
 [tool.ruff.lint]
-ignore = ["E701"]
+select = ["E"]
+ignore = ["E701", "E501"]
 
 [project.urls]
 Documentation = "https://github.com/DUB1401/dublib/tree/main/docs"
