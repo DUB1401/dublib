@@ -65,7 +65,7 @@ files = ["src"]
 include = ["src/*"]
 
 [tool.ruff.lint]
-select = ["E"]
+select = ["C", "E"]
 ignore = ["E701", "E501"]
 
 [project.urls]

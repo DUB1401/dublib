@@ -17,7 +17,7 @@ class Config:
 	#==========================================================================================#
 
 	__EXCEPTION_DISABLED = object()
-	__INSTANCES: "dict[str, Config]" = dict()
+	__INSTANCES: "dict[str, Config]" = {}
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА <<<<< #
@@ -103,7 +103,7 @@ class Config:
 
 		self.__Path: Path = Path(path)
 
-		self.__Data: dict  = dict()
+		self.__Data: dict = {}
 		self.__Model: type[BaseModel] | None = None
 
 		self.__IsSync: bool = True

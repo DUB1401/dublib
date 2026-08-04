@@ -124,7 +124,7 @@ class TextStyler:
 		:rtype: str
 		"""
 
-		Codes: list = list()
+		Codes: list = []
 		if self.__Decorations: Codes.extend(self.__Decorations)
 		if self.__TextColor: Codes.append(self.__TextColor)
 		if self.__BackgroundColor: Codes.append(self.__BackgroundColor)

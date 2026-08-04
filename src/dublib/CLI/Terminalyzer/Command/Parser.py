@@ -139,7 +139,7 @@ class _ParsedCommandParameters:
 		:rtype: tuple
 		"""
 
-		Result = list()
+		Result = []
 
 		for CurrentSequence in (self.__Positions.values(), self.__BasePosition):
 			for Parameter in CurrentSequence:
@@ -154,9 +154,9 @@ class _ParsedCommandParameters:
 	def __init__(self):
 		"""Данные о спаршенных параметрах команды."""
 
-		self.__Positions: dict[str, _ParsedArgument | _ParsedFlag | _ParsedKey | None] = dict()
-		self.__ImportantPositions: list[str] = list()
-		self.__BasePosition: list[_ParsedArgument | _ParsedFlag | _ParsedKey] = list()
+		self.__Positions: dict[str, _ParsedArgument | _ParsedFlag | _ParsedKey | None] = {}
+		self.__ImportantPositions: list[str] = []
+		self.__BasePosition: list[_ParsedArgument | _ParsedFlag | _ParsedKey] = []
 
 	def add_base_parameter(self, parameter: _ParsedArgument | _ParsedFlag | _ParsedKey):
 		"""
@@ -568,7 +568,7 @@ class _CommandParser:
 
 		self.__ParametersLocks: list[bool] = [False for _ in self.__Parameters]
 		self.__PositionsLocks: dict = {CurrentPosition.name: None for CurrentPosition in self.__Command.positions}
-		self.__BaseParameters: list = list()
+		self.__BaseParameters: list = []
 
 	def parse(self) -> ParsedCommandData:
 		"""

@@ -22,7 +22,7 @@ Terminalyzer
 
 	from dublib.CLI.Terminalyzer import Terminalyzer, Command, ValidableTypes
 
-	Commands = list()
+	Commands = []
 
 	# Создание описания команды.
 	Com = Command("open", "Open some file.")

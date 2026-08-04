@@ -236,7 +236,7 @@ class UserData:
 			"temp": {}
 		}
 
-		self.__Objects: dict[str, Any] = dict()
+		self.__Objects: dict[str, Any] = {}
 		self.__Path = Path(f"{self.__Manager.storage_directory}/{user_id}.json")
 		self.__SuppressSaving = False
 		self.__DeltaHash: str | None = None
@@ -318,7 +318,7 @@ class UserData:
 	def clear_temp_properties(self):
 		"""Очищает временные свойства пользователя."""
 
-		self.__Data["temp"] = dict()
+		self.__Data["temp"] = {}
 		self.save()		
 
 	def get_object(self, key: str) -> Any:
@@ -610,7 +610,7 @@ class UsersManager:
 	def premium_users(self) -> tuple[UserData, ...]:
 		"""Последовательность пользователей с Premium-подпиской из числа хранящихся в памяти."""
 
-		PremiumUsers = list()
+		PremiumUsers = []
 
 		for UserID in self.__Users:
 			if self.__Users[UserID].is_premium: PremiumUsers.append(self.__Users[UserID])
@@ -701,18 +701,18 @@ class UsersManager:
 
 		self.__StorageDirectory = Path(storage_directory)
 
-		self.__Users: dict[int, UserData] = dict()
+		self.__Users: dict[int, UserData] = {}
 
 		self.__IsAtomicWrites = False
 		self.__IsPrettySaving = True
 		self.__IsSavingQueue = False
 
-		self.__SavingQueue: list[int] = list()
+		self.__SavingQueue: list[int] = []
 		self.__SavingQueueThread = None
 
 		self.__Scheduler: BackgroundScheduler | None = None
 		self.__UnloaderTaskID: int | None = None
-		self.__UnloadedUsersID: list[int] = list()
+		self.__UnloadedUsersID: list[int] = []
 
 		if not os.path.exists(self.__StorageDirectory): os.makedirs(self.__StorageDirectory)
 		self.reload_users(threads)
@@ -843,9 +843,9 @@ class UsersManager:
 		Files = tuple(filter(lambda List: List.endswith(".json"), DirectoryFiles))
 		UsersID = tuple(int(File[:-5]) for File in Files)
 		Segments = tuple(tuple(Element) for Element in divide(threads, UsersID))
-		self.__Users = dict()
+		self.__Users = {}
 		with ThreadPoolExecutor(max_workers = threads) as Executor: Executor.map(self.__LoadUsers, Segments)
-		self.__UnloadedUsersID = list()
+		self.__UnloadedUsersID = []
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ ВЫГРУЗКИ ПОЛЬЗОВАТЕЛЕЙ <<<<< #
@@ -855,7 +855,7 @@ class UsersManager:
 		"""Заново загружает в память ранее выгруженные данные неактивных пользователей."""
 
 		self.__LoadUsers(self.__UnloadedUsersID)
-		self.__UnloadedUsersID = list()
+		self.__UnloadedUsersID = []
 
 	def start_unloader(self, interval: int, days: int):
 		"""

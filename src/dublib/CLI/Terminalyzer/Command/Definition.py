@@ -101,7 +101,7 @@ class _Flag:
 		"""
 
 		self.__Name = name
-		self.__Aliases = list(aliases) if aliases else list()
+		self.__Aliases = list(aliases) if aliases else []
 		self.__Description = description
 		self.__IsImportant = important
 
@@ -163,7 +163,7 @@ class _Key:
 		"""
 		
 		self.__Name = name
-		self.__Aliases = list(aliases) if aliases else list()
+		self.__Aliases = list(aliases) if aliases else []
 		self.__Type = type
 		self.__Description = description
 		self.__IsImportant = important
@@ -236,9 +236,9 @@ class _BasePosition:
 	def __init__(self):
 		"""Базовая позиция команды."""
 		
-		self.__Arguments: list[_Argument] = list()
-		self.__Flags: list[_Flag] = list()
-		self.__Keys: list[_Key] = list()
+		self.__Arguments: list[_Argument] = []
+		self.__Flags: list[_Flag] = []
+		self.__Keys: list[_Key] = []
 		
 	def add_argument(self, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
@@ -348,7 +348,7 @@ class _Position:
 	def parameters(self) -> list[_Argument | _Flag | _Key]:
 		"""Список всех описанных параметров позиции."""
 
-		List: list[_Argument | _Flag | _Key] = list()
+		List: list[_Argument | _Flag | _Key] = []
 		List += self.__Flags
 		List += self.__Keys
 		if self.__Argument: List.append(self.__Argument)
@@ -376,8 +376,8 @@ class _Position:
 		self.__IsImportant = important
 		
 		self.__Argument: _Argument | None = None
-		self.__Flags: list[_Flag] = list()
-		self.__Keys: list[_Key] = list()
+		self.__Flags: list[_Flag] = []
+		self.__Keys: list[_Key] = []
 
 	def add_flag(self, name: str, aliases: Sequence[str] | None = None, description: str | None = None):
 		"""
@@ -495,7 +495,7 @@ class Command:
 		self.__Category = category
 
 		self.__BasePosition = _BasePosition()
-		self.__Positions: dict[str, _Position] = dict()
+		self.__Positions: dict[str, _Position] = {}
 
 	def create_position(self, name: str, description: str | None = None, important: bool = False) -> _Position:
 		"""

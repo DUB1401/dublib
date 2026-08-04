@@ -88,7 +88,7 @@ class Helper:
 
 		Indicator = "• "
 		Indent = "  "
-		Help: list = list()
+		Help: list = []
 
 		if not base_position.parameters: return Help
 		Help.append(f"{Indicator}Other parameters:")
@@ -150,7 +150,7 @@ class Helper:
 
 		Indicator = "• "
 		Indent = "  "
-		Help = list()
+		Help = []
 		
 		Title = Indicator
 		Name = position.name
@@ -295,7 +295,7 @@ class Helper:
 
 		#---> Генерация таблицы.
 		#==========================================================================================#
-		Tables = list()
+		Tables = []
 		Categories: list[str | None] = list(CommandsCategories.keys())
 
 		for Category in Categories:

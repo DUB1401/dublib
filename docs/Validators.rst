@@ -53,7 +53,7 @@ Validators
 	class CustomValidableTypes(ValidableTypes):
 		ExampleBool = CustomValidator_ExampleBool
 
-	Commands = list()
+	Commands = []
 
 	Com = Command("example")
 	Com.base.add_argument(CustomValidableTypes.ExampleBool)

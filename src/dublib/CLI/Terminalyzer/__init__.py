@@ -153,7 +153,7 @@ class Terminalyzer:
 		self.__Input = list(input) if input else sys.argv[1:]
 
 		self.__CommandName = None
-		self.__Parameters: tuple = tuple()
+		self.__Parameters: tuple = ()
 
 		if self.__Input: self.__CommandName = self.__Input[0]
 		if len(self.__Input) > 1: self.__Parameters = tuple(self.__Input[1:])

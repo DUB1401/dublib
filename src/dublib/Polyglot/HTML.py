@@ -15,8 +15,8 @@ class _Validator(HTMLParser):
 
 		super().__init__()
 
-		self.stack = list()
-		self.errors = list()
+		self.stack = []
+		self.errors = []
 
 	def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]):
 		self.stack.append(tag)

@@ -107,7 +107,7 @@ class MessagesContainer:
 	def __init__(self):
 		"""Контейнер сообщений."""
 
-		self.__Messages: list[ExecutionMessage] = list()
+		self.__Messages: list[ExecutionMessage] = []
 		self.__HasErrors = False
 		self.__HasWarnings = False
 
@@ -138,7 +138,7 @@ class MessagesContainer:
 	def clear(self):
 		"""Удаляет сообщения."""
 
-		self.__Messages = list()
+		self.__Messages = []
 		self.__HasErrors = False
 		self.__HasWarnings = False
 
@@ -277,7 +277,7 @@ class RulesContainer:
 		"""Хранилище правил взаимодействия."""
 
 		self.__ValueInitializationRule = LogicalRule()
-		self.__AllowedKeys: tuple = tuple()
+		self.__AllowedKeys: tuple = ()
 
 	def set_allowed_keys(self, keys: Sequence[Any]):
 		"""
@@ -376,7 +376,7 @@ class ExecutionResult:
 		self._Messages = MessagesContainer()
 		self._Rules = RulesContainer()
 		self._Value = None
-		self._Data = dict()
+		self._Data = {}
 
 		self._IsValueSetted = False
 

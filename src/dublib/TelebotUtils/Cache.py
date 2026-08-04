@@ -96,7 +96,7 @@ class CachedFile:
 		self._ChatID = chat_id
 		self._FileID = file_id
 		self._MessageID = message_id
-		self._Data: dict[str, Any] = data or dict()
+		self._Data: dict[str, Any] = data or{}
 		self._Type = file_type
 
 class VirtualCachedFile(CachedFile):
@@ -199,6 +199,110 @@ class TeleCache:
 		return Wrapper
 
 	#==========================================================================================#
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ВЫГРУЗКИ ФАЙЛОВ <<<<< #
+	#==========================================================================================#
+
+	def __Upload_Animation(self, file_path: Path) -> str | None:
+		"""
+		Выгружает анимацию.
+
+		:param file_path: Путь к файлу.
+		:type file_path: Path
+		:return: ID файла или `None` в случае неудачи.
+		:rtype: str | None
+		:raises TypeError: Неверный тип файла для данного типа вложений.
+		"""
+
+		ChatID = cast(int, self.__ChatID)
+		Bot = cast(TeleBot, self.__Bot)
+		FileID: str | None = None
+
+		Message = Bot.send_animation(chat_id = ChatID, animation = types.InputFile(file_path))
+		if Message.animation: FileID = Message.animation.file_id
+		# Некоторые анимации отображаются верно, но распознаются как документы.
+		elif Message.document: FileID = Message.document.file_id
+		# Выброс исключения при попытке использования полноценного видео в качестве анимации.
+		elif Message.video: raise TypeError("Use InputMediaVideo for this file.")
+
+		return FileID
+
+	def __Upload_Audio(self, file_path: Path) -> str | None:
+		"""
+		Выгружает аудио.
+
+		:param file_path: Путь к файлу.
+		:type file_path: Path
+		:return: ID файла или `None` в случае неудачи.
+		:rtype: str | None
+		"""
+
+		ChatID = cast(int, self.__ChatID)
+		Bot = cast(TeleBot, self.__Bot)
+		FileID: str | None = None
+
+		Message = Bot.send_audio(chat_id = ChatID, audio = types.InputFile(file_path))
+		if Message.audio: FileID = Message.audio.file_id
+
+		return FileID
+
+	def __Upload_Document(self, file_path: Path) -> str | None:
+		"""
+		Выгружает документ.
+
+		:param file_path: Путь к файлу.
+		:type file_path: Path
+		:return: ID файла или `None` в случае неудачи.
+		:rtype: str | None
+		"""
+
+		ChatID = cast(int, self.__ChatID)
+		Bot = cast(TeleBot, self.__Bot)
+		FileID: str | None = None
+
+		Message = Bot.send_document(chat_id = ChatID, document = types.InputFile(file_path))
+		if Message.document: FileID = Message.document.file_id
+
+		return FileID
+
+	def __Upload_Photo(self, file_path: Path) -> str | None:
+		"""
+		Выгружает изображение.
+
+		:param file_path: Путь к файлу.
+		:type file_path: Path
+		:return: ID файла или `None` в случае неудачи.
+		:rtype: str | None
+		"""
+
+		ChatID = cast(int, self.__ChatID)
+		Bot = cast(TeleBot, self.__Bot)
+		FileID: str | None = None
+
+		Message = Bot.send_photo(chat_id = ChatID, photo = types.InputFile(file_path))
+		if Message.photo: FileID = Message.photo[-1].file_id
+
+		return FileID
+
+	def __Upload_Video(self, file_path: Path) -> str | None:
+		"""
+		Выгружает видео.
+
+		:param file_path: Путь к файлу.
+		:type file_path: Path
+		:return: ID файла или `None` в случае неудачи.
+		:rtype: str | None
+		"""
+
+		ChatID = cast(int, self.__ChatID)
+		Bot = cast(TeleBot, self.__Bot)
+		FileID: str | None = None
+
+		Message = Bot.send_video(chat_id = ChatID, video = types.InputFile(file_path))
+		if Message.video: FileID = Message.video.file_id
+
+		return FileID
+
+	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
@@ -255,40 +359,20 @@ class TeleCache:
 		"""
 		
 		if not type: type = types.InputMediaDocument
-		ChatID = cast(int, self.__ChatID)
-		Bot = cast(TeleBot, self.__Bot)
 		FilePath = Path(path)
 
 		Message: types.Message | None = None
 		FileID: str | None = None
 		
 		match type:
+			case types.InputMediaAnimation: FileID = self.__Upload_Animation(FilePath)
+			case types.InputMediaAudio: FileID = self.__Upload_Audio(FilePath)
+			case types.InputMediaDocument: FileID = self.__Upload_Document(FilePath)
+			case types.InputMediaPhoto: FileID = self.__Upload_Photo(FilePath)
+			case types.InputMediaVideo: FileID = self.__Upload_Video(FilePath)
 
-			case types.InputMediaAnimation:
-				Message = Bot.send_animation(chat_id = ChatID, animation = types.InputFile(FilePath))
-				if Message.animation: FileID = Message.animation.file_id
-				# Некоторые анимации отображаются верно, но распознаются как документы.
-				elif Message.document: FileID = Message.document.file_id
-				# Выброс исключения при попытке использования полноценного видео в качестве анимации.
-				elif Message.video: raise TypeError("Use InputMediaVideo for this file.")
-
-			case types.InputMediaAudio:
-				Message = Bot.send_audio(chat_id = ChatID, audio = types.InputFile(FilePath))
-				if Message.audio: FileID = Message.audio.file_id
-
-			case types.InputMediaDocument:
-				Message = Bot.send_document(chat_id = ChatID, document = types.InputFile(FilePath))
-				if Message.document: FileID = Message.document.file_id
-			
-			case types.InputMediaPhoto:
-				Message = Bot.send_photo(chat_id = ChatID, photo = types.InputFile(FilePath))
-				if Message.photo: FileID = Message.photo[-1].file_id
-
-			case types.InputMediaVideo:
-				Message = Bot.send_video(chat_id = ChatID, video = types.InputFile(FilePath))
-				if Message.video: FileID = Message.video.file_id
-
-		if not FileID or not Message: raise UnableCacheFile(FilePath)
+		if not FileID or not Message:
+			raise UnableCacheFile(FilePath)
 
 		return Cache(FileID, Message.id, type)
 
@@ -313,16 +397,16 @@ class TeleCache:
 		self.__Bot: TeleBot = bot
 		self.__ChatID: int | None = None
 
-		self.__RealData: dict[str, RealCachedFile] = dict()
-		self.__VirtualData: dict[str, VirtualCachedFile] = dict()
+		self.__RealData: dict[str, RealCachedFile] = {}
+		self.__VirtualData: dict[str, VirtualCachedFile] = {}
 
 		self.__Read()
 
 	def drop(self):
 		"""Удаляет данные всех кэшированных файлов."""
 
-		self.__RealData = dict()
-		self.__VirtualData = dict()
+		self.__RealData = {}
+		self.__VirtualData = {}
 		self.save()
 
 	def save(self):
@@ -402,7 +486,7 @@ class TeleCache:
 	def drop_real_cache(self):
 		"""Удаляет данные всех реальных кэшированных файлов."""
 
-		self.__RealData = dict()
+		self.__RealData = {}
 		self.save()
 
 	def get_real_cached_file(self, path: str | PathLike[str], autoupload_type: type[types.InputMedia] | None = None) -> RealCachedFile:
@@ -507,7 +591,7 @@ class TeleCache:
 	def drop_virtual_cache(self):
 		"""Удаляет данные всех виртуальных кэшированных файлов."""
 
-		self.__VirtualData = dict()
+		self.__VirtualData = {}
 		self.save()
 
 	def get_virtual_cached_file(self, identificator: str) -> VirtualCachedFile:

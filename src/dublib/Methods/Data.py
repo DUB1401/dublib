@@ -209,7 +209,7 @@ def InsertDictionaryAfterKey(base_dictionary: dict, insertable_dictionary: dict,
 		raise KeyError(target_key)
 
 	FirstPart, SecondPart = more_itertools.split_after(BaseKeys, lambda Element: Element == target_key, maxsplit = 1)
-	Result: dict = dict()
+	Result: dict = {}
 
 	for FirstPartKey in FirstPart: Result[FirstPartKey] = base_dictionary[FirstPartKey]
 	for InsertableKey in insertable_dictionary.keys(): Result[InsertableKey] = insertable_dictionary[InsertableKey]
@@ -258,7 +258,7 @@ def ReplaceDictionaryKey(dictionary: dict, old_key: Any, new_key: Any) -> dict:
 	:rtype: dict
 	"""
 	
-	Result = dict()
+	Result = {}
 	if old_key not in dictionary:
 		raise KeyError(old_key)
 
