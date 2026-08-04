@@ -1,7 +1,8 @@
-from ..CLI.TextStyler import FastStyler
-
 import functools
 import warnings
+
+from ..CLI.TextStyler import FastStyler
+
 
 def deprecated(message: str | None = None):
 	"""

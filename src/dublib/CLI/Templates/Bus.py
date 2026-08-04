@@ -1,7 +1,7 @@
-from ..TextStyler import Codes, TextStyler
-from .. import readline as readline
-
 import enum
+
+from .. import readline as readline
+from ..TextStyler import Codes, TextStyler
 
 #==========================================================================================#
 # >>>>> ПЕРЕЧИСЛЕНИЯ <<<<< #

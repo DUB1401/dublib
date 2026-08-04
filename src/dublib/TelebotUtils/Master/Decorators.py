@@ -3,6 +3,7 @@ from time import sleep
 
 from telebot import apihelper
 
+
 def ignore_frecuency_errors(function):
 	"""
 	Декоратор. Игнорирует ошибки частоты запросов, автоматически выжидая необходимый интервал.

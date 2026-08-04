@@ -1,10 +1,17 @@
-from .Command.Definition import _Argument, _BasePosition, Command, _Flag, _Key, _Position
-from ..TextStyler import FastStyler
-
 from dataclasses import dataclass
 from typing import Callable, cast
 
 from prettytable import PLAIN_COLUMNS, PrettyTable
+
+from ..TextStyler import FastStyler
+from .Command.Definition import (
+	Command,
+	_Argument,
+	_BasePosition,
+	_Flag,
+	_Key,
+	_Position,
+)
 
 #==========================================================================================#
 # >>>>> ДОПОЛНИТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #

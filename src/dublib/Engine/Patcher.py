@@ -1,8 +1,9 @@
+import re
+from os import PathLike
+from pathlib import Path
+
 from ..Methods.Filesystem import ReadTextFile, WriteTextFile
 
-from pathlib import Path
-from os import PathLike
-import re
 
 class Patch:
 	"""Патч."""

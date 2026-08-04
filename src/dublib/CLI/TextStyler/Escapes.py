@@ -1,6 +1,10 @@
-from .Codes import Drops as _DropsCodes, Colors as _ColorsCodes, BackgroundsColors as _BackgroundsColorsCodes, Decorations as _DecorationsCodes
-
 from dataclasses import dataclass
+
+from .Codes import BackgroundsColors as _BackgroundsColorsCodes
+from .Codes import Colors as _ColorsCodes
+from .Codes import Decorations as _DecorationsCodes
+from .Codes import Drops as _DropsCodes
+
 
 @dataclass(frozen = True)
 class Drops:

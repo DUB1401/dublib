@@ -1,10 +1,9 @@
-from ...Methods.Data import ToSequence
-
-from .FastStyler import FastStyler as FastStyler
-from . import Codes, Escapes
-
 from types import MappingProxyType
-from typing import cast, Sequence
+from typing import Sequence, cast
+
+from ...Methods.Data import ToSequence
+from . import Codes, Escapes
+from .FastStyler import FastStyler as FastStyler
 
 #==========================================================================================#
 # >>>>> СТИЛИЗАЦИЯ ИЗ HTML <<<<< #

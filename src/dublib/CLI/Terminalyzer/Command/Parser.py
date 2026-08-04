@@ -1,11 +1,11 @@
-from .... import Exceptions
-
-from typing import cast, overload, Sequence, TypeVar, TYPE_CHECKING
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING, Sequence, TypeVar, cast, overload
+
+from .... import Exceptions
 
 if TYPE_CHECKING:
-	from .Definition import _Flag, _Key, Command
+	from .Definition import Command, _Flag, _Key
 	
 #==========================================================================================#
 # >>>>> ПЕРЕМЕННЫЕ ТИПОВ <<<<< #

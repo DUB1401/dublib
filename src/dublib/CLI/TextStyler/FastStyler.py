@@ -1,4 +1,4 @@
-from .Escapes import BackgroundColors, Colors, Decorations, Drops 
+from .Escapes import BackgroundColors, Colors, Decorations, Drops
 
 #==========================================================================================#
 # >>>>> НАБОРЫ БЫСТРЫХ СТИЛИЗАТОРОВ <<<<< #

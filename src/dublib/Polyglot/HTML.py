@@ -1,7 +1,7 @@
-from html.parser import HTMLParser
-from typing import Sequence
 import html
 import re
+from html.parser import HTMLParser
+from typing import Sequence
 
 #==========================================================================================#
 # >>>>> ВАЛИДАТОРЫ HTML <<<<< #

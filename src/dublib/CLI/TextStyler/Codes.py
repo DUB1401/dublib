@@ -1,5 +1,6 @@
 import enum
 
+
 class Drops(enum.Enum):
 	"""Перечисление сбрасывающих кодов ANSI."""
 

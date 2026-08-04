@@ -1,8 +1,8 @@
-from ..CLI.Templates.Bus import GenerateMessage, MessagesTypes, PrintMessage
-from ..Exceptions.Engine import Bus as BusExceptions
-from ..CLI.TextStyler import Codes, TextStyler
-
 from typing import Any, Sequence
+
+from ..CLI.Templates.Bus import GenerateMessage, MessagesTypes, PrintMessage
+from ..CLI.TextStyler import Codes, TextStyler
+from ..Exceptions.Engine import Bus as BusExceptions
 
 #==========================================================================================#
 # >>>>> СИСТЕМА СООБЩЕНИЙ <<<<< #

@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Заголовки внутри `WebConfig` теперь всегда хранятся в нижнем регистре.
 - Метод `remove_header()` теперь может быть настроен для игнорирования попытки удаления несуществующего заголовка.
 - Для генерации заголовка _User-Agent_ и **Client Hints** применена библиотека [ua-generator](https://github.com/iamdual/ua-generator).
+- Код 404 удалён из считаемых результатом успешного выполнения запроса.
 
 ### Fixed
 #### Validators

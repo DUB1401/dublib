@@ -1,6 +1,7 @@
+import logging
+
 from .CLI.TextStyler import FastStyler, GetStyledTextFromHTML
 
-import logging
 
 class ColorFormatter(logging.Formatter):
 	"""Форматировщик вывода в консоль с поддержкой цветов."""

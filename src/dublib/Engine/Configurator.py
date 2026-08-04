@@ -1,13 +1,14 @@
-from ..Methods.Filesystem import ReadJSON, ReadYAML, WriteJSON, WriteYAML
-from ..Methods.Data import Copy
-
-from typing import Any, Callable, Self
-from threading import Thread
-from pathlib import Path
 from os import PathLike
+from pathlib import Path
+from threading import Thread
+from typing import Any, Callable, Self
 
 from pydantic import BaseModel
 from watchfiles import watch
+
+from ..Methods.Data import Copy
+from ..Methods.Filesystem import ReadJSON, ReadYAML, WriteJSON, WriteYAML
+
 
 class Config:
 	"""Контейнер конфигурации."""

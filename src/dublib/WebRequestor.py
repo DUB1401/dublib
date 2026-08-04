@@ -1,19 +1,20 @@
-from .Exceptions import WebRequestor as Exceptions
-from .Methods.Data import ToSequence
-from .Core import LOGS_HANDLER
-
-from typing import Any, Callable, cast, get_args, Sequence, TYPE_CHECKING
-from time import sleep
-import logging
-import random
 import enum
 import json
+import logging
+import random
+from time import sleep
+from typing import TYPE_CHECKING, Any, Callable, Sequence, cast, get_args
 
-from curl_cffi import BrowserTypeLiteral, CurlHttpVersion, ProxySpec, requests as curl_cffi_requests
-from ua_generator.user_agent import UserAgent
-import ua_generator
-import requests
 import httpx
+import requests
+import ua_generator
+from curl_cffi import BrowserTypeLiteral, CurlHttpVersion, ProxySpec
+from curl_cffi import requests as curl_cffi_requests
+from ua_generator.user_agent import UserAgent
+
+from .Core import LOGS_HANDLER
+from .Exceptions import WebRequestor as Exceptions
+from .Methods.Data import ToSequence
 
 if TYPE_CHECKING:
 	from requests.cookies import RequestsCookieJar
@@ -254,7 +255,7 @@ class Proxy:
 		:rtype: dict[str, str]
 		"""
 
-		ProxyDict = dict()
+		ProxyDict = {}
 
 		if self.__Protocol.value.startswith("http"):
 			ProxyDict["http"] = self.to_string()
@@ -382,9 +383,9 @@ class WebConfig:
 		self.__EnableRedirecting = True
 		self.__EnableLogging = True
 		self.__UserAgent: UserAgent | None = None
-		self.__Headers = dict()
+		self.__Headers = {}
 		self.__Retries = 0
-		self.__GoodCodes: tuple[int | None, ...] = (200, 404)
+		self.__GoodCodes: tuple[int | None, ...] = (200,)
 		self.__Delay = 0.25
 		self.__VerifySSL = True
 
@@ -592,6 +593,12 @@ class WebResponse:
 		return tuple(self.__Exceptions)
 
 	@property
+	def headers(self) -> dict:
+		"""Словарь заголовков ответа."""
+
+		return self.__Headers
+
+	@property
 	def json(self) -> dict | None:
 		"""Десериализованное в словарь из JSON представление ответа."""
 
@@ -639,15 +646,21 @@ class WebResponse:
 	#==========================================================================================#
 
 	def __init__(self, config: WebConfig | None = None):
-		"""Унифицированный контейнер ответа на веб-запросы."""
+		"""
+		Унифицированный контейнер ответа на веб-запросы.
 
-		self.__GoodCodes = config.good_codes if config else WebConfig().good_codes
+		:param config: Конфигурация оператора запросов. Используется для определения кодов, означающих успешное выполнение запроса.
+		:type config: WebConfig | None
+		"""
+
+		self.__GoodCodes: tuple[int | None, ...] = config.good_codes if config else WebConfig().good_codes
 
 		self.__StatusCode: int | None = None
 		self.__Content: bytes | None = None
 		self.__JSON: dict | None = None
 		self.__Text: str | None = None
-		self.__Exceptions: list[Exception] = list()
+		self.__Headers: dict = {}
+		self.__Exceptions: list[Exception] = []
 
 	def __bool__(self) -> bool:
 		"""Интерпретирует ответ в логическое значение: успешен ли запрос."""
@@ -669,12 +682,16 @@ class WebResponse:
 		:type parse_json: bool
 		"""
 
-		self.__StatusCode: int | None = response.status_code
-		self.__Text: str | None = response.text
-		self.__Content: bytes | None = response.content
-		self.__JSON: dict | None = None
-		
-		if parse_json: self.__JSON = self.__TryDeserialize(response.text)
+		self.__StatusCode = response.status_code
+		self.__Content = response.content
+		self.__Text = None
+		self.__JSON = None
+
+		self.set_text(response.text, parse_json)
+		self.set_headers(dict(response.headers))
+
+		if parse_json:
+			self.__JSON = self.__TryDeserialize(response.text)
 
 	def push_exception(self, exception: Exception):
 		"""
@@ -685,6 +702,18 @@ class WebResponse:
 		"""
 
 		self.__Exceptions.append(exception)
+
+	def set_headers(self, headers: dict, copy: bool = True):
+		"""
+		Задаёт словарь заголовков.
+
+		:param headers: Словарь заголовков.
+		:type headers: dict
+		:param copy: Указывает, нужно ли скопировать словарь или установить напрямую.
+		:type copy: dict
+		"""
+
+		self.__Headers = headers.copy() if copy else headers
 
 	def set_status_code(self, code: int | None):
 		"""
@@ -876,8 +905,8 @@ class WebRequestor:
 		"""
 
 		headers = self.__MergeHeaders(headers)
-		CurrentCookies = self.cookies or dict()
-		cookies = cookies or dict()
+		CurrentCookies = self.cookies or {}
+		cookies = cookies or {}
 
 		self.__Session = httpx.Client(
 			params = params,
@@ -918,8 +947,8 @@ class WebRequestor:
 		"""
 
 		headers = self.__MergeHeaders(headers)
-		CurrentCookies = self.cookies or dict()
-		cookies = cookies or dict()
+		CurrentCookies = self.cookies or {}
+		cookies = cookies or {}
 		
 		self.__Session = httpx.Client(
 			params = params,
@@ -1027,7 +1056,7 @@ class WebRequestor:
 		:type config: WebConfig | None
 		"""
 
-		self.__Proxies: tuple[Proxy, ...] = tuple()
+		self.__Proxies: tuple[Proxy, ...] = ()
 		self.__Config = config or WebConfig()
 		self.__Session = None
 
@@ -1070,7 +1099,7 @@ class WebRequestor:
 	def remove_proxies(self):
 		"""Удаляет данные используемых прокси."""
 
-		self.__Proxies = tuple()
+		self.__Proxies = ()
 
 	def request(self, request_type: RequestsTypes, url: str, **kwargs) -> WebResponse:
 		"""

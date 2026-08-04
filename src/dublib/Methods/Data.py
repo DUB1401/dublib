@@ -1,5 +1,5 @@
-from typing import Any, overload, Sequence
 import copy
+from typing import Any, Sequence, overload
 
 import more_itertools
 import orjson
