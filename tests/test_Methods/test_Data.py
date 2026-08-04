@@ -1,4 +1,4 @@
-from dublib.Methods import Data
+from dublib.Functions import Data
 
 def test_Copy():
 	Dictionary = {"test": [1]}

@@ -1,7 +1,7 @@
 from types import MappingProxyType
 from typing import Sequence, cast
 
-from ...Methods.Data import ToSequence
+from ...Functions.Data import ToSequence
 from . import Codes, Escapes
 from .FastStyler import FastStyler as FastStyler
 

@@ -6,8 +6,8 @@ from typing import Any, Callable, Self
 from pydantic import BaseModel
 from watchfiles import watch
 
-from ..Methods.Data import Copy
-from ..Methods.Filesystem import ReadJSON, ReadYAML, WriteJSON, WriteYAML
+from ..Functions.Data import Copy
+from ..Functions.Filesystem import ReadJSON, ReadYAML, WriteJSON, WriteYAML
 
 
 class Config:

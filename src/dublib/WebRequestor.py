@@ -14,7 +14,7 @@ from ua_generator.user_agent import UserAgent
 
 from .Core import LOGS_HANDLER
 from .Exceptions import WebRequestor as Exceptions
-from .Methods.Data import ToSequence
+from .Functions.Data import ToSequence
 
 if TYPE_CHECKING:
 	from requests.cookies import RequestsCookieJar

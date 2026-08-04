@@ -2,7 +2,7 @@ import gettext
 import os
 from typing import Callable, Sequence
 
-from ..Methods.Data import ToSequence
+from ..Functions.Data import ToSequence
 
 
 class GetText:

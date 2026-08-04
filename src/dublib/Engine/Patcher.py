@@ -2,7 +2,7 @@ import re
 from os import PathLike
 from pathlib import Path
 
-from ..Methods.Filesystem import ReadTextFile, WriteTextFile
+from ..Functions.Filesystem import ReadTextFile, WriteTextFile
 
 
 class Patch:

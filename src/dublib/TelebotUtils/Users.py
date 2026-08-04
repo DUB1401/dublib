@@ -17,8 +17,8 @@ from telebot import types
 
 from ..Core import LOGS_HANDLER
 from ..Exceptions import TelebotUtils as Exceptions
-from ..Methods.Data import Copy, ToSequence
-from ..Methods.Filesystem import ListDir, ReadJSON, WriteJSON
+from ..Functions.Data import Copy, ToSequence
+from ..Functions.Filesystem import ListDir, ReadJSON, WriteJSON
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #

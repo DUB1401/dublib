@@ -8,9 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-#### Methods.Data
+#### Functions.Data
 - Добавлена функция `InsertDictionaryAfterKey()` для вставки одного словаря внутрь другого после определённого ключа.
-#### Methods.System
+#### Functions.System
 - Функция `Clear()` теперь может сохранять буфер прокрутки сессии терминала через соответствующий параметр.
 #### WebRequestor
 - Для `WebConfig` добавлен метод `set_header()`, а метод `add_header()` теперь запрещает переопределение заголовка. Также реализовано соответствующее исключение `HeaderRedefining`.
@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Добавлен метод для разрешения запросов **Client Hints**, а также режим их автоматическоро разрешения при выполнении запросов.
 
 ### Changed
-#### Methods.System
+- Модуль `Methods` переименован в `Functions`.
+#### Functions.System
 - Функция `Clear()` теперь использует ANSI-коды вместо вызова системных утилит.
 #### WebRequestor
 - Заголовки внутри `WebConfig` теперь всегда хранятся в нижнем регистре.

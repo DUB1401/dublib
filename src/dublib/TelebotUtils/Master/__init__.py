@@ -6,7 +6,7 @@ from telebot import TeleBot
 from urllib3.exceptions import ReadTimeoutError
 
 from ...Core import LOGS_HANDLER
-from ...Methods.Data import ToSequence
+from ...Functions.Data import ToSequence
 from ..Users import UserData
 
 #==========================================================================================#

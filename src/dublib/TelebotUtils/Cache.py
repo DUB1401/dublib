@@ -9,7 +9,7 @@ from typing import Any, cast
 from telebot import TeleBot, types
 
 from ..Exceptions.TelebotUtils import ChatNotSpecified, UnableCacheFile
-from ..Methods.Filesystem import ReadJSON, WriteJSON
+from ..Functions.Filesystem import ReadJSON, WriteJSON
 
 #==========================================================================================#
 # >>>>> ВСПОМОГАТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
