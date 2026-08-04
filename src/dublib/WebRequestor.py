@@ -305,8 +305,14 @@ class WebConfig:
 	#==========================================================================================#
 
 	@property
+	def auto_accept_ch(self) -> bool:
+		"""Указывает, необходимо ли автоматическое разрешение **Client Hints** при выполнении запросов."""
+
+		return self.__AutoAcceptCH
+
+	@property
 	def logging(self) -> bool:
-		"""Указывает, требуется ли вести логи при помощи стандартного модуля Python."""
+		"""Указывает, требуется ли вести логи при помощи стандартного модуля **Python**."""
 
 		return self.__EnableLogging
 	
@@ -329,7 +335,7 @@ class WebConfig:
 		return self.__VerifySSL
 	
 	#==========================================================================================#
-	# >>>>> СОСТОЯНИЯ <<<<< #
+	# >>>>> СВОЙСТВА <<<<< #
 	#==========================================================================================#
 
 	@property
@@ -383,11 +389,12 @@ class WebConfig:
 		self.__EnableRedirecting = True
 		self.__EnableLogging = True
 		self.__UserAgent: UserAgent | None = None
-		self.__Headers = {}
-		self.__Retries = 0
+		self.__Headers: dict[str, str] = {}
+		self.__Retries: int = 0
 		self.__GoodCodes: tuple[int | None, ...] = (200,)
-		self.__Delay = 0.25
-		self.__VerifySSL = True
+		self.__Delay: float = 0.25
+		self.__VerifySSL: bool = True
+		self.__AutoAcceptCH: bool = True
 
 		self.__curl_cffi = _curl_cffi_config()
 		self.__httpx = _httpx_config()
@@ -426,6 +433,16 @@ class WebConfig:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ УПРАВЛЕНИЯ ЗАГОЛОВКАМИ <<<<< #
 	#==========================================================================================#
 	
+	def automatically_accept_client_hints(self, status: bool):
+		"""
+		Переключает автоматическое разрешение **Client Hints** при выполнении запросов.
+
+		:param status: Статус активации.
+		:type status: bool
+		"""
+
+		self.__AutoAcceptCH = status
+
 	def accept_client_hints(self, hints: str):
 		"""
 		Добавляет в заголовки запроса данные, запрашиваемые **Client Hints**.
@@ -475,7 +492,7 @@ class WebConfig:
 		if name == "user-agent" or name.startswith("sec-ch"):
 			raise Exceptions.UserAgentRedefining()
 		
-		self.__Headers[name] = str(value) if type(value) is int else value
+		self.__Headers[name] = value if type(value) is str else str(value)
 
 	def generate_user_agent(self, device: Sequence[str] | None = None, platform: Sequence[str] | None = None, browsers: Sequence[str] | None = None):
 		"""
@@ -703,17 +720,15 @@ class WebResponse:
 
 		self.__Exceptions.append(exception)
 
-	def set_headers(self, headers: dict, copy: bool = True):
+	def set_headers(self, headers: dict):
 		"""
-		Задаёт словарь заголовков.
+		Задаёт словарь заголовков. Приводит все ключи к нижнему регистру.
 
 		:param headers: Словарь заголовков.
 		:type headers: dict
-		:param copy: Указывает, нужно ли скопировать словарь или установить напрямую.
-		:type copy: dict
 		"""
 
-		self.__Headers = headers.copy() if copy else headers
+		self.__Headers = {Key.lower(): Value for Key, Value in headers.items()}
 
 	def set_status_code(self, code: int | None):
 		"""
@@ -777,6 +792,68 @@ class WebRequestor:
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
+
+	def __Request(self, request_type: RequestsTypes, url: str, **kwargs) -> WebResponse:
+		"""
+		Базовый обработчик запроса.
+
+		:param request_type: Тип запроса.
+		:type request_type: RequestsTypes
+		:param url: Адрес запроса.
+		:type url: str
+		:param kwargs: Дополнительные аргументы, соответствующие таковым именованным аргументам у конкретных методов запросов.
+		:return: Унифицированный контейнер ответа на веб-запросы.
+		:rtype: WebResponse
+		"""
+
+		tries = 1 + self.__Config.retries
+		Response = WebResponse(self.__Config)
+		Try = 0
+
+		while Try < tries and not Response.ok:
+			if Try > 0: sleep(self.__Config.delay)
+			Try += 1
+			
+			try:
+				CurrentProxy = random.choice(self.__Proxies) if self.__Proxies else None
+				self.__RequestsMethods[request_type][self.__Config.lib](Response, url, CurrentProxy, **kwargs)
+				
+				#---> Переключение HTTP/HTTPS протоколов прокси при неудачном запросе.
+				#==========================================================================================#
+				if Response.status_code not in self.__Config.good_codes and CurrentProxy and self.__Config.switch_proxy_protocol and CurrentProxy.protocol:
+
+					if CurrentProxy.protocol in (Protocols.HTTP, Protocols.HTTPS):
+						sleep(self.__Config.delay)
+
+						match CurrentProxy.protocol:
+							case Protocols.HTTP: CurrentProxy.set_protocol(Protocols.HTTPS)
+							case Protocols.HTTPS: CurrentProxy.set_protocol(Protocols.HTTP)
+
+						NewResponse = WebResponse(self.__Config)
+						self.__RequestsMethods[request_type][self.__Config.lib](NewResponse, url, CurrentProxy, **kwargs)
+						if NewResponse.status_code in self.__Config.good_codes: Response = NewResponse
+
+			except Exception as ExceptionData:
+				Response.push_exception(ExceptionData)
+				if self.__Config.logging: LOGGER.error(f"[{self.__Config.lib.value}-{request_type.name}] {ExceptionData}")
+
+		return Response
+
+	def __AcceptHints(self, response: WebResponse):
+		"""
+		Обрабатывает разрешение **Client Hints** на основе заголовков ответа.
+
+		:param response: Контейнер ответа.
+		:type response: WebResponse
+		"""
+
+		ResponseHeaders: dict[str, str] = response.headers
+
+		if ResponseHeaders:
+			AcceptCH: str | None = ResponseHeaders.get("accept-ch")
+			CriricalCH: str | None = ResponseHeaders.get("critical-ch")
+			if AcceptCH: self.__Config.accept_client_hints(AcceptCH)
+			if CriricalCH: self.__Config.accept_client_hints(CriricalCH)
 
 	def __Initialize(self):
 		"""Инициализирует сессию."""
@@ -1114,37 +1191,8 @@ class WebRequestor:
 		:rtype: WebResponse
 		"""
 
-		tries = 1 + self.__Config.retries
-		Response = WebResponse(self.__Config)
-		Try = 0
-		LibName = self.__Config.lib.value
-		
-		while Try < tries and not Response.ok:
-			if Try > 0: sleep(self.__Config.delay)
-			Try += 1
-			
-			try:
-				CurrentProxy = random.choice(self.__Proxies) if self.__Proxies else None
-				self.__RequestsMethods[request_type][self.__Config.lib](Response, url, CurrentProxy, **kwargs)
-				
-				#---> Переключение HTTP/HTTPS протоколов прокси при неудачном запросе.
-				#==========================================================================================#
-				if Response.status_code not in self.__Config.good_codes and CurrentProxy and self.__Config.switch_proxy_protocol and CurrentProxy.protocol:
-
-					if CurrentProxy.protocol in (Protocols.HTTP, Protocols.HTTPS):
-						sleep(self.__Config.delay)
-
-						match CurrentProxy.protocol:
-							case Protocols.HTTP: CurrentProxy.set_protocol(Protocols.HTTPS)
-							case Protocols.HTTPS: CurrentProxy.set_protocol(Protocols.HTTP)
-
-						NewResponse = WebResponse(self.__Config)
-						self.__RequestsMethods[request_type][self.__Config.lib](NewResponse, url, CurrentProxy, **kwargs)
-						if NewResponse.status_code in self.__Config.good_codes: Response = NewResponse
-
-			except Exception as ExceptionData:
-				Response.push_exception(ExceptionData)
-				if self.__Config.logging: LOGGER.error(f"[{LibName}-{request_type.name}] {ExceptionData}")
+		Response: WebResponse = self.__Request(request_type, url, **kwargs)
+		if self.__Config.auto_accept_ch: self.__AcceptHints(Response)
 
 		return Response
 
