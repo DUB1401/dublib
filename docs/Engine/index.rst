@@ -1,4 +1,0 @@
-Engine
-======
-.. toctree::
-	Configurator

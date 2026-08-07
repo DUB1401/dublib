@@ -1,0 +1,1 @@
+from . import terminalyzer as terminalyzer

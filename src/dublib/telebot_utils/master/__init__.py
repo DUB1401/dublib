@@ -1,0 +1,150 @@
+import logging
+from typing import Sequence, cast
+
+from requests.exceptions import ReadTimeout
+from telebot import TeleBot
+from urllib3.exceptions import ReadTimeoutError
+
+from ...core import LOGS_HANDLER
+from ...functions.data import ToSequence
+from ..users import UserData
+
+#==========================================================================================#
+# >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
+#==========================================================================================#
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.addHandler(LOGS_HANDLER)
+LOGGER.setLevel(logging.INFO)
+
+#==========================================================================================#
+# >>>>> ДОПОЛНИТЕЛЬНЫЕ КОНФИГУРАЦИИ БИБЛИОТЕК ЗАПРОСОВ <<<<< #
+#==========================================================================================#
+
+class TeleMaster:
+	"""Набор дополнительного функционала для бота Telegram."""
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def bot(self) -> TeleBot:
+		"""Бот Telegram."""
+
+		return self.__Bot
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __init__(self, bot: str | TeleBot):
+		"""
+		Набор дополнительного функционала для бота Telegram.
+		
+		:param bot: Бот Telegram. Вместо объекта бота можно передать токен, на основе которого будет инициализирован новый объект.
+		:type bot: str | TeleBot
+		"""
+
+		self.__Bot: TeleBot = TeleBot(bot) if type(bot) is str else cast(TeleBot, bot)
+
+	def check_user_subscription(self, user: UserData, chat_id: int, max_tries: int = 3) -> bool | None:
+		"""
+		Проверяет, состоит ли пользователь в указанном чате. Бот должен иметь доступ ко всем проверяемым чатам.
+		
+		Также содержит в себе механизм повторов при превышении времени ожидания ответа от сервера.
+
+		:param user: Данные проверяемого пользователя.
+		:type user: UserData
+		:param chat_id: ID чата, для которого производится проверка.
+		:type chat_id: int
+		:param max_tries: Количество попыток запросов. Повторные запросы отправляются только в случае превышения времени ожидания ответа. Не может быть меньше 1.
+		:type max_tries: int
+		:return: Возвращает `True`, если пользователь состоит во всех указанных чатах, или `None` при ошибке проверки.
+		:rtype: bool | None
+		:raise ValueError: Выбрасывается, если количество попыток запросов меньше 1.
+		:raise urllib3.exceptions.ReadTimeoutError: Выбрасывается в случае превышения времени ожидания ответа от сервера.
+		:raise requests.exceptions.ReadTimeout: Выбрасывается в случае превышения времени ожидания ответа от сервера.
+		"""
+
+		Try = 1
+		
+		while Try <= max_tries:
+			Try += 1
+
+			try:
+				Response = self.__Bot.get_chat_member(chat_id, user.id)
+				if Response.status in ("administrator", "creator", "member", "restricted"): return True
+				
+			except (ReadTimeoutError, ReadTimeout) as ExceptionData:
+				if Try == max_tries:
+					raise ExceptionData
+
+			except Exception as ExceptionData:
+				if str(ExceptionData).endswith("chat not found"):
+					LOGGER.error(f"Chat {chat_id} not found. May be bot not a member.")
+					return None
+
+			else: break
+
+		return False
+
+	def check_user_subscriptions(self, user: UserData, chats: int | Sequence[int], max_tries: int = 3) -> bool | None:
+		"""
+		Проверяет, состоит ли пользователь в указанных чатах. Бот должен иметь доступ ко всем проверяемым чатам.
+		
+		Также содержит в себе механизм повторов при превышении времени ожидания ответа от сервера.
+
+		:param user: Данные проверяемого пользователя.
+		:type user: UserData
+		:param chats: ID чата или набор ID чатов, для которых производится проверка.
+		:type chats: int | Sequence[int]
+		:param max_tries: Количество попыток запросов. Повторные запросы отправляются только в случае превышения времени ожидания ответа. Не может быть меньше 1.
+		:type max_tries: int
+		:return: Возвращает `True`, если пользователь состоит во всех указанных чатах, или `None` при ошибке проверки.
+		:rtype: bool | None
+		:raise ValueError: Выбрасывается, если количество попыток запросов меньше 1.
+		:raise urllib3.exceptions.ReadTimeoutError: Выбрасывается в случае превышения времени ожидания ответа от сервера.
+		:raise requests.exceptions.ReadTimeout: Выбрасывается в случае превышения времени ожидания ответа от сервера.
+		"""
+
+		ChatsTuple = ToSequence(chats)
+		
+		if max_tries < 1:
+			raise ValueError("Max tries can't be less than 1.")
+
+		Subscriptions = 0
+			
+		for ChatID in ChatsTuple:
+			if self.check_user_subscription(user, ChatID, max_tries): Subscriptions += 1
+
+		if Subscriptions == len(ChatsTuple): return True
+		else: return False
+	
+	def safely_delete_messages(self, chat_id: int, messages: int | Sequence[int], complex: bool = False) -> Exception | None:
+		"""
+		Безопасно удаляет сообщения без выброса исключений.
+
+		:param chat_id: ID чата.
+		:type chat_id: int
+		:param messages: Последовательность ID сообщений или ID конкретного сообщения.
+		:type messages: int | Sequence[int]
+		:param complex: При включении сообщения будут удалены одним запросом. По умолчанию `False`.
+		:type complex: bool
+		:return: Выброшенное во время работы исключение в случае наличия такового.
+		:rtype: Exception | None
+		"""
+
+		MessagesList = ToSequence(messages, target_type = list)
+		ExceptionObject: Exception | None = None
+
+		if complex:
+			try: self.__Bot.delete_messages(chat_id, MessagesList)
+			except Exception as ExceptionData: ExceptionObject = ExceptionData
+
+		else:
+			for MessageID in MessagesList:
+				try: self.__Bot.delete_message(chat_id, MessageID)
+				except Exception as ExceptionData: ExceptionObject = ExceptionData
+
+		return ExceptionObject

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Модули переименованы в соответствии с [PEP 8](https://peps.python.org/pep-0008).
+#### web_requestor
+- В классе `WebConfig` метод `generate_user_agent()` теперь может принимать строку, а не только последовательности строк.
+- Управление всеми заголовками вынесено в свойство `headers`.
+
+### Fixed
+#### web_requestor
+- Конфигурация `WebConfig` не отдавала заголовки **Client Hints**.
+
+## [0.29.0] - 2026-08-05
+
 ### Added
 #### Functions.Data
 - Добавлена функция `InsertDictionaryAfterKey()` для вставки одного словаря внутрь другого после определённого ключа.

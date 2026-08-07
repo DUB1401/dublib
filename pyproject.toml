@@ -3,7 +3,7 @@ requires = ["setuptools"]
 
 [project]
 name = "dublib"
-version = "0.29.0"
+version = "0.30.0"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}
@@ -54,6 +54,12 @@ dev = [
 	"sphinx-rtd-theme"
 ]
 
+[project.urls]
+Documentation = "https://github.com/DUB1401/dublib/tree/main/docs"
+"Source Code" = "https://github.com/DUB1401/dublib"
+"Bug Tracker" = "https://github.com/DUB1401/dublib/issues"
+Changelog = "https://github.com/DUB1401/dublib/releases"
+
 [tool.mypy]
 ignore_missing_imports = true
 check_untyped_defs = true
@@ -62,14 +68,14 @@ follow_imports = "silent"
 files = ["src"]
 
 [tool.ruff]
-include = ["src/*"]
+include = ["src/*", "tests/*"]
 
 [tool.ruff.lint]
 select = ["C", "E", "I"]
 ignore = ["E701", "E501"]
 
-[project.urls]
-Documentation = "https://github.com/DUB1401/dublib/tree/main/docs"
-"Source Code" = "https://github.com/DUB1401/dublib"
-"Bug Tracker" = "https://github.com/DUB1401/dublib/issues"
-Changelog = "https://github.com/DUB1401/dublib/releases"
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 1
