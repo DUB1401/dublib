@@ -62,5 +62,5 @@ validators
 Предоставленные типы
 --------------------
 
-.. automodule:: dublib.Validators
+.. automodule:: dublib.validators
 	:members:

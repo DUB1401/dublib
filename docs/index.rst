@@ -1,9 +1,9 @@
 dublib
 ======
 .. toctree::
-	CLI/index
-	Engine/index
-	Methods/index
-	TelebotUtils/index
-	WebRequestor
-	Validators
+	cli/index
+	engine/index
+	functions/index
+	telebot_utils/index
+	web_requestor
+	validators
