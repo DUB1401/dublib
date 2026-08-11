@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Модули переименованы в соответствии с [PEP 8](https://peps.python.org/pep-0008).
+- Добавлен модуль `progress_indicator` для индикации прогресса в терминале на основе протокола *OSC 9;4*.
 #### web_requestor
 - В классе `WebConfig` метод `generate_user_agent()` теперь может принимать строку, а не только последовательности строк.
 - Управление всеми заголовками вынесено в свойство `headers`.

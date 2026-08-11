@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["uv-build>=0.12.2,<0.13.0"]
+build-backend = "uv_build"
 
 [project]
 name = "dublib"
@@ -31,7 +32,6 @@ dependencies = [
 ]
 classifiers = [
 	"Development Status :: 4 - Beta",
-	"License :: OSI Approved :: The Unlicense (Unlicense)",
 	"Natural Language :: Russian",
 	"Operating System :: OS Independent",
 	"Programming Language :: Python",
@@ -71,7 +71,7 @@ files = ["src"]
 include = ["src/*", "tests/*"]
 
 [tool.ruff.lint]
-select = ["C", "E", "I"]
+select = ["C", "E", "F", "I"]
 ignore = ["E701", "E501"]
 
 [tool.ruff.lint.per-file-ignores]
