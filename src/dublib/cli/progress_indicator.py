@@ -1,5 +1,5 @@
-import math
 import sys
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Literal, Self
 
 class ProgressIndicator:
@@ -108,7 +108,7 @@ class ProgressIndicator:
 		:raises ValueError: Выход за диапазон значений прогресса.
 		"""
 
-		Progress: int = int(math.floor(progress + 0.5))
+		Progress: int = int(Decimal(str(progress)).quantize(Decimal("1"), rounding = ROUND_HALF_UP))
 
 		if Progress < 0 or Progress > 100:
 			raise ValueError(f"Progress value must be between 0 and 100, given {Progress}.")
