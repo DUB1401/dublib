@@ -1,19 +1,6 @@
-import enum
-
+from ...engine.bus.enums import MessagesTypes
 from .. import readline as readline
 from ..text_styler import TextStyler, codes
-
-#==========================================================================================#
-# >>>>> ПЕРЕЧИСЛЕНИЯ <<<<< #
-#==========================================================================================#
-
-class MessagesTypes(enum.Enum):
-	"""Перечисление типов сообщений."""
-
-	Info = "info"
-	Warning = "warning"
-	Error = "error"
-	Critical = "critical"
 
 #==========================================================================================#
 # >>>>> ФУНКЦИИ ГЕНЕРАЦИИ И ВЫВОДА СООБЩЕНИЙ <<<<< #
@@ -44,6 +31,7 @@ def GenerateMessage(text: str, type: MessagesTypes | None = None, origin: str | 
 
 	if colorize:
 		ColorsDict: dict[MessagesTypes | None, codes.Colors | None] = {
+			MessagesTypes.Debug: codes.Colors.Gray,
 			MessagesTypes.Info: codes.Colors.White,
 			MessagesTypes.Error: codes.Colors.Red,
 			MessagesTypes.Warning: codes.Colors.Yellow,
@@ -71,6 +59,18 @@ def PrintMessage(text: str, type: MessagesTypes | None = None, origin: str | Non
 #==========================================================================================#
 # >>>>> ШАБЛОНЫ ТИПОВ СООБЩЕНИЙ <<<<< #
 #==========================================================================================#
+
+def PrintDebug(text: str, origin: str | None = None):
+	"""
+	Выводит в консоль стилизованное сообщение отладки.
+
+	:param text: Текст сообщения.
+	:type text: str
+	:param origin: Источник сообщения.
+	:type origin: str | None
+	"""
+
+	PrintMessage(text, type = MessagesTypes.Debug, origin = origin)
 
 def PrintInfo(text: str, origin: str | None = None):
 	"""
