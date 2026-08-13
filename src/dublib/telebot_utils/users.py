@@ -18,7 +18,7 @@ from telebot import types
 from ..core import LOGS_HANDLER
 from ..exceptions import telebot_utils as Exceptions
 from ..functions.data import Copy, ToSequence
-from ..functions.filesystem import ListDir, ReadJSON, WriteJSON
+from ..functions.filesystem import ReadJSON, WriteJSON
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
@@ -839,7 +839,7 @@ class UsersManager:
 		:type threads: int
 		"""
 
-		DirectoryFiles = ListDir(self.__StorageDirectory)
+		DirectoryFiles = os.listdir(self.__StorageDirectory)
 		Files = tuple(filter(lambda List: List.endswith(".json"), DirectoryFiles))
 		UsersID = tuple(int(File[:-5]) for File in Files)
 		Segments = tuple(tuple(Element) for Element in divide(threads, UsersID))

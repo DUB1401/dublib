@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - В классе `WebConfig` метод `generate_user_agent()` теперь может принимать строку, а не только последовательности строк.
 - Управление всеми заголовками вынесено в свойство `headers`.
 
+### Removed
+#### filesystem
+- Удалена функция `ListDir()`.
+
 ### Fixed
 #### web_requestor
 - Конфигурация `WebConfig` не отдавала заголовки **Client Hints**.

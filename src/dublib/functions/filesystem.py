@@ -49,25 +49,11 @@ def GetRandomFile(directory: str | PathLike[str]) -> Path | None:
 	"""
 
 	DirectoryPath = Path(directory)
-	Files = ListDir(DirectoryPath)
+	Files = os.listdir(DirectoryPath)
 	if not Files: return None
 	FilePath = DirectoryPath / random.choice(Files)
 
 	return FilePath
-
-def ListDir(directory: str | PathLike[str] | None = None) -> list[str]:
-	"""
-	Основана на `os.scandir()`, более быстром и подробном варианте `os.listdir()`.
-
-	:param directory: Путь для сканирования. Если передать `None`, будет возвращёт список элементов в текущей директории.
-	:type directory: str | PathLike[str] | None
-	:return: Список названий каталогов и имён файлов по указанному пути
-	:rtype: list[str]
-	"""
-
-	TargetPath = Path(directory) if directory else Path(".")
-
-	return [Entry.name for Entry in os.scandir(TargetPath)]
 
 def MakeRootDirectories(directories: Sequence[str] | str):
 	"""

@@ -111,7 +111,7 @@ class ProgressIndicator:
 		Progress: int = int(math.floor(progress + 0.5))
 
 		if Progress < 0 or Progress > 100:
-			raise ValueError("Progress value must be between 0 and 100.")
+			raise ValueError(f"Progress value must be between 0 and 100, given {Progress}.")
 
 		self.__State = 1
 		self.__Progress = Progress
