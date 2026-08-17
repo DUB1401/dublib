@@ -44,6 +44,7 @@ class Protocols(enum.Enum):
 class RequestsTypes(enum.Enum):
 	"""Перечисление типов поддерживаемыйх запросов."""
 	
+	DELETE = "delete"
 	GET = "get"
 	POST = "post"
 
@@ -889,6 +890,46 @@ class WebRequestor:
 	# >>>>> ПРИАТНЫЕ МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ CURL_CFFI <<<<< #
 	#==========================================================================================#
 
+	def __curl_cffi_DELETE(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> WebResponse:
+		"""
+		Отправляет DELETE запрос через библиотеку **curl_cffi**.
+
+		:param response: Контейнер ответа.
+		:type response: WebResponse
+		:param url: Адрес запроса.
+		:type url: str
+		:param proxy: Данные прокси.
+		:type proxy: Proxy | None
+		:param params: Словарь параметров запроса.
+		:type params: dict | None
+		:param headers: Словарь заголовков.
+		:type headers: dict | None
+		:param cookies: Словарь cookies.
+		:type cookies: dict | None
+		:param data: Данные запроса.
+		:type data: Any
+		:param json: Словарь для сериализации и передачи в качестве JSON. Игнорируется при передаче `data`.
+		:type json: dict | None
+		:return: Контейнер ответа от библиотеки **curl_cffi**.
+		:rtype: WebResponse
+		"""
+
+		self.__Session = cast(curl_cffi_requests.Session, self.__Session)
+		headers = self.__MergeHeaders(headers)
+
+		response.parse_response(self.__Session.delete(
+			url = url,
+			params = params,
+			headers = headers,
+			cookies = cookies,
+			data = data,
+			json = json,
+			proxies = cast(ProxySpec, proxy.to_dict()) if proxy else None,
+			verify = self.__Config.verify_ssl
+		))
+
+		return response
+
 	def __curl_cffi_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> WebResponse:
 		"""
 		Отправляет GET запрос через библиотеку **curl_cffi**.
@@ -941,7 +982,7 @@ class WebRequestor:
 		:type cookies: dict | None
 		:param data: Данные запроса.
 		:type data: Any
-		:param json: Словарь для сериализации и передачи в качестве JSON.
+		:param json: Словарь для сериализации и передачи в качестве JSON. Игнорируется при передаче `data`.
 		:type json: dict | None
 		:return: Контейнер ответа от библиотеки **curl_cffi**.
 		:rtype: WebResponse
@@ -966,6 +1007,48 @@ class WebRequestor:
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ HTTPX <<<<< #
 	#==========================================================================================#
+
+	def __httpx_DELETE(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> WebResponse:
+		"""
+		Отправляет DELETE запрос через библиотеку **httpx**.
+
+		:param response: Контейнер ответа.
+		:type response: WebResponse
+		:param url: Адрес запроса.
+		:type url: str
+		:param proxy: Данные прокси.
+		:type proxy: Proxy | None
+		:param params: Словарь параметров запроса.
+		:type params: dict | None
+		:param headers: Словарь заголовков.
+		:type headers: dict | None
+		:param cookies: Словарь cookies.
+		:type cookies: dict | None
+		:param data: Данные запроса.
+		:type data: Any
+		:param json: Словарь для сериализации и передачи в качестве JSON. Игнорируется при передаче `data`.
+		:type json: dict | None
+		:return: Контейнер ответа от библиотеки **httpx**.
+		:rtype: WebResponse
+		"""
+
+		headers = self.__MergeHeaders(headers)
+		CurrentCookies = self.cookies or {}
+		cookies = cookies or {}
+		
+		self.__Session = httpx.Client(
+			params = params,
+			headers = headers,
+			cookies = CurrentCookies | cookies,
+			proxy = proxy.to_string() if proxy else None,
+			http2 = self.__Config.httpx.http2,
+			follow_redirects = self.__Config.redirecting,
+			verify = self.__Config.verify_ssl
+		)
+
+		response.parse_response(self.__Session.request("DELETE", url, data = data, json = json))
+
+		return response
 
 	def __httpx_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> WebResponse:
 		"""
@@ -1023,7 +1106,7 @@ class WebRequestor:
 		:type cookies: dict | None
 		:param data: Данные запроса.
 		:type data: Any
-		:param json: Словарь для сериализации и передачи в качестве JSON.
+		:param json: Словарь для сериализации и передачи в качестве JSON. Игнорируется при передаче `data`.
 		:type json: dict | None
 		:return: Контейнер ответа от библиотеки **httpx**.
 		:rtype: WebResponse
@@ -1050,6 +1133,47 @@ class WebRequestor:
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ REQUESTS <<<<< #
 	#==========================================================================================#
+
+	def __requests_DELETE(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> WebResponse:
+		"""
+		Отправляет DELETE запрос через библиотеку **requests**.
+
+		:param response: Контейнер ответа.
+		:type response: WebResponse
+		:param url: Адрес запроса.
+		:type url: str
+		:param proxy: Данные прокси.
+		:type proxy: Proxy | None
+		:param params: Словарь параметров запроса.
+		:type params: dict | None
+		:param headers: Словарь заголовков.
+		:type headers: dict | None
+		:param cookies: Словарь cookies.
+		:type cookies: dict | None
+		:param data: Данные запроса.
+		:type data: Any
+		:param json: Словарь для сериализации и передачи в качестве JSON. Игнорируется при передаче `data`.
+		:type json: dict | None
+		:return: Контейнер ответа от библиотеки **requests**.
+		:rtype: WebResponse
+		"""
+		
+		self.__Session = cast(requests.Session, self.__Session)
+		headers = self.__MergeHeaders(headers)
+
+		response.parse_response(self.__Session.delete(
+			url = url,
+			params = params,
+			data = data,
+			headers = headers,
+			cookies = cookies,
+			proxies = proxy.to_dict() if proxy else None,
+			allow_redirects = self.__Config.redirecting,
+			verify = self.__Config.verify_ssl,
+			json = json
+		))
+
+		return response
 
 	def __requests_GET(self, response: WebResponse, url: str, proxy: Proxy | None = None, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> WebResponse:
 		"""
@@ -1104,7 +1228,7 @@ class WebRequestor:
 		:type cookies: dict | None
 		:param data: Данные запроса.
 		:type data: Any
-		:param json: Словарь для сериализации и передачи в качестве JSON.
+		:param json: Словарь для сериализации и передачи в качестве JSON. Игнорируется при передаче `data`.
 		:type json: dict | None
 		:return: Контейнер ответа от библиотеки **requests**.
 		:rtype: WebResponse
@@ -1113,7 +1237,7 @@ class WebRequestor:
 		self.__Session = cast(requests.Session, self.__Session)
 		headers = self.__MergeHeaders(headers)
 
-		response.parse_response(self.__Session.get(
+		response.parse_response(self.__Session.post(
 			url = url,
 			params = params,
 			headers = headers,
@@ -1144,6 +1268,11 @@ class WebRequestor:
 		self.__Session = None
 
 		self.__RequestsMethods: dict[RequestsTypes, dict[WebLibs, Callable]] = {
+			RequestsTypes.DELETE: {
+				WebLibs.curl_cffi: self.__curl_cffi_DELETE,
+				WebLibs.httpx: self.__httpx_DELETE,
+				WebLibs.requests: self.__requests_DELETE
+			},
 			RequestsTypes.GET: {
 				WebLibs.curl_cffi: self.__curl_cffi_GET,
 				WebLibs.httpx: self.__httpx_GET,
@@ -1153,7 +1282,7 @@ class WebRequestor:
 				WebLibs.curl_cffi: self.__curl_cffi_POST,
 				WebLibs.httpx: self.__httpx_POST,
 				WebLibs.requests: self.__requests_POST
-			},
+			}
 		}
 
 		self.__Initialize()
@@ -1192,7 +1321,7 @@ class WebRequestor:
 		:type request_type: RequestsTypes
 		:param url: Адрес запроса.
 		:type url: str
-		:param kwargs: Дополнительные аргументы, соответствующие таковым именованным аргументам у конкретных методов запросов.
+		:param kwargs: Дополнительные аргументы, соответствующие таковым именованным аргументам у конкретных методов запросов (_proxy, params, headers, cookies, data, json_).
 		:return: Унифицированный контейнер ответа на веб-запросы.
 		:rtype: WebResponse
 		"""
@@ -1205,6 +1334,28 @@ class WebRequestor:
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ ВЫПОЛНЕНИЯ ЗАПРОСОВ <<<<< #
 	#==========================================================================================#	
+
+	def delete(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None, data: Any = None, json: dict | None = None) -> WebResponse:
+		"""
+		Отправляет DELETE-запрос.
+
+		:param url: Адрес запроса.
+		:type url: str
+		:param params: Словарь параметров запроса.
+		:type params: dict | None
+		:param headers: Словарь заголовков.
+		:type headers: dict | None
+		:param cookies: Словарь cookies.
+		:type cookies: dict | None
+		:param data: Данные запроса.
+		:type data: Any
+		:param json: Словарь для сериализации и передачи в качестве JSON. Игнорируется при передаче `data`.
+		:type json: dict | None
+		:return: Унифицированный контейнер ответа на веб-запросы.
+		:rtype: WebResponse
+		"""
+
+		return self.request(RequestsTypes.DELETE, url, params = params, headers = headers, cookies = cookies, data = data, json = json)
 
 	def get(self, url: str, params: dict | None = None, headers: dict | None = None, cookies: dict | None = None) -> WebResponse:
 		"""

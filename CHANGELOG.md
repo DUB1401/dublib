@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### cli
 - Добавлен модуль `progress_indicator` для индикации прогресса в терминале на основе протокола **OSC 9;4**.
 - В модуле `templates.bus` добавлен шаблон вывода для отладочного сообщения.
+#### web_requestor
+- Добавлена поддержка запросов `DELETE`.
 
 ### Changed
 - Модули переименованы в соответствии с [PEP 8](https://peps.python.org/pep-0008).
@@ -27,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 #### web_requestor
 - Конфигурация `WebConfig` не отдавала заголовки **Client Hints**.
+- Запросы типа **POST** через [requests](https://github.com/psf/requests) ошибочно выполнялись как **GET**.
 
 ## [0.29.0] - 2026-08-05
 
