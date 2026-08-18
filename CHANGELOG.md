@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### web_requestor
 - В классе `WebConfig` метод `generate_user_agent()` теперь может принимать строку, а не только последовательности строк.
 - Управление всеми заголовками вынесено в свойство `headers`.
+- Оптимизированы попытки парсинга JSON внутри `WebResponse` через библиотеку [orjson](https://github.com/ijl/orjson).
 
 ### Removed
 #### filesystem
