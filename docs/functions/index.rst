@@ -1,7 +1,8 @@
 functions
-=======
+=========
 .. toctree::
-	data
+	data/index
 	decorators
-	filesystem
 	system
+	filesystem
+

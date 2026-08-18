@@ -584,7 +584,7 @@ class WebRequestor:
 		:type request_type: RequestsTypes
 		:param url: Адрес запроса.
 		:type url: str
-		:param kwargs: Дополнительные аргументы, соответствующие таковым именованным аргументам у конкретных методов запросов (_proxy, params, headers, cookies, data, json_).
+		:param kwargs: Дополнительные аргументы, соответствующие таковым именованным аргументам у конкретных методов запросов.
 		:return: Унифицированный контейнер ответа на веб-запросы.
 		:rtype: WebResponse
 		"""

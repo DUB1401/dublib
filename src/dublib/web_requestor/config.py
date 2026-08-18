@@ -8,7 +8,7 @@ from curl_cffi import BrowserTypeLiteral, CurlHttpVersion
 from ua_generator.user_agent import UserAgent
 
 from ..exceptions import web_requestor as Exceptions
-from ..functions.data import LowerDictionaryKeys, ToSequence
+from ..functions.data import ToSequence, dictionary
 from .enums import WebLibs
 
 #==========================================================================================#
@@ -210,7 +210,7 @@ class BearerAuthorizator:
 		:rtype: dict
 		"""
 
-		LowerHeaders: dict = LowerDictionaryKeys(headers)
+		LowerHeaders: dict = dictionary.LowerKeys(headers)
 		if self.__AUTH_HEADER in LowerHeaders: raise Exceptions.HeaderRedefining(self.__AUTH_HEADER)
 		
 		return headers | self.headers
