@@ -1,6 +1,6 @@
-import tomllib
-import sys
 import os
+import sys
+import tomllib
 
 work_dir = os.path.abspath("..")
 lib_data = None
@@ -30,4 +30,3 @@ exclude_patterns = []
 language = "ru"
 
 html_theme = "sphinx_rtd_theme"
-html_static_path = ["_static"]
