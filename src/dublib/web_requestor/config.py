@@ -1,11 +1,14 @@
+from datetime import datetime
+from time import time
 from typing import Sequence, cast, get_args
 
+import jwt
 import ua_generator
 from curl_cffi import BrowserTypeLiteral, CurlHttpVersion
 from ua_generator.user_agent import UserAgent
 
 from ..exceptions import web_requestor as Exceptions
-from ..functions.data import ToSequence
+from ..functions.data import LowerDictionaryKeys, ToSequence
 from .enums import WebLibs
 
 #==========================================================================================#
@@ -94,9 +97,148 @@ class _httpx_config:
 		self.__EnableHTTP2 = status
 
 #==========================================================================================#
-# >>>>> СЕКЦИИ КОНФИГУРАЦИИ <<<<< #
+# >>>>> ОБРАБОТЧИКИ ЗАГОЛОВКОВ <<<<< #
 #==========================================================================================#
 	
+class BearerAuthorizator:
+	"""Оператор авторизации посредством Bearer-токена."""
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def headers(self) -> dict:
+		"""Словарь предоставляемых заголовков."""
+
+		if not self.__IsEnabled or not self.__Token:
+			return {}
+
+		return {self.__AUTH_HEADER: f"Bearer {self.__Token}"}
+
+	@property
+	def is_enabled(self) -> bool:
+		"""Состояние: включено ли использование токена для авторизации."""
+
+		return self.__IsEnabled
+
+	@property
+	def token(self) -> str | None:
+		"""Bearer-токен без идентификатора."""
+
+		return self.__Token
+
+	#==========================================================================================#
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __ClearBearerWord(self, token: str) -> str:
+		"""
+		Удаляет из токена слово-идентификатор.
+
+		:param token: Токен.
+		:type token: str
+		:return: Обработанный токен.
+		:rtype: str
+		"""
+
+		IDENTIFICATOR: str = "bearer"
+		IDENTIFICATOR_LENGHT: int = len(IDENTIFICATOR)
+
+		if token.lower().startswith(IDENTIFICATOR):
+			token = token[:IDENTIFICATOR_LENGHT * -1].strip()
+
+		return token
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __init__(self):
+		"""Оператор авторизации посредством Bearer-токена."""
+
+		self.__Token: str | None = None
+		self.__IsEnabled: bool = True
+
+		self.__AUTH_HEADER: str = "authorization"
+
+	def clear(self):
+		"""Удаляет токен."""
+
+		self.__Token = None
+
+	def disable(self):
+		"""Отключает использование токена, сохраняя его данные."""
+
+		self.set_using_status(False)
+
+	def enable(self):
+		"""Включает использование токена."""
+
+		self.set_using_status(True)
+
+	def is_token_expired(self, token: str, exception: bool = False) -> bool:
+		"""
+		Проверяет, устарел ли токен.
+
+		:param token: Токен без слова-идентификатора.
+		:type token: str
+		:param exception: Указывает, выбрасывать ли исключение при устаревании токена.
+		:type exception: bool
+		:return: Возвращает `True`, если токен устарел.
+		:rtype: bool
+		:raises jwt.exceptions.DecodeError: Неверный формат токена.
+		:raises TokenExpired: Токен устарел.
+		"""
+
+		TokenData = jwt.decode(token, options = {"verify_signature": False})
+		ExpiratonTimestamp: int = TokenData["exp"]
+		IsExpired: bool = ExpiratonTimestamp < time()
+
+		if exception and IsExpired:
+			raise Exceptions.TokenExpired(datetime.fromtimestamp(ExpiratonTimestamp))
+
+		return IsExpired
+
+	def merge_with_headers(self, headers: dict) -> dict:
+		"""
+		Безопасно выполняет слияние заголовков, предотвращая переопределение заголовка _authorization_.
+
+		:param headers: Словарь заголовков.
+		:type headers: dict
+		:return: Словарь заголовков.
+		:rtype: dict
+		"""
+
+		LowerHeaders: dict = LowerDictionaryKeys(headers)
+		if self.__AUTH_HEADER in LowerHeaders: raise Exceptions.HeaderRedefining(self.__AUTH_HEADER)
+		
+		return headers | self.headers
+
+	def set_token(self, token: str):
+		"""
+		Задаёт Bearer-токен.
+
+		:param token: Berarer-токен со словом-идентификатором или без него.
+		:type token: str
+		:raises TokenExpired: Токен устарел.
+		"""
+
+		token = self.__ClearBearerWord(token)
+		self.is_token_expired(token, exception = True)
+
+		self.__Token = token
+	
+	def set_using_status(self, status: bool):
+		"""
+		Задаёт статус использования авторизации.
+
+		:param status: Статус использования авторизации.
+		:type status: bool
+		"""
+
+		self.__IsEnabled = status
+
 class ImportantHeaders:
 	"""Оператор приоритетных заголовков."""
 
@@ -109,6 +251,12 @@ class ImportantHeaders:
 		"""Указывает, необходимо ли автоматическое разрешение **Client Hints** при выполнении запросов."""
 
 		return self.__AutoAcceptCH
+
+	@property
+	def bearer(self) -> BearerAuthorizator:
+		"""Оператор авторизации посредством Bearer-токена."""
+
+		return self.__BearerAuthorizator
 
 	@property
 	def user_agent(self) -> str | None:
@@ -124,6 +272,7 @@ class ImportantHeaders:
 		"""Оператор приоритетных заголовков."""
 
 		self.__Headers: dict[str, str] = {}
+		self.__BearerAuthorizator: BearerAuthorizator = BearerAuthorizator()
 		self.__UserAgent: UserAgent | None = None
 		self.__AutoAcceptCH: bool = True
 	
@@ -239,9 +388,8 @@ class ImportantHeaders:
 		"""
 
 		Headers = self.__Headers.copy()
-
-		if self.__UserAgent:
-			Headers.update(self.__UserAgent.headers.get())
+		if self.__UserAgent: Headers.update(self.__UserAgent.headers.get())
+		Headers = self.__BearerAuthorizator.merge_with_headers(Headers)
 
 		return Headers
 

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 class HeaderRedefining(Exception):
 	"""Исключение: переопределение заголовка."""
 
@@ -10,6 +12,19 @@ class HeaderRedefining(Exception):
 		"""
 
 		super().__init__(header)
+
+class TokenExpired(Exception):
+	"""Исключение: токен устарел."""
+
+	def __init__(self, expiration_date: datetime):
+		"""
+		Исключение: токен устарел.
+
+		:param expiration_date: Дата устаревания токена.
+		:type expiration_date: datetime
+		"""
+
+		super().__init__(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
 
 class UserAgentRedefining(Exception):
 	"""Исключение: переопределение заголовка User-Agent."""

@@ -23,6 +23,7 @@ dependencies = [
 	"prettytable",
 	"requests",
 	"pathvalidate",
+	"PyJWT",
 	"pyyaml",
 	"pydantic",
 	"validators",

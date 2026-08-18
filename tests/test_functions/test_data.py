@@ -57,6 +57,9 @@ def test_InsertDictionaryAfterKey():
 	Result = data.InsertDictionaryAfterKey(FirstDict, SecondDict, "1", overwrite = True)
 	assert tuple(Result.values())[1] == 33
 
+def test_LowerDictionaryKeys():
+	assert data.LowerDictionaryKeys({"AbC": 1, 34: "ACb"}) == {"abc": 1, 34: "ACb"}
+
 def test_MergeDictionaries():
 	assert data.MergeDictionaries(
 		{"1": 1, "3": 3},

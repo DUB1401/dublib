@@ -223,6 +223,18 @@ def InsertDictionaryAfterKey(base_dictionary: dict, insertable_dictionary: dict,
 
 	return Result
 
+def LowerDictionaryKeys(data: dict) -> dict:
+	"""
+	Приводит все строковые ключи словаря в нижний регистр.
+
+	:param data: Обрабатываемый словарь.
+	:type data: dict
+	:return: Обработанный словарь.
+	:rtype: dict
+	"""
+
+	return {Key.lower() if type(Key) is str else Key: Value for Key, Value in data.items()}
+
 def MergeDictionaries(base_dictionary: dict, mergeable_dictionary: dict, overwrite: bool = False) -> dict:
 	"""
 	Объединяет словари.
