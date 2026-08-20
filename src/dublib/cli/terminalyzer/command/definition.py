@@ -35,19 +35,19 @@ class _Argument:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, type: ValidableTypes, description: str | None, important: bool):
+	def __init__(self, value_type: ValidableTypes, description: str | None, important: bool):
 		"""
 		Аргумент команды.
 
-		:param type: nип значения аргумента.
-		:type type: ValidableTypes
+		:param value_type: nип значения аргумента.
+		:type value_type: ValidableTypes
 		:param description: Описание аргумента.
 		:type description: str | None
 		:param important: Указывает, является ли аргумент обязательным.
 		:type important: bool
 		"""
 
-		self.__Type = type
+		self.__Type = value_type
 		self.__Description = description
 		self.__IsImportant = important
 
@@ -146,7 +146,7 @@ class _Key:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, name: str, aliases: Sequence[str] | None, type: ValidableTypes, description: str | None, important: bool):
+	def __init__(self, name: str, aliases: Sequence[str] | None, value_type: ValidableTypes, description: str | None, important: bool):
 		"""
 		Ключ команды.
 
@@ -154,8 +154,8 @@ class _Key:
 		:type name: str
 		:param aliases: Список псевдонимов.
 		:type aliases: Sequence[str] | None
-		:param type: Тип значения ключа.
-		:type type: ValidableTypes
+		:param value_type: Тип значения ключа.
+		:type value_type: ValidableTypes
 		:param description: Описание ключа.
 		:type description: str | None
 		:param important: Указывает, является ли ключ обязательным.
@@ -164,7 +164,7 @@ class _Key:
 		
 		self.__Name = name
 		self.__Aliases = list(aliases) if aliases else []
-		self.__Type = type
+		self.__Type = value_type
 		self.__Description = description
 		self.__IsImportant = important
 
@@ -240,17 +240,17 @@ class _BasePosition:
 		self.__Flags: list[_Flag] = []
 		self.__Keys: list[_Key] = []
 		
-	def add_argument(self, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
+	def add_argument(self, value_type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
 		Добавляет аргумент на позицию.
 
-		:param type: Тип аргумента.
-		:type type: ValidableTypes
+		:param value_type: Тип аргумента.
+		:type value_type: ValidableTypes
 		:param description: Описание аргумента.
 		:type description: str | None
 		"""
 
-		self.__Arguments.append(_Argument(type, description, important = False))
+		self.__Arguments.append(_Argument(value_type, description, important = False))
 
 	def add_flag(self, name: str, aliases: Sequence[str] | None = None, description: str | None = None):
 		"""
@@ -266,7 +266,7 @@ class _BasePosition:
 
 		self.__Flags.append(_Flag(name, aliases, description, important = False))
 
-	def add_key(self, name: str, aliases: Sequence[str] | None = None, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
+	def add_key(self, name: str, aliases: Sequence[str] | None = None, value_type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
 		Добавляет ключ на позицию.
 
@@ -274,13 +274,13 @@ class _BasePosition:
 		:type name: str
 		:param aliases: Список псевдонимов.
 		:type aliases: Sequence[str] | None
-		:param type: Тип значения ключа.
-		:type type: ValidableTypes
+		:param value_type: Тип значения ключа.
+		:type value_type: ValidableTypes
 		:param description: Описание ключа.
 		:type description: str | None
 		"""
 
-		self.__Keys.append(_Key(name, aliases, type, description, important = False))
+		self.__Keys.append(_Key(name, aliases, value_type, description, important = False))
 
 class _Position:
 	"""Позиция команды."""
@@ -393,7 +393,7 @@ class _Position:
 
 		self.__Flags.append(_Flag(name, aliases, description, self.__IsImportant))
 
-	def add_key(self, name: str, aliases: Sequence[str] | None = None, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
+	def add_key(self, name: str, aliases: Sequence[str] | None = None, value_type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
 		Добавляет ключ на позицию.
 
@@ -401,25 +401,25 @@ class _Position:
 		:type name: str
 		:param aliases: Список псевдонимов.
 		:type aliases: Sequence[str] | None
-		:param type: Тип значения ключа.
-		:type type: ValidableTypes
+		:param value_type: Тип значения ключа.
+		:type value_type: ValidableTypes
 		:param description: Описание ключа.
 		:type description: str | None
 		"""
 
-		self.__Keys.append(_Key(name, aliases, type, description, self.__IsImportant))
+		self.__Keys.append(_Key(name, aliases, value_type, description, self.__IsImportant))
 
-	def set_argument(self, type: ValidableTypes = ValidableTypes.All, description: str | None = None):
+	def set_argument(self, value_type: ValidableTypes = ValidableTypes.All, description: str | None = None):
 		"""
 		Устанавливает аргумент на позицию.
 
-		:param type: Тип аргумента. По умолчанию `ValidableTypes.All`.
-		:type type: ValidableTypes
+		:param value_type: Тип аргумента. По умолчанию `ValidableTypes.All`.
+		:type value_type: ValidableTypes
 		:param description: Описание аргумента. По умолчанию `None`.
 		:type description: str | None
 		"""
 
-		self.__Argument = _Argument(type, description, self.__IsImportant)
+		self.__Argument = _Argument(value_type, description, self.__IsImportant)
 
 #==========================================================================================#
 # >>>>> ОСНОВНОЙ КЛАСС <<<<< #

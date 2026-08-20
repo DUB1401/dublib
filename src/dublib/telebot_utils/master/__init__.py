@@ -121,7 +121,7 @@ class TeleMaster:
 		if Subscriptions == len(ChatsTuple): return True
 		else: return False
 	
-	def safely_delete_messages(self, chat_id: int, messages: int | Sequence[int], complex: bool = False) -> Exception | None:
+	def safely_delete_messages(self, chat_id: int, messages: int | Sequence[int], complex_request: bool = False) -> Exception | None:
 		"""
 		Безопасно удаляет сообщения без выброса исключений.
 
@@ -129,8 +129,8 @@ class TeleMaster:
 		:type chat_id: int
 		:param messages: Последовательность ID сообщений или ID конкретного сообщения.
 		:type messages: int | Sequence[int]
-		:param complex: При включении сообщения будут удалены одним запросом. По умолчанию `False`.
-		:type complex: bool
+		:param complex_request: При включении сообщения будут удалены одним запросом. По умолчанию `False`.
+		:type complex_request: bool
 		:return: Выброшенное во время работы исключение в случае наличия такового.
 		:rtype: Exception | None
 		"""
@@ -138,7 +138,7 @@ class TeleMaster:
 		MessagesList = ToSequence(messages, target_type = list)
 		ExceptionObject: Exception | None = None
 
-		if complex:
+		if complex_request:
 			try: self.__Bot.delete_messages(chat_id, MessagesList)
 			except Exception as ExceptionData: ExceptionObject = ExceptionData
 

@@ -6,14 +6,14 @@ from ..text_styler import TextStyler, codes
 # >>>>> ФУНКЦИИ ГЕНЕРАЦИИ И ВЫВОДА СООБЩЕНИЙ <<<<< #
 #==========================================================================================#
 
-def GenerateMessage(text: str, type: MessagesTypes | None = None, origin: str | None = None, colorize: bool = True) -> str:
+def GenerateMessage(text: str, message_type: MessagesTypes | None = None, origin: str | None = None, colorize: bool = True) -> str:
 	"""
 	Генерирует сообщение на основе переданных параметров.
 
 	:param text: Текст сообщения.
 	:type text: str
-	:param type: Тип сообщения.
-	:type type: MessagesTypes | None
+	:param message_type: Тип сообщения.
+	:type message_type: MessagesTypes | None
 	:param origin: Источник сообщения.
 	:type origin: str | None
 	:return: Текст сообщения в формате `[{ORIGIN}:{TYPE}] {MESSAGE}`.
@@ -24,8 +24,8 @@ def GenerateMessage(text: str, type: MessagesTypes | None = None, origin: str | 
 	TypePart = ""
 	if origin:
 		OriginPart = f"{origin}:"
-	if type:
-		TypePart = f"[{OriginPart}{type.name.upper()}] "
+	if message_type:
+		TypePart = f"[{OriginPart}{message_type.name.upper()}] "
 
 	Message = f"{TypePart}{text}"
 
@@ -38,23 +38,23 @@ def GenerateMessage(text: str, type: MessagesTypes | None = None, origin: str | 
 			MessagesTypes.Critical: codes.Colors.Red,
 			None: None
 		}
-		Message = TextStyler(text_color = ColorsDict[type]).get_styled_text(Message)
+		Message = TextStyler(text_color = ColorsDict[message_type]).get_styled_text(Message)
 
 	return Message
 
-def PrintMessage(text: str, type: MessagesTypes | None = None, origin: str | None = None):
+def PrintMessage(text: str, message_type: MessagesTypes | None = None, origin: str | None = None):
 	"""
 	Выводит в консоль стилизованное сообщение.
 
 	:param text: Текст сообщения.
 	:type text: str
-	:param type: Тип сообщения.
-	:type type: MessagesTypes | None
+	:param message_type: Тип сообщения.
+	:type message_type: MessagesTypes | None
 	:param origin: Источник сообщения.
 	:type origin: str | None
 	"""
 
-	print(GenerateMessage(text, type, origin))
+	print(GenerateMessage(text, message_type, origin))
 
 #==========================================================================================#
 # >>>>> ШАБЛОНЫ ТИПОВ СООБЩЕНИЙ <<<<< #
@@ -70,7 +70,7 @@ def PrintDebug(text: str, origin: str | None = None):
 	:type origin: str | None
 	"""
 
-	PrintMessage(text, type = MessagesTypes.Debug, origin = origin)
+	PrintMessage(text, message_type = MessagesTypes.Debug, origin = origin)
 
 def PrintInfo(text: str, origin: str | None = None):
 	"""
@@ -82,7 +82,7 @@ def PrintInfo(text: str, origin: str | None = None):
 	:type origin: str | None
 	"""
 
-	PrintMessage(text, type = MessagesTypes.Info, origin = origin)
+	PrintMessage(text, message_type = MessagesTypes.Info, origin = origin)
 
 def PrintWarning(text: str, origin: str | None = None):
 	"""
@@ -94,7 +94,7 @@ def PrintWarning(text: str, origin: str | None = None):
 	:type origin: str | None
 	"""
 
-	PrintMessage(text, type = MessagesTypes.Warning, origin = origin)
+	PrintMessage(text, message_type = MessagesTypes.Warning, origin = origin)
 
 def PrintError(text: str, origin: str | None = None):
 	"""
@@ -106,7 +106,7 @@ def PrintError(text: str, origin: str | None = None):
 	:type origin: str | None
 	"""
 
-	PrintMessage(text, type = MessagesTypes.Error, origin = origin)
+	PrintMessage(text, message_type = MessagesTypes.Error, origin = origin)
 
 def PrintCritical(text: str, origin: str | None = None):
 	"""
@@ -118,4 +118,4 @@ def PrintCritical(text: str, origin: str | None = None):
 	:type origin: str | None
 	"""
 
-	PrintMessage(text, type = MessagesTypes.Critical, origin = origin)
+	PrintMessage(text, message_type = MessagesTypes.Critical, origin = origin)

@@ -7,7 +7,7 @@ from ... import exceptions
 from ...core import LOGS_HANDLER
 from ...validators import ValidableTypes as ValidableTypes
 from .command.definition import Command
-from .command.parser import ParsedCommandData, CommandParser
+from .command.parser import CommandParser, ParsedCommandData
 from .helper import Helper
 
 #==========================================================================================#
@@ -100,15 +100,15 @@ class Terminalyzer:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, input: Sequence[str] | None = None):
+	def __init__(self, input_parameters: Sequence[str] | None = None):
 		"""
 		Обработчик консольных параметров.
 
-		:param input: Последовательность параметров команды, первым из которых является названия. По умолчанию берётся из *sys.argv* скрипта.
-		:type input: Sequence[str] | None
+		:param input_parameters: Последовательность параметров команды, первым из которых является названия. По умолчанию берётся из *sys.argv* скрипта.
+		:type input_parameters: Sequence[str] | None
 		"""
 
-		self.set_input(input)
+		self.set_input(input_parameters)
 		
 		self.__Helper = Helper()
 
@@ -146,7 +146,7 @@ class Terminalyzer:
 		
 		return CommandData
 
-	def set_input(self, input: Sequence[str] | None):
+	def set_input(self, input_parameters: Sequence[str] | None):
 		"""
 		Задаёт последовательность параметров, из которых будут парситься данные команды.
 
@@ -154,7 +154,7 @@ class Terminalyzer:
 		:type parameters: Sequence[str] | None
 		"""
 
-		self.__Input = list(input) if input else sys.argv[1:]
+		self.__Input = list(input_parameters) if input_parameters else sys.argv[1:]
 
 		self.__CommandName = None
 		self.__Parameters: tuple = ()

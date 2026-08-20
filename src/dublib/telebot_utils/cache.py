@@ -344,27 +344,27 @@ class TeleCache:
 				Storage[Identificator] = Object(Identificator, Cache["chat_id"], Cache["file_id"], Cache["message_id"], Cache["data"], Cache["type"])
 
 	@require_initialization
-	def __UploadFile(self, path: str | PathLike[str], type: type[types.InputMedia] | None = None) -> Cache:
+	def __UploadFile(self, path: str | PathLike[str], attachment_type: type[types.InputMedia] | None = None) -> Cache:
 		"""
 		Кэширует файл.
 
 		:param path: Путь к файлу.
 		:type path: str | PathLike[str]
-		:param type: Тип вложения (по умолчанию `types.InputMediaDocument`).
-		:type type: type[types.InputMedia] | None
+		:param attachment_type: Тип вложения (по умолчанию `types.InputMediaDocument`).
+		:type attachment_type: type[types.InputMedia] | None
 		:raises RuntimeError: Выбрасывается при отсутствии привязки менеджера к боту Telegram.
 		:raises TypeError: Выбрасывается при попытке использования полноценного видео (например со звуковой дорожкой) в качестве анимации.
 		:return: Данные кэша.
 		:rtype: Cache
 		"""
 		
-		if not type: type = types.InputMediaDocument
+		if not attachment_type: attachment_type = types.InputMediaDocument
 		FilePath = Path(path)
 
 		Message: types.Message | None = None
 		FileID: str | None = None
 		
-		match type:
+		match attachment_type:
 			case types.InputMediaAnimation: FileID = self.__Upload_Animation(FilePath)
 			case types.InputMediaAudio: FileID = self.__Upload_Audio(FilePath)
 			case types.InputMediaDocument: FileID = self.__Upload_Document(FilePath)
@@ -374,7 +374,7 @@ class TeleCache:
 		if not FileID or not Message:
 			raise UnableCacheFile(FilePath)
 
-		return Cache(FileID, Message.id, type)
+		return Cache(FileID, Message.id, attachment_type)
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -453,24 +453,24 @@ class TeleCache:
 	#==========================================================================================#
 
 	@require_initialization
-	def cache_real_file(self, path: str | PathLike[str], type: type[types.InputMedia] | None = None, data: dict | None = None) -> RealCachedFile:
+	def cache_real_file(self, path: str | PathLike[str], attachment_type: type[types.InputMedia] | None = None, data: dict | None = None) -> RealCachedFile:
 		"""
 		Кэширует реальный файл.
 
 		:param path: Путь к файлу.
 		:type path: str | PathLike[str]
-		:param type: Тип вложения (по умолчанию `types.InputMediaDocument`).
-		:type type: type[types.InputMedia] | None
+		:param attachment_type: Тип вложения (по умолчанию `types.InputMediaDocument`).
+		:type attachment_type: type[types.InputMedia] | None
 		:param data: Словарь дополнительных данных.
 		:type data: dict | None
 		:return: Данные кэша реального файла.
 		:rtype: RealCachedFile
 		"""
 
-		if not type: type = types.InputMediaDocument
+		if not attachment_type: attachment_type = types.InputMediaDocument
 
 		if path not in self.__RealData.keys():
-			Cache = self.__UploadFile(path, type)
+			Cache = self.__UploadFile(path, attachment_type)
 			self.register_real_file(path, cast(int, self.__ChatID), Cache.file_id, Cache.message_id, data, Cache.file_type)
 
 		return self.__RealData[str(path)]
@@ -519,7 +519,7 @@ class TeleCache:
 
 		return path in self.__RealData.keys()
 
-	def register_real_file(self, path: str | PathLike[str], chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, type: type[types.InputMedia] | None = None) -> RealCachedFile:
+	def register_real_file(self, path: str | PathLike[str], chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, attachment_type: type[types.InputMedia] | None = None) -> RealCachedFile:
 		"""
 		Регистрирует в хранилище данные кэша реального файла.
 
@@ -533,13 +533,13 @@ class TeleCache:
 		:type message_id: int | None
 		:param data: Словарь дополнительных данных.
 		:type data: dict | None
-		:param type: Тип представления файла.
-		:type type: type[types.InputMedia] | None
+		:param attachment_type: Тип представления файла.
+		:type attachment_type: type[types.InputMedia] | None
 		:return: Данные кэша реального файла.
 		:rtype: RealCachedFile
 		"""
 		
-		File = RealCachedFile(path, chat_id, file_id, message_id, data, type)	
+		File = RealCachedFile(path, chat_id, file_id, message_id, data, attachment_type)	
 		self.__RealData[str(path)] = File
 		self.save()
 		
@@ -561,7 +561,7 @@ class TeleCache:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ РАБОТЫ С ВИРТУАЛЬНЫМИ ФАЙЛАМИ <<<<< #
 	#==========================================================================================#
 
-	def cache_virtual_file(self, path: str | PathLike[str], identificator: str, type: type[types.InputMedia] | None = None, data: dict | None = None) -> VirtualCachedFile:
+	def cache_virtual_file(self, path: str | PathLike[str], identificator: str, attachment_type: type[types.InputMedia] | None = None, data: dict | None = None) -> VirtualCachedFile:
 		"""
 		Кэширует виртуальный файл.
 
@@ -569,8 +569,8 @@ class TeleCache:
 		:type path: str | PathLike[str]
 		:param identificator: Идентификатор файла.
 		:type identificator: str
-		:param type: Тип вложения (по умолчанию `types.InputMediaDocument`).
-		:type type: type[types.InputMedia] | None
+		:param attachment_type: Тип вложения (по умолчанию `types.InputMediaDocument`).
+		:type attachment_type: type[types.InputMedia] | None
 		:param data: Словарь дополнительных данных.
 		:type data: dict | None
 		:return: Данные кэша виртуального файла.
@@ -580,10 +580,10 @@ class TeleCache:
 		self.__Bot = cast(TeleBot, self.__Bot)
 		self.__ChatID = cast(int, self.__ChatID)
 
-		if not type: type = types.InputMediaDocument
+		if not attachment_type: attachment_type = types.InputMediaDocument
 
 		if path not in self.__VirtualData.keys():
-			Cache = self.__UploadFile(path, type)
+			Cache = self.__UploadFile(path, attachment_type)
 			self.register_virtual_file(identificator, self.__ChatID, Cache.file_id, Cache.message_id, data, Cache.file_type)
 
 		return self.__VirtualData[identificator]
@@ -619,7 +619,7 @@ class TeleCache:
 
 		return identificator in self.__VirtualData.keys()
 	
-	def register_virtual_file(self, identificator: str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, type: type[types.InputMedia] | None = None) -> VirtualCachedFile:
+	def register_virtual_file(self, identificator: str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, attachment_type: type[types.InputMedia] | None = None) -> VirtualCachedFile:
 		"""
 		Регистрирует в хранилище данные кэша виртуального файла.
 
@@ -633,13 +633,13 @@ class TeleCache:
 		:type message_id: int | None
 		:param data: Словарь дополнительных данных.
 		:type data: dict | None
-		:param type: Тип представления файла.
-		:type type: type[types.InputMedia] | None
+		:param attachment_type: Тип представления файла.
+		:type attachment_type: type[types.InputMedia] | None
 		:return: Данные кэша виртуального файла.
 		:rtype: VirtualCachedFile
 		"""
 		
-		File = VirtualCachedFile(identificator, chat_id, file_id, message_id, data, type)	
+		File = VirtualCachedFile(identificator, chat_id, file_id, message_id, data, attachment_type)	
 		self.__VirtualData[identificator] = File
 		self.save()
 		

@@ -29,20 +29,20 @@ class ExecutionMessage:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, text: str, type: MessagesTypes | None = None, origin: str | None = None):
+	def __init__(self, text: str, message_type: MessagesTypes | None = None, origin: str | None = None):
 		"""
 		Сообщение процесса выполнения.
 
 		:param text: Текст сообщения.
 		:type text: str
-		:param type: Тип сообщения.
-		:type type: MessagesTypes | None
+		:param message_type: Тип сообщения.
+		:type message_type: MessagesTypes | None
 		:param origin: Источник сообщения.
 		:type origin: str | None
 		"""
 
 		self._Text = text
-		self._Type = type
+		self._Type = message_type
 		self._Origin = origin
 
 	def check_origin(self, origin: str | None) -> bool:

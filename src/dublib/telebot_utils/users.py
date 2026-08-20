@@ -284,19 +284,19 @@ class UserData:
 
 		self.__AddFlags(permissions, "permissions")
 
-	def attach_object(self, key: str, object: Any, force: bool = True):
+	def attach_object(self, key: str, custom_object: Any, force: bool = True):
 		"""
 		Прикрепляет объект к пользователю. При перезапуске объект будет удалён.
 
 		:param key: Ключ объекта.
 		:type key: str
-		:param object: Прикрепляемый объект.
-		:type object: Any
+		:param custom_object: Прикрепляемый объект.
+		:type custom_object: Any
 		:param force: Указывает, нужно ли перезаписывать уже существующий объект.
 		:type force: bool
 		"""
 		
-		if key not in self.__Objects or force: self.__Objects[key] = object
+		if key not in self.__Objects or force: self.__Objects[key] = custom_object
 
 	def check_flags(self, flags: Sequence[str] | str) -> bool:
 		"""
