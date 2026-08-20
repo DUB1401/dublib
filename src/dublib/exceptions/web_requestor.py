@@ -1,5 +1,13 @@
 from datetime import datetime
 
+class AuthorizationRedefining(Exception):
+	"""Исключение: переопределение заголовка _Authorization_."""
+
+	def __init__(self):
+		"""Исключение: переопределение заголовка _Authorization_"""
+
+		super().__init__("Generate \"Authorization\" by headers subsystem.")
+
 class HeaderRedefining(Exception):
 	"""Исключение: переопределение заголовка."""
 
@@ -27,9 +35,9 @@ class TokenExpired(Exception):
 		super().__init__(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
 
 class UserAgentRedefining(Exception):
-	"""Исключение: переопределение заголовка User-Agent."""
+	"""Исключение: переопределение заголовков _User-Agent_ или _Sec-CH-*_."""
 
 	def __init__(self):
-		"""Исключение: переопределение заголовка User-Agent."""
+		"""Исключение: переопределение заголовков _User-Agent_ или _Sec-CH-*_."""
 
-		super().__init__("Use only set_user_agent() to manage \"User-Agent\" header.")
+		super().__init__("Generate \"User-Agent\" and \"Sec-CH-*\" by headers subsystem.")

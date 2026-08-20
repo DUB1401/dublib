@@ -15,11 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### functions
 - Добавлена функция `LowerDictionaryKeys()`, приводящая строковые ключи в нижний регистр.
 #### web_requestor
-- Реализован оператор обработки Bearer-токенов авторизации.
+- Реализован оператор авторизации, управляющий заголовком _Authorization_.
 - Добавлена поддержка запросов `DELETE`.
 
 ### Changed
 - Модули переименованы в соответствии с [PEP 8](https://peps.python.org/pep-0008).
+- Исправлено множество затенений встроенных ключевых компонентов Python, в связи с чем переименованы некоторые аргументы.
 #### engine.bus
 - Удалены все методы генерации текстовых представлений и вывода в консоль.
 #### functions
@@ -36,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 #### web_requestor
-- Конфигурация `WebConfig` не отдавала заголовки **Client Hints**.
+- Объект `WebConfig` не отдавал заголовки **Client Hints**.
 - Запросы типа **POST** через [requests](https://github.com/psf/requests) ошибочно выполнялись как **GET**.
 
 ## [0.29.0] - 2026-08-05
