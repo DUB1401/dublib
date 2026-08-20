@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### cli
 - Добавлен модуль `progress_indicator` для индикации прогресса в терминале на основе протокола **OSC 9;4**.
 - В модуле `templates.bus` добавлен шаблон вывода для отладочного сообщения.
+- Во время парсинга команды модулем `terminalyzer` теперь проверяется использование всех переданных параметров.
 #### functions
 - Добавлена функция `LowerDictionaryKeys()`, приводящая строковые ключи в нижний регистр.
 #### web_requestor

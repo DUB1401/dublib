@@ -114,4 +114,17 @@ class UnboundKey(Exception):
 		:type key: str
 		"""
 		
-		super().__init__(f"\"{key}\".") 
+		super().__init__(f"\"{key}\".")
+
+class UnboundParameter(Exception):
+	"""Исключение: параметр не используется."""
+
+	def __init__(self, parameter: str):
+		"""
+		Исключение: параметр не используется.
+
+		:param parameter: Параметр.
+		:type parameter: str
+		"""
+
+		super().__init__(parameter) 

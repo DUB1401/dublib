@@ -7,7 +7,7 @@ from ... import exceptions
 from ...core import LOGS_HANDLER
 from ...validators import ValidableTypes as ValidableTypes
 from .command.definition import Command
-from .command.parser import ParsedCommandData, _CommandParser
+from .command.parser import ParsedCommandData, CommandParser
 from .helper import Helper
 
 #==========================================================================================#
@@ -25,6 +25,10 @@ LOGGER.setLevel(logging.INFO)
 class Terminalyzer:
 	"""Обработчик консольных параметров."""
 
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
 	@property
 	def helper(self) -> Helper:
 		"""Настройки модуля помощи."""
@@ -32,7 +36,7 @@ class Terminalyzer:
 		return self.__Helper
 
 	#==========================================================================================#
-	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ВАЛИДАЦИИ <<<<< #
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ВАЛИДАЦИИ ОПИСАНИЙ КОМАНД <<<<< #
 	#==========================================================================================#
 
 	def __CheckSinglePositionalParametersDescriptionMissing(self, command: Command):
@@ -57,7 +61,8 @@ class Terminalyzer:
 		"""
 
 		for CurrentPosition in command.positions:
-			if not CurrentPosition.parameters: raise exceptions.cli.terminalyzer.EmptyPosition(command.name, CurrentPosition.name)
+			if not CurrentPosition.parameters:
+				raise exceptions.cli.terminalyzer.EmptyPosition(command.name, CurrentPosition.name)
 
 		return command
 
@@ -72,7 +77,8 @@ class Terminalyzer:
 
 		CommandsNames = tuple(CurrentCommand.name for CurrentCommand in commands)
 		for Name in CommandsNames:
-			if CommandsNames.count(Name) > 1: raise exceptions.cli.terminalyzer.MultipleCommandDefinition(Name)
+			if CommandsNames.count(Name) > 1:
+				raise exceptions.cli.terminalyzer.MultipleCommandDefinition(Name)
 
 	def __ValidateCommandsDefinitions(self, commands: list[Command]):
 		"""
@@ -129,7 +135,7 @@ class Terminalyzer:
 
 		for CurrentCommand in commands:
 			if CurrentCommand.name == self.__CommandName:
-				CommandData = _CommandParser(CurrentCommand, self.__Parameters).parse()
+				CommandData = CommandParser(CurrentCommand, self.__Parameters).parse()
 				break
 
 		if self.__Helper.is_enabled and CommandData and CommandData.name == "help":

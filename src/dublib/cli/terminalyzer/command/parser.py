@@ -430,7 +430,7 @@ class ParsedCommandData:
 # >>>>> ОСНОВНОЙ КЛАСС <<<<< #
 #==========================================================================================#
 
-class _CommandParser:
+class CommandParser:
 	"""Парсер команды."""
 
 	#==========================================================================================#
@@ -459,6 +459,18 @@ class _CommandParser:
 		ParametersCount = len(self.__Parameters)
 		if ParametersCount > self.__Command.max_parameters_count: raise exceptions.cli.terminalyzer.TooManyParameters(self.__Command.max_parameters_count, ParametersCount)
 		if ParametersCount < self.__Command.min_parameters_count: raise exceptions.cli.terminalyzer.NotEnoughParameters(self.__Command.min_parameters_count, ParametersCount)
+
+	def __CheckUnboundParameters(self):
+		"""
+		Проверяет, все ли параметры в команде использованы.
+
+		:raises UnboundParameter: Параметр не используется.
+		"""
+
+		if False in self.__ParametersLocks:
+			UnboundParameterIndex: int = self.__ParametersLocks.index(False)
+			Parameter: str = self.__Parameters[UnboundParameterIndex]
+			raise exceptions.cli.terminalyzer.UnboundParameter(Parameter)
 
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ПАРСИНГА <<<<< #
@@ -596,5 +608,6 @@ class _CommandParser:
 
 		self.__CheckImportantPositionsLocks()
 		self.__CheckParametersCount()
+		self.__CheckUnboundParameters()
 
 		return ParsedCommandData(self.__Command.name, ParsedData)

@@ -72,7 +72,7 @@ files = ["src"]
 include = ["src/*", "tests/*"]
 
 [tool.ruff.lint]
-select = ["C", "E", "F", "I"]
+select = ["A", "C", "E", "F", "I"]
 ignore = ["E701", "E501"]
 
 [tool.ruff.lint.per-file-ignores]
