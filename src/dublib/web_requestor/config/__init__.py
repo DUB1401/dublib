@@ -185,7 +185,7 @@ class WebConfig:
 		self.__Retries: int = 0
 		self.__UsedLib = WebLibs.requests
 		self.__GoodCodes: tuple[int | None, ...] = (200,)
-		self.__Delay: float = 0.25
+		self.__Delay: float = 0.0
 
 		self.__SwitchProtocol: bool = False
 		self.__EnableRedirecting: bool = True
@@ -209,7 +209,7 @@ class WebConfig:
 
 	def set_delay(self, delay: float | int):
 		"""
-		Задаёт интервал ожидания между повторными запросами.
+		Задаёт минимальный интервал ожидания между запросами.
 
 		:param delay: Интервал в секундах.
 		:type delay: float | int

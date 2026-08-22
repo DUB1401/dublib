@@ -1,6 +1,6 @@
 import logging
 import random
-from time import sleep
+from time import sleep, time
 from typing import TYPE_CHECKING, Any, Callable, Sequence, cast
 
 import httpx
@@ -18,7 +18,7 @@ from .response import WebResponse
 if TYPE_CHECKING:
 	from requests.cookies import RequestsCookieJar
 
-__all__ = ["Protocols", "WebConfig", "WebLibs", "WebRequestor", "WebResponse"]
+__all__ = ["Protocols", "Proxy", "WebConfig", "WebLibs", "WebRequestor", "WebResponse"]
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
@@ -150,6 +150,21 @@ class WebRequestor:
 			else: headers = self.__Config.headers.to_dict()
 
 		return headers
+
+	def __WaitDelay(self):
+		"""Проверяет, выдержан ли интервал с момента последнего запроса, и автоматически выполняет ожидание."""
+
+		Delay: float = self.config.delay
+
+		if self.__LastRequestTime is None or not Delay:
+			return
+
+		Elapsedtime: float = time() - self.__LastRequestTime
+
+		if Elapsedtime < Delay:
+			TimeToWait: float = Delay - Elapsedtime
+			LOGGER.debug(f"Waiting {TimeToWait} seconds before request.")
+			sleep(TimeToWait)
 
 	#==========================================================================================#
 	# >>>>> ПРИАТНЫЕ МЕТОДЫ ЗАПРОСОВ БИБЛИОТЕКИ CURL_CFFI <<<<< #
@@ -531,6 +546,7 @@ class WebRequestor:
 		self.__Proxies: tuple[Proxy, ...] = ()
 		self.__Config = config or WebConfig()
 		self.__Session = None
+		self.__LastRequestTime: float | None = None
 
 		self.__RequestsMethods: dict[RequestsTypes, dict[WebLibs, Callable]] = {
 			RequestsTypes.DELETE: {
@@ -591,7 +607,10 @@ class WebRequestor:
 		:rtype: WebResponse
 		"""
 
+		self.__WaitDelay()
 		Response: WebResponse = self.__Request(request_type, url, **kwargs)
+		self.__LastRequestTime = time()
+
 		if self.__Config.headers.auto_accept_ch: self.__AcceptHints(Response)
 
 		return Response

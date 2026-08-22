@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Добавлен модуль `progress_indicator` для индикации прогресса в терминале на основе протокола **OSC 9;4**.
 - В модуле `templates.bus` добавлен шаблон вывода для отладочного сообщения.
 - Во время парсинга команды модулем `terminalyzer` теперь проверяется использование всех переданных параметров.
+- Заданный интервал между запросами теперь выдерживается автоматически.
 #### functions
 - Добавлена функция `LowerDictionaryKeys()`, приводящая строковые ключи в нижний регистр.
 #### web_requestor
@@ -30,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - В классе `WebConfig` метод `generate_user_agent()` теперь может принимать строку, а не только последовательности строк.
 - Управление всеми заголовками вынесено в свойство `headers`.
 - Оптимизированы попытки парсинга JSON внутри `WebResponse` через библиотеку [orjson](https://github.com/ijl/orjson).
+- По умолчанию убран интервал между запросами.
 
 ### Removed
 #### filesystem
