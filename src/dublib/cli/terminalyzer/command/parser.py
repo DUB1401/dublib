@@ -288,7 +288,6 @@ class ParsedCommandData:
 	
 	@overload
 	def get_key_value(self, key: str, expected_type: type[_EXPECTED_TYPE], exception: bool = False) -> _EXPECTED_TYPE | None: ...
-
 	@overload
 	def get_key_value(self, key: str, expected_type: None = None, exception: bool = False) -> bool | float | int | Path | str | datetime | None: ...
 
@@ -330,6 +329,25 @@ class ParsedCommandData:
 
 		return ValueToReturn
 
+	def get_position_named_parameter(self, position_name: str) -> _ParsedFlag | _ParsedKey | None:
+		"""
+		Возвращает именованный параметр позиции (флаг или ключ).
+
+		:param position_name: Имя позиции.
+		:type position_name: str
+		:return: Именованный параметр позиции или `None` при пустой позиции.
+		:rtype: _ParsedArgument | _ParsedFlag | _ParsedKey | None
+		:raises KeyError: Позиция не обнаружена.
+		:raises TypeError: На позиции находится аргумент, а не именованный параметр.
+		"""
+
+		Parameter = self.get_position_parameter(position_name)
+
+		if isinstance(Parameter, _ParsedArgument):
+			raise TypeError("Expected named parameter (flag or key), found argument.")
+		
+		return Parameter
+
 	def get_position_parameter(self, position_name: str) -> _ParsedArgument | _ParsedFlag | _ParsedKey | None:
 		"""
 		Возвращает параметр позиции.
@@ -343,9 +361,42 @@ class ParsedCommandData:
 
 		return self.__ParsedData.positions[position_name]
 
+	def get_important_position_parameter(self, position_name: str) -> _ParsedArgument | _ParsedFlag | _ParsedKey:
+		"""
+		Возвращает параметр обязательной позиции.
+
+		:param position_name: Имя позиции.
+		:type position_name: str
+		:return: Параметр обязательной позиции.
+		:rtype: _ParsedArgument | _ParsedFlag | _ParsedKey
+		"""
+
+		Parameter = self.get_position_parameter(position_name)
+
+		if Parameter is None:
+			raise exceptions.cli.terminalyzer.ImportantPositionEmpty(position_name)
+
+		return Parameter
+
+	def get_important_position_named_parameter(self, position_name: str) -> _ParsedFlag | _ParsedKey:
+		"""
+		Возвращает именованный параметр обязательной позиции (флаг или ключ).
+
+		:param position_name: Имя позиции.
+		:type position_name: str
+		:return: Именованный параметр обязательной позиции.
+		:rtype: _ParsedFlag | _ParsedKey
+		"""
+
+		Parameter = self.get_important_position_parameter(position_name)
+
+		if isinstance(Parameter, _ParsedArgument):
+			raise TypeError("Expected named parameter (flag or key), found argument.")
+
+		return Parameter
+
 	@overload
 	def get_important_position_value(self, position_name: str, expected_type: type[_EXPECTED_TYPE]) -> _EXPECTED_TYPE: ...
-
 	@overload
 	def get_important_position_value(self, position_name: str, expected_type: None = None) -> bool | float | int | Path | str | datetime: ...
 
@@ -375,7 +426,6 @@ class ParsedCommandData:
 
 	@overload
 	def get_position_value(self, position_name: str, expected_type: type[_EXPECTED_TYPE]) -> _EXPECTED_TYPE | None: ...
-
 	@overload
 	def get_position_value(self, position_name: str, expected_type: None = None) -> bool | float | int | Path | str | datetime | None: ...
 

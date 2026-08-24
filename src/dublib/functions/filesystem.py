@@ -167,7 +167,6 @@ def WriteYAML(path: str | PathLike[str], data: dict, atomic: bool = False):
 
 @overload
 def ReadTextFile(path: str | PathLike[str], split: Literal[True], strip: bool = False) -> list[str]: ...
-
 @overload
 def ReadTextFile(path: str | PathLike[str], split: Literal[False] = False, strip: bool = False) -> str: ...
 
