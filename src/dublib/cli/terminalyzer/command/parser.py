@@ -324,7 +324,7 @@ class ParsedCommandData:
 		
 		if expected_type and ValueToReturn is not None:
 			ReturnedType = type(ValueToReturn)
-			if ReturnedType is not expected_type:
+			if not isinstance(ReturnedType, expected_type):
 				raise TypeError(f"Expected \"{expected_type}\", but on key {ReturnedType}.")
 
 		return ValueToReturn

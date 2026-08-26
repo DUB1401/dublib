@@ -44,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Удалена функция `ListDir()`.
 
 ### Fixed
+#### cli.terminalyzer
+- При ожидании пути возникала ошибка сравнения типа `Path` и его производных.
 #### web_requestor
 - Объект `WebConfig` не отдавал заголовки **Client Hints**.
 - Запросы типа **POST** через [requests](https://github.com/psf/requests) ошибочно выполнялись как **GET**.
