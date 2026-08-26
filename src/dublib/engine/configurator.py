@@ -1,22 +1,33 @@
 from os import PathLike
 from pathlib import Path
-from threading import Thread
-from typing import Any, Callable, Self
+from typing import Self
 
-from pydantic import BaseModel
-from watchfiles import watch
+from pydantic import TypeAdapter
+from pydantic.dataclasses import dataclass
 
-from ..functions.data import Copy
 from ..functions.filesystem import ReadJSON, ReadYAML, WriteJSON, WriteYAML
 
-class Config:
+#==========================================================================================#
+# >>>>> ВСПОМОГАТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
+#==========================================================================================#
+
+@dataclass
+class ConfigTemplate:
+	"""Модель конфигурации."""
+
+	pass
+
+#==========================================================================================#
+# >>>>> ОСНОВНОЙ КЛАСС <<<<< #
+#==========================================================================================#
+
+class Config[T: ConfigTemplate]:
 	"""Контейнер конфигурации."""
 
 	#==========================================================================================#
 	# >>>>> СТАТИЧЕСКИЕ АТРИБУТЫ <<<<< #
 	#==========================================================================================#
 
-	__EXCEPTION_DISABLED = object()
 	__INSTANCES: "dict[str, Config]" = {}
 
 	#==========================================================================================#
@@ -24,48 +35,16 @@ class Config:
 	#==========================================================================================#
 
 	@property
-	def data(self) -> dict:
-		"""Глубокая копия словаря параметров."""
+	def data(self) -> T:
+		"""Параметры конфигурации."""
 
-		return Copy(self.__Data)
+		return self.__Data
 
 	@property
 	def path(self) -> Path:
-		"""Путь к файлу параметров."""
+		"""Путь к файлу конфигурации."""
 
-		return self.__Path
-	
-	#==========================================================================================#
-	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
-	#==========================================================================================#
-
-	def __GetValue(self, key: str, copy: bool = True) -> Any:
-		"""
-		Возвращает значение параметра.
-
-		:param key: Ключ параметра.
-		:type key: str
-		:param copy: Указывает, нужно ли вернуть копию для изменяемых типов (`dict`, `list`). Не рекомендуется отключать без острой необходимости прямой манипуляции объектами.
-		:type copy: bool
-		:raise KeyError: Выбрасывается при отсутствии параметра с указанным ключом.
-		:return: Значение параметра.
-		:rtype: Any
-		"""
-
-		Value = self.__Data[key]
-		if copy and type(Value) in (dict, list): Value = Copy(Value)
-
-		return Value
-
-	def __SyncProcessor(self):
-		"""Метод отслеживания изменений в файле конфигурации."""
-
-		for _ in watch(self.__Path):
-			if not self.__IsSync: break
-			if self.__OnChangesCallback: self.__OnChangesCallback()
-			self.load()
-
-		self.__SyncThread = None
+		return self.__ConfigFile
 
 	#==========================================================================================#
 	# >>>>> СПЕЦИАЛЬНЫЕ МЕТОДЫ <<<<< #
@@ -89,7 +68,7 @@ class Config:
 
 		return cls.__INSTANCES[args[0]]
 	
-	def __init__(self, path: str | PathLike[str]):
+	def __init__(self, path: str | PathLike[str], model: type[T]):
 		"""
 		Контейнер конфигурации.
 
@@ -97,170 +76,50 @@ class Config:
 
 		:param path: Путь к файлу параметров. На данный момент поддерживается только JSON.
 		:type path: str | PathLike[str]
+		:param model: Модель для валидации конфигурации, унаследованная от `ConfigTemplate`.
+		:type model: type[ConfigTemplate]
 		"""
 
 		if self._IS_INITIALIZED: return
 
-		self.__Path: Path = Path(path)
-
-		self.__Data: dict = {}
-		self.__Model: type[BaseModel] | None = None
-
-		self.__IsSync: bool = True
-		self.__SyncThread = None
-		self.__OnChangesCallback: Callable | None = None
+		self.__ConfigFile: Path = Path(path)
+		self.__Model: type[T] = model
+		self.__Data: T = self.load()
 
 		self._IS_INITIALIZED: bool = True
-
-	def __getitem__(self, key: str) -> Any:
-		"""
-		Возвращает значение параметра. Для изменяемых типов (`dict`, `list`) возвращает копию.
-
-		:param key: Ключ параметра.
-		:type key: str
-		:raise KeyError: Выбрасывается при отсутствии параметра с указанным ключом.
-		:return: Значение параметра.
-		:rtype: Any
-		"""
-		
-		return self.__GetValue(key)
-	
-	def __setitem__(self, key: str, value: Any):
-		"""
-		Задаёт значение параметра. Если файл параметров не загружался, будет создан новый.
-
-		:param key: Ключ параметра.
-		:type key: str
-		:param value: Значение параметра.
-		:type value: Any
-		"""
-		
-		self.set(key, value)
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def disable_sync(self):
+	def load(self) -> T:
 		"""
-		Отключает отслеживание изменений в файле конфигурации.
+		Считывает файл конфигурации.
 
-		Демон остаётся функционировать до следующего изменения файла, но загрузку изменений и вызов Callback-функции пропустит. Это связано с отсутствием в Python механизмов прерывания потоков.
-		"""
-
-		self.__IsSync = False
-
-	def enable_sync(self, callback: Callable | None = None):
-		"""
-		Включает отслеживание изменений в файле конфигурации.
-
-		При отключении синхронизации демон остаётся функционировать до следующего изменения файла, но загрузку изменений пропустит. Это связано с отсутствием в Python механизмов прерывания потоков.
-
-		:param callback: Функция, вызываемая при обнаружении изменений в файле конфигурации.
-		:type callback: Callable | None
+		:return: Данные конфигурации.
+		:rtype: ConfigTemplate
 		"""
 
-		self.__IsSync = True
-		self.__OnChangesCallback = callback
+		Data: dict | None = None
 
-		if self.__IsSync and not self.__SyncThread:
-			self.__SyncThread = Thread(target = self.__SyncProcessor, daemon = True)
-			self.__SyncThread.start()
+		match self.__ConfigFile.suffix:
+			case ".yaml" | ".yml": Data = ReadYAML(self.path)
+			case _: Data = ReadJSON(self.path)
 
-	def get(self, key: str, copy: bool = True, default: Any = __EXCEPTION_DISABLED) -> Any:
-		"""
-		Возвращает значение параметра.
+		self.__Data = TypeAdapter(self.__Model).validate_python(Data)
 
-		:param key: Ключ параметра.
-		:type key: str
-		:param copy: Указывает, нужно ли вернуть копию для изменяемых типов (`dict`, `list`). Не рекомендуется отключать без острой необходимости прямой манипуляции объектами.
-		:type copy: bool
-		:param default: Значение по умолчанию. При указании вместо выброса исключения будет возвращено данное значение.
-		:type default: Any
-		:return: Значение параметра.
-		:rtype: Any
-		:raise KeyError: Выбрасывается при отсутствии параметра с указанным ключом.
-		"""
-
-		try: return self.__GetValue(key, copy)
-		except KeyError: 
-			if default is Config.__EXCEPTION_DISABLED: raise KeyError(key)
-			else: return default
-	
-	def load(self, validate: bool = True):
-		"""
-		Загружает параметры из файла JSON.
-
-		:param validate: Если указана модель и включен этот параметр, будет проведена валидация прочитанного файла.
-		:type validate: bool
-		:raise pydantic.ValidationError: Выбрасывается при ошибке валидации.
-		"""
-
-		match self.__Path.suffix:
-			case ".yaml" | ".yml": self.__Data = ReadYAML(self.path)
-			case _: self.__Data = ReadJSON(self.path)
-
-		if self.__Model and validate: self.validate()
+		return self.__Data
 
 	def save(self):
-		"""Записывает изменения параметров в файл."""
+		"""Сохраняет файл конфигурации."""
 
-		match self.__Path.suffix:
-			case ".yaml" | ".yml": WriteYAML(self.path, self.__Data)
-			case _: WriteJSON(self.path, self.__Data)
+		Data = TypeAdapter(self.__Model).dump_python(self.__Data)
 
-	def set(self, key: str, value: Any):
-		"""
-		Задаёт значение параметра. Если файл параметров не загружался, будет создан новый.
-
-		:param key: Ключ параметра.
-		:type key: str
-		:param value: Значение параметра.
-		:type value: Any
-		"""
-
-		self.__Data[key] = value
-		self.save()
-
-	def set_data(self, data: dict, validate: bool = True):
-		"""
-		Задаёт словарь параметров.
-
-		:param data: Словарь параметров.
-		:type data: dict
-		:param validate: Если указана модель и включен этот параметр, будет проведена валидация данных.
-		:type validate: bool
-		:raise pydantic.ValidationError: Выбрасывается при ошибке валидации.
-		"""
-
-		self.__Data = data
-		if self.__Model and validate: self.validate()
-
-	def set_model(self, model: type[BaseModel] | None):
-		"""
-		Задаёт модель валидации **pydantic**.
-
-		:param model: Модель для валидации.
-		:type model: type[BaseModel] | None
-		"""
-
-		self.__Model = model
+		match self.__ConfigFile.suffix:
+			case ".yaml" | ".yml": WriteYAML(self.path, Data)
+			case _: WriteJSON(self.path, Data)
 
 	def unload(self):
 		"""Выгружает контейнер из памяти."""
 
 		del self.__INSTANCES[self.path.as_posix()]
-
-	def validate(self, model: type[BaseModel] | None = None):
-		"""
-		Проводит валидацию параметров согласно модели **pydantic**.
-
-		:param model: Модель для валидации.
-		:type model: BaseModel | None
-		:raise pydantic.ValidationError: Выбрасывается при ошибке валидации.
-		:raise TypeError: Выбрасывается при отсутствии модели для валидации.
-		"""
-
-		Model = model or self.__Model
-		if not Model: raise TypeError("Missing model for validation.")
-		Model(**self.__Data)
