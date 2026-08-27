@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### 🚀 Added
 - Поддержка документации в формате **Markdown**.
 #### cli
 - Модуль `progress_indicator` для индикации прогресса в терминале на основе протокола **OSC 9;4**.
@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Добавлена поддержка запросов `DELETE`.
 - Заданный интервал между запросами теперь выдерживается автоматически.
 
-### Changed
+### ✏️ Changed
 - Минимальная поддерживаемая версия **Python** теперь 3.12.
 - Модули переименованы в соответствии с [PEP 8](https://peps.python.org/pep-0008).
 - Исправлено множество затенений встроенных ключевых компонентов Python, в связи с чем переименованы некоторые аргументы.
@@ -43,11 +43,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Оптимизированы попытки парсинга JSON внутри `WebResponse` через библиотеку [orjson](https://github.com/ijl/orjson).
 - По умолчанию убран интервал между запросами.
 
-### Removed
+### 🗑️ Removed
 #### functions.filesystem
 - Функция `ListDir()`.
 
-### Fixed
+### 🛠️ Fixed
 #### cli.terminalyzer
 - При ожидании пути возникала ошибка сравнения типа `Path` и его производных.
 #### web_requestor
@@ -56,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.29.0] - 2026-08-05
 
-### Added
+### 🚀 Added
 #### Functions.Data
 - Добавлена функция `InsertDictionaryAfterKey()` для вставки одного словаря внутрь другого после определённого ключа.
 #### Functions.System
@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - В `WebResponse` реализовано хранилище заголовков ответа.
 - Добавлен метод для разрешения запросов **Client Hints**, а также режим их автоматическоро разрешения при выполнении запросов.
 
-### Changed
+### ✏️ Changed
 - Модуль `Methods` переименован в `Functions`.
 #### Functions.System
 - Функция `Clear()` теперь использует ANSI-коды вместо вызова системных утилит.
@@ -76,19 +76,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Для генерации заголовка _User-Agent_ и **Client Hints** применена библиотека [ua-generator](https://github.com/iamdual/ua-generator).
 - Код 404 удалён из считаемых результатом успешного выполнения запроса.
 
-### Fixed
+### 🛠️ Fixed
 #### Validators
 - Невозможно импортировать исключения модуля `Validators`.
 #### WebRequestor
 - Установка целочисленных значений в заголовок запроса приводила к сбою.
 
-### Security
+### 🔒 Security
 - Заменены устаревшие вызовы `os.system()` на `subprocess.run()`.
 
 ## [0.28.5] - 2026-07-22
 
-### Added
+### 🚀 Added
 - Для `Methods.System` и `Methods.Decorators` теперь поставляется документация.
 
-### Changed
+### ✏️ Changed
 - Модуль `Validators` вынесен в корень и более не привязан к `CLI`.
