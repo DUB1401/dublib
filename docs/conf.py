@@ -20,12 +20,20 @@ author = "DUB1401"
 release = lib_data["project"]["version"]
 
 extensions = [
+	"myst_parser",
     "sphinx.ext.autodoc",
 	"sphinx.ext.viewcode"
 ]
 
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown"
+}
+
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = [
+	"README.md"
+]
 
 language = "ru"
 

@@ -1,9 +1,12 @@
+import asyncio
 from os import PathLike
 from pathlib import Path
+from threading import Thread
 from typing import Self
 
 from pydantic import TypeAdapter
 from pydantic.dataclasses import dataclass
+from watchfiles import awatch, watch
 
 from ..functions.filesystem import ReadJSON, ReadYAML, WriteJSON, WriteYAML
 
@@ -23,6 +26,8 @@ class ConfigTemplate:
 
 class Config[T: ConfigTemplate]:
 	"""Контейнер конфигурации."""
+
+	__WatchingThread: Thread | None
 
 	#==========================================================================================#
 	# >>>>> СТАТИЧЕСКИЕ АТРИБУТЫ <<<<< #
@@ -45,6 +50,19 @@ class Config[T: ConfigTemplate]:
 		"""Путь к файлу конфигурации."""
 
 		return self.__ConfigFile
+
+	#==========================================================================================#
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __Watch(self):
+		"""Метод отслеживания изменений в файле конфигурации."""
+
+		for _ in watch(self.__ConfigFile):
+			if not self.__IsWatching: break
+			self.load()
+
+		self.__WatchingThread = None
 
 	#==========================================================================================#
 	# >>>>> СПЕЦИАЛЬНЫЕ МЕТОДЫ <<<<< #
@@ -84,7 +102,11 @@ class Config[T: ConfigTemplate]:
 
 		self.__ConfigFile: Path = Path(path)
 		self.__Model: type[T] = model
+
 		self.__Data: T = self.load()
+		
+		self.__IsWatching: bool = False
+		self.__WatchingThread: Thread | None = None
 
 		self._IS_INITIALIZED: bool = True
 
@@ -119,7 +141,34 @@ class Config[T: ConfigTemplate]:
 			case ".yaml" | ".yml": WriteYAML(self.path, Data)
 			case _: WriteJSON(self.path, Data)
 
+	def stop_watching(self):
+		"""
+		Останавливает отслеживание изменений в файле.
+
+		При отключении синхронизации демон остаётся функционировать до следующего изменения файла, но загрузку изменений пропустит. Это связано с отсутствием в **Python** механизмов прерывания потоков.
+		"""
+
+		self.__IsWatching = False
+
 	def unload(self):
 		"""Выгружает контейнер из памяти."""
 
 		del self.__INSTANCES[self.path.as_posix()]
+
+	def watch(self):
+		"""Включает отслеживание изменений в файле конфигурации и автоматическую перезагрузку последнего."""
+
+		self.__IsWatching = True
+
+		if not self.__WatchingThread:
+			self.__WatchingThread = Thread(target = self.__Watch, daemon = True)
+			self.__WatchingThread.start()
+
+	async def watch_async(self):
+		"""Включает асинхронное отслеживание изменений в файле конфигурации и автоматическую перезагрузку последнего."""
+
+		self.__IsWatching = True
+		
+		async for _ in awatch(self.__ConfigFile):
+			if not self.__IsWatching: break
+			await asyncio.to_thread(self.load)

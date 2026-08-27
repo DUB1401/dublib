@@ -11,7 +11,7 @@ authors = [
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
 	"curl_cffi>=0.16.0",
 	"dateparser",
@@ -36,7 +36,6 @@ classifiers = [
 	"Natural Language :: Russian",
 	"Operating System :: OS Independent",
 	"Programming Language :: Python",
-	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
 	"Programming Language :: Python :: 3.14"
@@ -49,6 +48,7 @@ telebot = [
 ]
 dev = [
 	"mypy",
+	"myst_parser",
 	"pytest",
 	"ruff",
 	"Sphinx",

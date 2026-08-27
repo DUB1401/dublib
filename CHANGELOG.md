@@ -8,16 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Поддержка документации в формате **Markdown**.
 #### cli
-- Добавлен модуль `progress_indicator` для индикации прогресса в терминале на основе протокола **OSC 9;4**.
-##### templates
+- Модуль `progress_indicator` для индикации прогресса в терминале на основе протокола **OSC 9;4**.
+#### cli.templates
 - В модуле `bus` добавлен шаблон вывода для отладочного сообщения.
-##### terminalyzer
+#### cli.terminalyzer
 - Во время парсинга команды теперь проверяется использование всех переданных параметров.
-- Добавлен метод `get_position_named_parameter()` для получения флагов и ключей с позиции.
-- Добавлены метод `get_important_position_parameter()` для получения параметров с обязательной позиции.
-- Добавлены метод `get_important_position_named_parameter()` для получения флагов и ключей с обязательной позиции.
-
+- Метод `get_position_named_parameter()` для получения флагов и ключей с позиции.
+- Метод `get_important_position_parameter()` для получения параметров с обязательной позиции.
+- Метод `get_important_position_named_parameter()` для получения флагов и ключей с обязательной позиции.
 #### functions.string
 - Добавлена функция `LowerDictionaryKeys()`, приводящая строковые ключи в нижний регистр.
 #### web_requestor
@@ -26,8 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Заданный интервал между запросами теперь выдерживается автоматически.
 
 ### Changed
+- Минимальная поддерживаемая версия **Python** теперь 3.12.
 - Модули переименованы в соответствии с [PEP 8](https://peps.python.org/pep-0008).
 - Исправлено множество затенений встроенных ключевых компонентов Python, в связи с чем переименованы некоторые аргументы.
+#### engine.configurator
+- Контейнер теперь использует только валидируемые посредством [pydantic](https://github.com/pydantic/pydantic) представления.
+- Добавлен асинхронный режим отслеживания изменений.
 #### engine.bus
 - Удалены все методы генерации текстовых представлений и вывода в консоль.
 #### functions
@@ -40,8 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - По умолчанию убран интервал между запросами.
 
 ### Removed
-#### filesystem
-- Удалена функция `ListDir()`.
+#### functions.filesystem
+- Функция `ListDir()`.
 
 ### Fixed
 #### cli.terminalyzer
