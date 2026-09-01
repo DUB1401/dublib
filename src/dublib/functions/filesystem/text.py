@@ -4,9 +4,9 @@ from typing import Literal, Sequence, overload
 from . import atomic_write
 
 @overload
-def read(path: PathLike[str] | str, split: Literal[True], strip_level: Literal[1, 2]) -> list[str]: ...
+def read(path: PathLike[str] | str, split: Literal[True], strip_level: Literal[0, 1, 2] = 0) -> list[str]: ...
 @overload
-def read(path: PathLike[str] | str, split: Literal[False] = False, strip_level: Literal[0] = 0) -> str: ...
+def read(path: PathLike[str] | str, split: Literal[False] = False, strip_level: Literal[0, 1, 2] = 0) -> str: ...
 
 def read(path: PathLike[str] | str, split: bool = False, strip_level: Literal[0, 1, 2] = 0) -> str | list[str]:
 	"""
@@ -16,7 +16,7 @@ def read(path: PathLike[str] | str, split: bool = False, strip_level: Literal[0,
 	:type path: PathLike[str] | str
 	:param split: Если активировано, файл будет разбит на набор строк по символу новой строки.
 	:type split: bool
-	:param strip: Уровень очистки от пробельных символов. 0 – отключён, 1 – применить `strip()` к каждой строке, 2 – дополнительно убрать пустые строки.
+	:param strip: Уровень очистки от пробельных символов. 0 – отключён, 1 – применить `strip()` к каждой строке, 2 – дополнительно убрать пустые строки (если включён параметр **split**s).
 	:type strip: Literal[0, 1, 2]
 	:return: Содержимое текстового файла в виде строки или набора строк.
 	:rtype: str | tuple[str]

@@ -2,7 +2,7 @@ from typing import Any
 
 import more_itertools
 
-def insert_after_ley(base_dictionary: dict, insertable_dictionary: dict, target_key: Any, overwrite: bool = False) -> dict:
+def insert_after_key(base_dictionary: dict, insertable_dictionary: dict, target_key: Any, overwrite: bool = False) -> dict:
 	"""
 	Вставляет словарь после определённого ключа. При конфликте ключей приоритет расположения отдаётся порядку ключей из вставляемого словаря.
 

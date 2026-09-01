@@ -1,13 +1,13 @@
 from dublib.functions import data
 
-def test_insert_after_ley():
+def test_insert_after_key():
 	FirstDict = {"1": 1, "2": 2, "3": 3}
 	SecondDict = {"3": 33, "4": 4}
 
-	Result = data.dictionary.insert_after_ley(FirstDict, SecondDict, "1")
+	Result = data.dictionary.insert_after_key(FirstDict, SecondDict, "1")
 	assert tuple(Result.keys())[1] == "3"
 	assert tuple(Result.values())[1] == 3
-	Result = data.dictionary.insert_after_ley(FirstDict, SecondDict, "1", overwrite = True)
+	Result = data.dictionary.insert_after_key(FirstDict, SecondDict, "1", overwrite = True)
 	assert tuple(Result.values())[1] == 33
 
 def test_lower_keys():
