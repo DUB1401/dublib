@@ -1,4 +1,4 @@
-bus
+Bus
 ===
 .. automodule:: dublib.cli.templates.bus
 	:members:

@@ -1,4 +1,4 @@
-terminalyzer
+Terminalyzer
 ============
 .. automodule:: dublib.cli.terminalyzer
 	:members:

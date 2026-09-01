@@ -1,4 +1,4 @@
-cli
+CLI
 ===
 .. toctree::
 	progress_indicator

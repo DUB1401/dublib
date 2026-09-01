@@ -1,4 +1,4 @@
-telebot_utils
+Telebot Utils
 =============
 .. toctree::
 	cache

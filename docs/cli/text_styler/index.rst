@@ -1,4 +1,4 @@
-text_styler
+Text Styler
 ===========
 .. automodule:: dublib.cli.text_styler
 	:members:

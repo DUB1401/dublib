@@ -1,4 +1,4 @@
-progress_indicator
+Progress Indicator
 ==================
 .. automodule:: dublib.cli.progress_indicator
 	:members:

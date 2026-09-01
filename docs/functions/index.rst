@@ -1,8 +1,8 @@
-functions
+Functions
 =========
 
 .. toctree::
 	data/index
 	decorators
-	filesystem
+	filesystem/index
 	system

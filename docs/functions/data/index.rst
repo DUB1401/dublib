@@ -1,4 +1,4 @@
-data
+Data
 ====
 
 .. automodule:: dublib.functions.data
