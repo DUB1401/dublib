@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Метод `get_position_named_parameter()` для получения флагов и ключей с позиции.
 - Метод `get_important_position_parameter()` для получения параметров с обязательной позиции.
 - Метод `get_important_position_named_parameter()` для получения флагов и ключей с обязательной позиции.
+#### engine.configurator
+- Асинхронный режим отслеживания изменений.
 #### functions.string
 - Добавлена функция `LowerDictionaryKeys()`, приводящая строковые ключи в нижний регистр.
 #### web_requestor
@@ -31,16 +33,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Исправлено множество затенений встроенных ключевых компонентов Python, в связи с чем переименованы некоторые аргументы.
 #### engine.configurator
 - Контейнер теперь использует только валидируемые посредством [pydantic](https://github.com/pydantic/pydantic) представления.
-- Добавлен асинхронный режим отслеживания изменений.
-#### engine.bus
-- Удалены все методы генерации текстовых представлений и вывода в консоль.
 #### functions
 - Функции переименованы в соответствии с [PEP 8](https://peps.python.org/pep-0008).
 - Функции работы с файлами вынесены в подмодули `json`, `text` и `yaml`.
 - Функции работы со строками и словарями вынесены в подмодули `string` и `dictionary` соответственно.
 - Из названий функций работы со словарями удалено слово _Dictionary_.
-#### functions.data.dictionaries
-- Удалена функция `Merge()`.
+#### functions.filesystem.text
+- Параметр **strip** теперь принимает уровень обработки.
 #### web_requestor
 - В классе `WebConfig` метод `generate_user_agent()` теперь может принимать строку, а не только последовательности строк.
 - Управление всеми заголовками вынесено в свойство `headers`.
@@ -48,6 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - По умолчанию убран интервал между запросами.
 
 ### 🗑️ Removed
+#### engine.bus
+- Методы генерации текстовых представлений и вывода в консоль.
+#### functions.data.dictionary
+- Функция `Merge()`.
 #### functions.filesystem
 - Функция `ListDir()`.
 

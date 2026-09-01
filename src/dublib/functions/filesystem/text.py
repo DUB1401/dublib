@@ -4,11 +4,11 @@ from typing import Literal, Sequence, overload
 from . import atomic_write
 
 @overload
-def read(path: PathLike[str] | str, split: Literal[True], strip: bool = False) -> list[str]: ...
+def read(path: PathLike[str] | str, split: Literal[True], strip_level: Literal[1, 2]) -> list[str]: ...
 @overload
-def read(path: PathLike[str] | str, split: Literal[False] = False, strip: bool = False) -> str: ...
+def read(path: PathLike[str] | str, split: Literal[False] = False, strip_level: Literal[0] = 0) -> str: ...
 
-def read(path: PathLike[str] | str, split: bool = False, strip: bool = False) -> str | list[str]:
+def read(path: PathLike[str] | str, split: bool = False, strip_level: Literal[0, 1, 2] = 0) -> str | list[str]:
 	"""
 	Считывает текстовый файл.
 
@@ -16,8 +16,8 @@ def read(path: PathLike[str] | str, split: bool = False, strip: bool = False) ->
 	:type path: PathLike[str] | str
 	:param split: Если активировано, файл будет разбит на набор строк по символу новой строки.
 	:type split: bool
-	:param strip: Если активировано, к каждой возвращаемой строке будет применён метод `strip()`.
-	:type strip: bool
+	:param strip: Уровень очистки от пробельных символов. 0 – отключён, 1 – применить `strip()` к каждой строке, 2 – дополнительно убрать пустые строки.
+	:type strip: Literal[0, 1, 2]
 	:return: Содержимое текстового файла в виде строки или набора строк.
 	:rtype: str | tuple[str]
 	:raises FileNotFoundError: Выбрасывается при отсутствии файла.
@@ -30,9 +30,13 @@ def read(path: PathLike[str] | str, split: bool = False, strip: bool = False) ->
 
 	TextLines: list[str] = Text.split("\n")
 
-	if strip:
+	if strip_level:
 		for Index in range(len(TextLines)):
-			TextLines[Index] = TextLines[Index].strip()
+			Buffer: str = TextLines[Index].strip()
+
+			if strip_level == 1: TextLines[Index] = Buffer
+			elif Buffer: TextLines[Index] = Buffer
+			
 
 	return TextLines if split else "\n".join(TextLines)
 
