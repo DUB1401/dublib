@@ -20,8 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Метод `get_important_position_named_parameter()` для получения флагов и ключей с обязательной позиции.
 #### engine.configurator
 - Асинхронный режим отслеживания изменений.
-#### functions.string
-- Добавлена функция `LowerDictionaryKeys()`, приводящая строковые ключи в нижний регистр.
+#### functions.dictionary
+- Функция `insert_item()` для вставки пары ключ-значение в словарь после определённого ключа.
+- Функция `lower_keys()`, приводящая строковые ключи в нижний регистр.
 #### web_requestor
 - Реализован оператор авторизации, управляющий заголовком _Authorization_.
 - Добавлена поддержка запросов `DELETE`.

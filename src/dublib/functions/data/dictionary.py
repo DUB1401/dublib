@@ -2,7 +2,32 @@ from typing import Any
 
 import more_itertools
 
-def insert_after_key(base_dictionary: dict, insertable_dictionary: dict, target_key: Any, overwrite: bool = False) -> dict:
+def insert_item(base_dictionary: dict, target_key: Any, item: tuple[Any, Any]) -> dict:
+	"""
+	Вставляет пару ключ-значение после определённого ключа.
+
+	:param base_dictionary: Базовый словарь, в который производится вставка.
+	:type base_dictionary: dict
+	:param target_key: Ключ, после которого необходимо разместить пару.
+	:type target_key: Any
+	:param item: Добавляемая пара..
+	:type item: tuple[Any, Any]
+	:return: Обработанный словарь.
+	:rtype: dict
+	:raises IndexError: Целевой ключ не найден.
+	"""
+
+	base_keys = list(base_dictionary.keys())
+	base_values = list(base_dictionary.values())
+
+	place_index: int = base_keys.index(target_key) + 1
+
+	base_keys.insert(place_index, item[0])
+	base_values.insert(place_index, item[1])
+
+	return dict(zip(base_keys, base_values))
+
+def insert_dictionary_after_key(base_dictionary: dict, insertable_dictionary: dict, target_key: Any, overwrite: bool = False) -> dict:
 	"""
 	Вставляет словарь после определённого ключа. При конфликте ключей приоритет расположения отдаётся порядку ключей из вставляемого словаря.
 
