@@ -454,10 +454,9 @@ class ParsedCommandData:
 			ParsedParameter = cast(_ParsedArgument | _ParsedKey, ParsedParameter)
 			ValueToReturn = ParsedParameter.value
 
-		if expected_type:
+		if expected_type and not isinstance(ValueToReturn, expected_type) and ValueToReturn is not None:
 			ReturnedType = type(ValueToReturn)
-			if ReturnedType is not expected_type and ValueToReturn is not None:
-				raise TypeError(f"Expected \"{expected_type}\", but on position {ReturnedType}.")
+			raise TypeError(f"Expected \"{expected_type}\", but on position {ReturnedType}.")
 			
 		return ValueToReturn
 
