@@ -74,12 +74,12 @@ class CachedFile:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, identificator: str | PathLike[str], chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, file_type: type[types.InputMedia] | None = None):
+	def __init__(self, identificator: PathLike[str] | str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, file_type: type[types.InputMedia] | None = None):
 		"""
 		Данные кэшированного файла.
 
 		:param identificator: Путь к файлу или его вирутальный идентификатор.
-		:type identificator: str | PathLike[str] 
+		:type identificator: PathLike[str] | str 
 		:param chat_id: ID чата с файлом.
 		:type chat_id: int
 		:param file_id: ID файла 
@@ -344,12 +344,12 @@ class TeleCache:
 				Storage[Identificator] = Object(Identificator, Cache["chat_id"], Cache["file_id"], Cache["message_id"], Cache["data"], Cache["type"])
 
 	@require_initialization
-	def __UploadFile(self, path: str | PathLike[str], attachment_type: type[types.InputMedia] | None = None) -> Cache:
+	def __UploadFile(self, path: PathLike[str] | str, attachment_type: type[types.InputMedia] | None = None) -> Cache:
 		"""
 		Кэширует файл.
 
 		:param path: Путь к файлу.
-		:type path: str | PathLike[str]
+		:type path: PathLike[str] | str
 		:param attachment_type: Тип вложения (по умолчанию `types.InputMediaDocument`).
 		:type attachment_type: type[types.InputMedia] | None
 		:raises RuntimeError: Выбрасывается при отсутствии привязки менеджера к боту Telegram.
@@ -380,14 +380,14 @@ class TeleCache:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, bot: TeleBot, cache_file_path: str | PathLike[str] | None = None,):
+	def __init__(self, bot: TeleBot, cache_file_path: PathLike[str] | str | None = None,):
 		"""
 		Менеджер кэша загружаемых в Telegram файлов.
 
 		:param bot: Бот Telegram.
 		:type bot: TeleBot
 		:param storage_path: Путь к файлу JSON для хранения данных. По умолчанию `.telecache.json`.
-		:type storage_path: str | PathLike[str] | None
+		:type storage_path: PathLike[str] | str | None
 		:raises IsADirectoryError: По переданному пути к файлу кэша находится директория.
 		"""
 
@@ -453,12 +453,12 @@ class TeleCache:
 	#==========================================================================================#
 
 	@require_initialization
-	def cache_real_file(self, path: str | PathLike[str], attachment_type: type[types.InputMedia] | None = None, data: dict | None = None) -> RealCachedFile:
+	def cache_real_file(self, path: PathLike[str] | str, attachment_type: type[types.InputMedia] | None = None, data: dict | None = None) -> RealCachedFile:
 		"""
 		Кэширует реальный файл.
 
 		:param path: Путь к файлу.
-		:type path: str | PathLike[str]
+		:type path: PathLike[str] | str
 		:param attachment_type: Тип вложения (по умолчанию `types.InputMediaDocument`).
 		:type attachment_type: type[types.InputMedia] | None
 		:param data: Словарь дополнительных данных.
@@ -489,12 +489,12 @@ class TeleCache:
 		self.__RealData = {}
 		self.save()
 
-	def get_real_cached_file(self, path: str | PathLike[str], autoupload_type: type[types.InputMedia] | None = None) -> RealCachedFile:
+	def get_real_cached_file(self, path: PathLike[str] | str, autoupload_type: type[types.InputMedia] | None = None) -> RealCachedFile:
 		"""
 		Возвращает данные кэша реального файла.
 
 		:param path: Путь к файлу.
-		:type path: str | PathLike[str]
+		:type path: PathLike[str] | str
 		:param autoupload_type: Если файл отсутствует в кэше, а тип указан, то он автоматически будет выгружен на сервера Telegram.
 		:type autoupload_type: type[types.InputMedia] | None
 		:raises FileNotFoundError: Выбрасывается при отсутствии файла.
@@ -507,24 +507,24 @@ class TeleCache:
 
 		return self.__RealData[str(path)]
 	
-	def has_real_cache(self, path: str | PathLike[str]) -> bool:
+	def has_real_cache(self, path: PathLike[str] | str) -> bool:
 		"""
 		Проверяет наличие реального файла в кэше.
 
 		:param path: Путь к файлу.
-		:type path: str | PathLike[str]
+		:type path: PathLike[str] | str
 		:return: Возвращает `True`, если указанный файл найден в кэше.
 		:rtype: bool
 		"""
 
 		return path in self.__RealData.keys()
 
-	def register_real_file(self, path: str | PathLike[str], chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, attachment_type: type[types.InputMedia] | None = None) -> RealCachedFile:
+	def register_real_file(self, path: PathLike[str] | str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, attachment_type: type[types.InputMedia] | None = None) -> RealCachedFile:
 		"""
 		Регистрирует в хранилище данные кэша реального файла.
 
 		:param path: Путь к файлу.
-		:type path: str | PathLike[str]
+		:type path: PathLike[str] | str
 		:param chat_id: ID чата.
 		:type chat_id: int
 		:param file_id: ID файла.
@@ -561,12 +561,12 @@ class TeleCache:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ РАБОТЫ С ВИРТУАЛЬНЫМИ ФАЙЛАМИ <<<<< #
 	#==========================================================================================#
 
-	def cache_virtual_file(self, path: str | PathLike[str], identificator: str, attachment_type: type[types.InputMedia] | None = None, data: dict | None = None) -> VirtualCachedFile:
+	def cache_virtual_file(self, path: PathLike[str] | str, identificator: str, attachment_type: type[types.InputMedia] | None = None, data: dict | None = None) -> VirtualCachedFile:
 		"""
 		Кэширует виртуальный файл.
 
 		:param path: Путь к файлу.
-		:type path: str | PathLike[str]
+		:type path: PathLike[str] | str
 		:param identificator: Идентификатор файла.
 		:type identificator: str
 		:param attachment_type: Тип вложения (по умолчанию `types.InputMediaDocument`).

@@ -6,7 +6,7 @@ import orjson
 from . import dictionary as dictionary
 from . import string as string
 
-def Copy(data: Any) -> Any:
+def deep_copy(data: Any) -> Any:
 	"""
 	Выполняет глубокое копирование объекта с автоматическим определением наилучшего метода.
 	
@@ -21,7 +21,7 @@ def Copy(data: Any) -> Any:
 	try: return orjson.loads(orjson.dumps(data))
 	except (orjson.JSONDecodeError, orjson.JSONEncodeError): return copy.deepcopy(data)
 
-def StringifyFloat(number: float, round_factor: int = 2) -> str:
+def stringify_float(number: float, round_factor: int = 2) -> str:
 	"""
 	Преобразует число с плавающей запятой в строку, отсекая `.0` в конце при наличии.
 
@@ -38,7 +38,7 @@ def StringifyFloat(number: float, round_factor: int = 2) -> str:
 
 	return String
 
-def StringToBool(value: str, literals: Sequence[str] = ("false", "0")) -> bool:
+def string_to_bool(value: str, literals: Sequence[str] = ("false", "0")) -> bool:
 	"""
 	Преобразует строку в логический тип, учитывая её содержимое.
 	
@@ -57,13 +57,13 @@ def StringToBool(value: str, literals: Sequence[str] = ("false", "0")) -> bool:
 	return bool(value)
 
 @overload
-def ToSequence(value: Any, target_type: type[list]) -> list: ...
+def to_sequence(value: Any, target_type: type[list]) -> list: ...
 @overload
-def ToSequence(value: Any, target_type: type[set]) -> set: ...
+def to_sequence(value: Any, target_type: type[set]) -> set: ...
 @overload
-def ToSequence(value: Any, target_type: type[tuple] = ...) -> tuple: ...
+def to_sequence(value: Any, target_type: type[tuple] = ...) -> tuple: ...
 
-def ToSequence(value: Any, target_type: type[list | set | tuple] = tuple) -> list | set | tuple:
+def to_sequence(value: Any, target_type: type[list | set | tuple] = tuple) -> list | set | tuple:
 	"""
 	Преобразует значение в итерируемый контейнерн целевого типа.
 
@@ -80,7 +80,7 @@ def ToSequence(value: Any, target_type: type[list | set | tuple] = tuple) -> lis
 	
 	return target_type((value,))
 
-def Zerotify(value: Any) -> Any:
+def zerotify(value: Any) -> Any:
 	"""
 	Преобразует значения, логически интерпретируемые в `False`, в тип `None`.
 

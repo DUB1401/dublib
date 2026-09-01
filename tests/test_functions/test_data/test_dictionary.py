@@ -1,36 +1,25 @@
 from dublib.functions import data
 
-def test_InsertAfterKey():
+def test_insert_after_ley():
 	FirstDict = {"1": 1, "2": 2, "3": 3}
 	SecondDict = {"3": 33, "4": 4}
 
-	Result = data.dictionary.InsertAfterKey(FirstDict, SecondDict, "1")
+	Result = data.dictionary.insert_after_ley(FirstDict, SecondDict, "1")
 	assert tuple(Result.keys())[1] == "3"
 	assert tuple(Result.values())[1] == 3
-	Result = data.dictionary.InsertAfterKey(FirstDict, SecondDict, "1", overwrite = True)
+	Result = data.dictionary.insert_after_ley(FirstDict, SecondDict, "1", overwrite = True)
 	assert tuple(Result.values())[1] == 33
 
-def test_LowerDictionaryKeys():
-	assert data.dictionary.LowerKeys({"AbC": 1, 34: "ACb"}) == {"abc": 1, 34: "ACb"}
+def test_lower_keys():
+	assert data.dictionary.lower_keys({"AbC": 1, 34: "ACb"}) == {"abc": 1, 34: "ACb"}
 
-def test_MergeDictionaries():
-	assert data.dictionary.Merge(
-		{"1": 1, "3": 3},
-		{"2": 2}
-	) == {"1": 1, "2": 2, "3": 3}
-	assert data.dictionary.Merge(
-		{"1": 1, "2": 2, "3": 3},
-		{"2": 4},
-		overwrite = True
-	) == {"1": 1, "2": 4, "3": 3}
-
-def test_ReplaceDictionaryKey():
-	assert data.dictionary.ReplaceKey(
+def test_replace_key():
+	assert data.dictionary.replace_key(
 		{"1": 1, "2": 2},
 		"2",
 		"3"
 	) == {"1": 1, "3": 2}
-	assert tuple(data.dictionary.ReplaceKey(
+	assert tuple(data.dictionary.replace_key(
 		{"1": 1, "2": 2, "3": 3},
 		"2",
 		"4"

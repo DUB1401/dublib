@@ -14,14 +14,14 @@ def deprecated(message: str | None = None):
 	def decorator(function):
 
 		@functools.wraps(function)
-		def Wrapper(*args, **kwargs):
+		def wrapper(*args, **kwargs):
 			Message = f" {message}" or ""
 			Function = FastStyler(function.__name__).decorate.bold
 			warnings.warn(f"{Function} is deprecated.{Message}", DeprecationWarning, stacklevel = 2)
 
 			return function(*args, **kwargs)
 		
-		return Wrapper
+		return wrapper
 	
 	return decorator
 
@@ -39,7 +39,7 @@ def run_before_method(method_name: str):
 	def decorator(function):
 
 		@functools.wraps(function)
-		def Wrapper(*args, **kwargs):
+		def wrapper(*args, **kwargs):
 			if args:
 				Object = args[0]
 				Method = getattr(Object, method_name, None)
@@ -48,6 +48,6 @@ def run_before_method(method_name: str):
 
 			return function(*args, **kwargs)
 		
-		return Wrapper
+		return wrapper
 	
 	return decorator

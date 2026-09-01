@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = True) -> bool:
+def check_python_minimal_version(major: int, minor: int, raise_exception: bool = True) -> bool:
 	"""
 	Проверяет, соответствует ли используемая версия Python минимальной требуемой.
 
@@ -22,7 +22,7 @@ def CheckPythonMinimalVersion(major: int, minor: int, raise_exception: bool = Tr
 
 	return True
 
-def Clear(clear_history: bool = True):
+def clear(clear_history: bool = True):
 	"""
 	Очищает терминал.
 
@@ -35,11 +35,13 @@ def Clear(clear_history: bool = True):
 	sys.stdout.write(Operation)
 	sys.stdout.flush()
 
-def Shutdown():
+def shutdown():
 	"""Выключает устройство."""
 	
-	if sys.platform == "linux":
-		subprocess.run(("sudo", "shutdown", "now"))
-		
-	elif sys.platform == "win32":
-		subprocess.run(("shutdown", "/s", "/t", "0"))
+	match sys.platform:
+		case"linux":
+			subprocess.run(("sudo", "shutdown", "now"))
+		case "win32":
+			subprocess.run(("shutdown", "/s", "/t", "0"))
+		case _:
+			raise RuntimeError("Unsuported platform to shutdown.")

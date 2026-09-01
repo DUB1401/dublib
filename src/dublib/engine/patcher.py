@@ -33,12 +33,12 @@ class Patch:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, path: str | PathLike[str]):
+	def __init__(self, path: PathLike[str] | str):
 		"""
 		Патч.
 
 		:param path: Путь к файлу.
-		:type path: str | PathLike[str]
+		:type path: PathLike[str] | str
 		"""
 
 		self.__Path = Path(path)

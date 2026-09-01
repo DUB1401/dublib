@@ -35,8 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### engine.bus
 - Удалены все методы генерации текстовых представлений и вывода в консоль.
 #### functions
+- Функции переименованы в соответствии с [PEP 8](https://peps.python.org/pep-0008).
+- Функции работы с файлами вынесены в подмодули `json`, `text` и `yaml`.
 - Функции работы со строками и словарями вынесены в подмодули `string` и `dictionary` соответственно.
 - Из названий функций работы со словарями удалено слово _Dictionary_.
+#### functions.data.dictionaries
+- Удалена функция `Merge()`.
 #### web_requestor
 - В классе `WebConfig` метод `generate_user_agent()` теперь может принимать строку, а не только последовательности строк.
 - Управление всеми заголовками вынесено в свойство `headers`.

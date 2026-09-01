@@ -2,7 +2,7 @@ from typing import Sequence
 
 _CYRYLLIC_CHARACTERS: set = set("абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
 
-def CheckForCyrillic(text: str) -> bool:
+def is_contains_cyrillic(text: str) -> bool:
 	"""
 	Проверяет, имеются ли кирилические символы в строке.
 
@@ -17,7 +17,7 @@ def CheckForCyrillic(text: str) -> bool:
 	
 	return False
 
-def СontainsAlpha(text: str) -> bool:
+def is_contains_alpha(text: str) -> bool:
 	"""
 	Проверяет, содержит ли строка хотя бы один буквенный символ.
 
@@ -32,7 +32,7 @@ def СontainsAlpha(text: str) -> bool:
 
 	return False
 
-def MultipleReplace(string: str, values: Sequence[str], new_value: str) -> str:
+def multiple_replace(string: str, values: Sequence[str], new_value: str) -> str:
 	"""
 	Поочердёно выполняет замену подстрок в строке на новое значение.
 
@@ -50,7 +50,7 @@ def MultipleReplace(string: str, values: Sequence[str], new_value: str) -> str:
 
 	return string
 
-def RemoveRecurringSubstrings(string: str, substring: str) -> str:
+def remove_recurring_substrings(string: str, substring: str) -> str:
 	"""
 	Удаляет из строки подряд идущие повторяющиеся подстроки.
 
@@ -66,7 +66,7 @@ def RemoveRecurringSubstrings(string: str, substring: str) -> str:
 
 	return string
 
-def StripAlpha(text: str) -> str:
+def strip_non_alpha(text: str) -> str:
 	"""
 	Удаляет из строки начальные и конечные небуквенные символы.
 

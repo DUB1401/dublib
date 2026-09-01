@@ -2,7 +2,7 @@ from typing import Any
 
 import more_itertools
 
-def InsertAfterKey(base_dictionary: dict, insertable_dictionary: dict, target_key: Any, overwrite: bool = False) -> dict:
+def insert_after_ley(base_dictionary: dict, insertable_dictionary: dict, target_key: Any, overwrite: bool = False) -> dict:
 	"""
 	Вставляет словарь после определённого ключа. При конфликте ключей приоритет расположения отдаётся порядку ключей из вставляемого словаря.
 
@@ -24,7 +24,7 @@ def InsertAfterKey(base_dictionary: dict, insertable_dictionary: dict, target_ke
 	if target_key not in BaseKeys:
 		raise KeyError(target_key)
 
-	FirstPart, SecondPart = more_itertools.split_after(BaseKeys, lambda Element: Element == target_key, maxsplit = 1)
+	FirstPart, SecondPart = more_itertools.split_after(BaseKeys, lambda element: element == target_key, maxsplit = 1)
 	Result: dict = {}
 
 	for FirstPartKey in FirstPart: Result[FirstPartKey] = base_dictionary[FirstPartKey]
@@ -39,7 +39,7 @@ def InsertAfterKey(base_dictionary: dict, insertable_dictionary: dict, target_ke
 
 	return Result
 
-def LowerKeys(data: dict) -> dict:
+def lower_keys(data: dict) -> dict:
 	"""
 	Приводит все строковые ключи словаря в нижний регистр.
 
@@ -51,27 +51,7 @@ def LowerKeys(data: dict) -> dict:
 
 	return {Key.lower() if type(Key) is str else Key: Value for Key, Value in data.items()}
 
-def Merge(base_dictionary: dict, mergeable_dictionary: dict, overwrite: bool = False) -> dict:
-	"""
-	Объединяет словари.
-
-	:param base_dictionary: Словарь, в который выполняется копирование.
-	:type base_dictionary: dict
-	:param mergeable_dictionary: Словарь, из котрого выполняется копирование.
-	:type mergeable_dictionary: dict
-	:param overwrite: Указывает, нужно ли перезаписывать значения конфликтующих ключей базового словаря. По умолчанию `False`.
-	:type overwrite: bool
-	:return: Словарь, образованный слиянием двух переданных словарей.
-	:rtype: dict
-	"""
- 
-	for key, value in mergeable_dictionary.items():
-		if overwrite or key not in base_dictionary:
-			base_dictionary[key] = value
-			
-	return base_dictionary
-
-def ReplaceKey(dictionary: dict, old_key: Any, new_key: Any) -> dict:
+def replace_key(dictionary: dict, old_key: Any, new_key: Any) -> dict:
 	"""
 	Заменяет ключ в словаре, сохраняя исходный порядок элементов.
 

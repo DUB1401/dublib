@@ -86,14 +86,14 @@ class Config[T: ConfigTemplate]:
 
 		return cls.__INSTANCES[args[0]]
 	
-	def __init__(self, path: str | PathLike[str], model: type[T]):
+	def __init__(self, path: PathLike[str] | str, model: type[T]):
 		"""
 		Контейнер конфигурации.
 
 		Может работать с файлами JSON и YAML. Определение происходит по расширению файла, в противном случае предпочтение отдаётся JSON.
 
 		:param path: Путь к файлу параметров. На данный момент поддерживается только JSON.
-		:type path: str | PathLike[str]
+		:type path: PathLike[str] | str
 		:param model: Модель для валидации конфигурации, унаследованная от `ConfigTemplate`.
 		:type model: type[ConfigTemplate]
 		"""
