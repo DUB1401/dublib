@@ -2,7 +2,7 @@ import gettext
 import os
 from typing import Callable, Sequence
 
-from ..functions.data import ToSequence
+from ..functions.data import to_sequence
 
 class GetText:
 	"""Абстракция управления GNU gettext."""
@@ -37,7 +37,7 @@ class GetText:
 		if path and not os.path.exists(path): raise FileNotFoundError(path)
 
 		GetText._DOMAIN = domain
-		GetText._LANGUAGES = ToSequence(languages)
+		GetText._LANGUAGES = to_sequence(languages)
 		GetText._PATH = path or "Locales"
 
 		try: GetText._METHOD = gettext.translation(GetText._DOMAIN, GetText._PATH, languages = GetText._LANGUAGES).gettext

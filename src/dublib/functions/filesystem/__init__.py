@@ -6,7 +6,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Sequence
 
-from ..data import ToSequence
+from ..data import to_sequence
 
 def atomic_write(path: PathLike[str] | str, data: bytes):
 	"""
@@ -55,7 +55,7 @@ def make_cwd_directories(directories: str | Sequence[str]):
 	:type directories: str | Sequence[str]
 	"""
 
-	for Name in ToSequence(directories):
+	for Name in to_sequence(directories):
 		os.makedirs(Name, exist_ok = True)
 
 def clear_directory(directory: PathLike[str] | str):

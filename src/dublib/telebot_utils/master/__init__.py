@@ -6,7 +6,7 @@ from telebot import TeleBot
 from urllib3.exceptions import ReadTimeoutError
 
 from ...core import LOGS_HANDLER
-from ...functions.data import ToSequence
+from ...functions.data import to_sequence
 from ..users import UserData
 
 #==========================================================================================#
@@ -108,7 +108,7 @@ class TeleMaster:
 		:raise requests.exceptions.ReadTimeout: Выбрасывается в случае превышения времени ожидания ответа от сервера.
 		"""
 
-		ChatsTuple = ToSequence(chats)
+		ChatsTuple = to_sequence(chats)
 		
 		if max_tries < 1:
 			raise ValueError("Max tries can't be less than 1.")
@@ -135,7 +135,7 @@ class TeleMaster:
 		:rtype: Exception | None
 		"""
 
-		MessagesList = ToSequence(messages, target_type = list)
+		MessagesList = to_sequence(messages, target_type = list)
 		ExceptionObject: Exception | None = None
 
 		if complex_request:

@@ -9,7 +9,7 @@ from curl_cffi import ProxySpec
 from curl_cffi import requests as curl_cffi_requests
 
 from ..core import LOGS_HANDLER
-from ..functions.data import ToSequence
+from ..functions.data import to_sequence
 from .config import WebConfig
 from .enums import Protocols, RequestsTypes, WebLibs
 from .proxy import Proxy
@@ -584,7 +584,7 @@ class WebRequestor:
 		"""
 		
 		if proxies:
-			ProxiesList = ToSequence(proxies, list)
+			ProxiesList = to_sequence(proxies, list)
 			Buffer = list(self.__Proxies)
 			Buffer += ProxiesList
 			self.__Proxies = tuple(Buffer)

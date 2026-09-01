@@ -2,7 +2,7 @@ import re
 from os import PathLike
 from pathlib import Path
 
-from ..functions.filesystem import ReadTextFile, WriteTextFile
+from ..functions.filesystem import text
 
 class Patch:
 	"""Патч."""
@@ -42,7 +42,7 @@ class Patch:
 		"""
 
 		self.__Path = Path(path)
-		self.__TextLines: list[str] = list(ReadTextFile(path, split = True))
+		self.__TextLines: list[str] = text.read(path, split = True)
 
 	def append_line(self, index: int, text: str):
 		"""
@@ -144,4 +144,4 @@ class Patch:
 	def save(self):
 		"""Сохраняет пропатченный файл."""
 
-		WriteTextFile(self.__Path, self.__TextLines)
+		text.write(self.__Path, self.__TextLines)

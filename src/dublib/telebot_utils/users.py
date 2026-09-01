@@ -17,8 +17,8 @@ from telebot import types
 
 from ..core import LOGS_HANDLER
 from ..exceptions import telebot_utils as Exceptions
-from ..functions.data import Copy, ToSequence
-from ..functions.filesystem import ReadJSON, WriteJSON
+from ..functions.data import deep_copy, to_sequence
+from ..functions.filesystem import json
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
@@ -129,7 +129,7 @@ class UserData:
 		:type key: str
 		"""
 
-		Flags = ToSequence(flags)
+		Flags = to_sequence(flags)
 		IsChanged = False
 
 		for Flag in Flags:
@@ -188,7 +188,7 @@ class UserData:
 		:type value: Any
 		"""
 
-		if type(value) in (dict, list): value = Copy(value)
+		if type(value) in (dict, list): value = deep_copy(value)
 		if key in self.__Data[property_type] and self.__Data[property_type][key] == value: return
 		self.__Data[property_type][key] = value
 		self.save()
@@ -308,7 +308,7 @@ class UserData:
 		:rtype: bool
 		"""
 
-		Flags = ToSequence(flags)
+		Flags = to_sequence(flags)
 
 		for Flag in Flags:
 			if Flag not in self.__Data["flags"]: return False
@@ -353,7 +353,7 @@ class UserData:
 		else: Data = self.__Data["data"][key]
 
 		# Для изменяемых объектов создание копии через сериализацию (быстрее глубокого копирования).
-		if copy and type(Data) in (dict, list): Data = Copy(Data)
+		if copy and type(Data) in (dict, list): Data = deep_copy(Data)
 
 		return Data
 
@@ -367,7 +367,7 @@ class UserData:
 		:rtype: bool
 		"""
 
-		Permissions = ToSequence(permissions)
+		Permissions = to_sequence(permissions)
 
 		for Permission in Permissions:
 			if Permission not in self.__Data["permissions"]: return False
@@ -408,7 +408,7 @@ class UserData:
 		"""
 
 		if self.__SuppressSaving: raise Exceptions.RefreshingBlocked()
-		Data = ReadJSON(self.__Path)
+		Data = json.read(self.__Path)
 
 		for Key in self.__Data.keys():
 			if Key not in Data.keys(): Data[Key] = self.__Data[Key]
@@ -496,7 +496,7 @@ class UserData:
 			self.__Manager.push_to_saving_queue(self)
 			return
 
-		WriteJSON(self.__Path, self.__ToSerializableDict(), pretty = self.__Manager.is_pretty_saving_enabled, atomic = self.__Manager.is_atomic_writes)
+		json.write(self.__Path, self.__ToSerializableDict(), pretty = self.__Manager.is_pretty_saving_enabled, atomic = self.__Manager.is_atomic_writes)
 		self.__DeltaHash = self.__CalculateHash()
 
 	def set_chat_forbidden(self, status: bool):

@@ -8,7 +8,7 @@ from pydantic import TypeAdapter
 from pydantic.dataclasses import dataclass
 from watchfiles import awatch, watch
 
-from ..functions.filesystem import ReadJSON, ReadYAML, WriteJSON, WriteYAML
+from ..functions.filesystem import json, yaml
 
 #==========================================================================================#
 # >>>>> ВСПОМОГАТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
@@ -125,8 +125,8 @@ class Config[T: ConfigTemplate]:
 		Data: dict | None = None
 
 		match self.__ConfigFile.suffix:
-			case ".yaml" | ".yml": Data = ReadYAML(self.path)
-			case _: Data = ReadJSON(self.path)
+			case ".yaml" | ".yml": Data = yaml.read(self.path)
+			case _: Data = json.read(self.path)
 
 		self.__Data = TypeAdapter(self.__Model).validate_python(Data)
 
@@ -138,8 +138,8 @@ class Config[T: ConfigTemplate]:
 		Data = TypeAdapter(self.__Model).dump_python(self.__Data)
 
 		match self.__ConfigFile.suffix:
-			case ".yaml" | ".yml": WriteYAML(self.path, Data)
-			case _: WriteJSON(self.path, Data)
+			case ".yaml" | ".yml": yaml.write(self.path, Data)
+			case _: json.write(self.path, Data)
 
 	def stop_watching(self):
 		"""

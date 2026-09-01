@@ -9,7 +9,7 @@ from typing import Any, cast
 from telebot import TeleBot, types
 
 from ..exceptions.telebot_utils import ChatNotSpecified, UnableCacheFile
-from ..functions.filesystem import ReadJSON, WriteJSON
+from ..functions.filesystem import json
 
 #==========================================================================================#
 # >>>>> ВСПОМОГАТЕЛЬНЫЕ СТРУКТУРЫ ДАННЫХ <<<<< #
@@ -310,7 +310,7 @@ class TeleCache:
 		"""Считывает данные кэша."""
 
 		if not os.path.exists(self.__StoragePath): return
-		JSON = ReadJSON(self.__StoragePath)
+		JSON = json.read(self.__StoragePath)
 
 		Determinations: dict[str, dict] = {
 			"real": {
@@ -417,7 +417,7 @@ class TeleCache:
 			"virtual": [Cache.to_dict() for Cache in self.__VirtualData.values()]
 		}
 
-		WriteJSON(self.__StoragePath, Buffer)
+		json.write(self.__StoragePath, Buffer)
 
 	def set_bot(self, bot: TeleBot | str):
 		"""

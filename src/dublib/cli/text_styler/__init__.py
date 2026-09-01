@@ -1,7 +1,7 @@
 from types import MappingProxyType
 from typing import Sequence, cast
 
-from ...functions.data import ToSequence
+from ...functions.data import to_sequence
 from . import codes, escapes
 from .fast_styler import FastStyler as FastStyler
 
@@ -93,7 +93,7 @@ class TextStyler:
 		:type autoreset: bool
 		"""
 
-		self.__Decorations: tuple[codes.Decorations, ...] | None = cast(tuple[codes.Decorations, ...], ToSequence(decorations)) if decorations else None
+		self.__Decorations: tuple[codes.Decorations, ...] | None = cast(tuple[codes.Decorations, ...], to_sequence(decorations)) if decorations else None
 		self.__TextColor = text_color
 		self.__BackgroundColor = background_color
 		self.__Autoreset = autoreset
@@ -145,7 +145,7 @@ class TextStyler:
 		:type decorations: Codes.Decorations | Sequence[Codes.Decorations] | None
 		"""
 
-		self.__Decorations = cast(tuple[codes.Decorations, ...], ToSequence(decorations)) if decorations else None
+		self.__Decorations = cast(tuple[codes.Decorations, ...], to_sequence(decorations)) if decorations else None
 
 	def set_text_color(self, text_color: codes.Colors | None):
 		"""

@@ -4,7 +4,7 @@ import ua_generator
 from ua_generator.user_agent import UserAgent
 
 from ...exceptions import web_requestor as Exceptions
-from ...functions.data import ToSequence
+from ...functions.data import to_sequence
 from . import constants
 from .authorization import Authorizator
 
@@ -125,9 +125,9 @@ class ImportantHeaders:
 		"""
 
 		self.__UserAgent = ua_generator.generate(
-			ToSequence(device) if device else None,
-			ToSequence(platform) if platform else None,
-			ToSequence(browsers) if browsers else None
+			to_sequence(device) if device else None,
+			to_sequence(platform) if platform else None,
+			to_sequence(browsers) if browsers else None
 		)
 
 	def remove(self, name: str, exception: bool = False):
