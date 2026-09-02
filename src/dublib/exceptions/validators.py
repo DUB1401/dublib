@@ -10,7 +10,5 @@ class ValidationError(Exception):
 		:param target_type: Тип, к которому происходило приведение.
 		:type target_type: type
 		"""
-
-		TypeName = target_type.__name__.split("_", maxsplit = 1)[-1]
-
-		super().__init__(f"Unable convert \"{value}\" to \"{TypeName}\" type.")
+		
+		super().__init__(f"Unable convert \"{value}\" to \"{target_type.__name__}\" type.")

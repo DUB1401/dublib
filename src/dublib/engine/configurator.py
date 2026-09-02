@@ -68,7 +68,7 @@ class Config[T: ConfigTemplate]:
 	# >>>>> СПЕЦИАЛЬНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __new__(cls: "type[Self]", *args, **kwargs) -> "Config":
+	def __new__(cls: "type[Self]", *args) -> "Config":
 		"""
 		Инициализирует новый объект или возвращает уже существующий (поддерживает множественные конфигурации).
 
@@ -78,11 +78,12 @@ class Config[T: ConfigTemplate]:
 		:rtype: Config
 		"""
 
-		if args[0] not in cls.__INSTANCES:
-			Instance = super().__new__(cls)
+		PosixConfigPath = Path(args[0]).as_posix()
+
+		if PosixConfigPath not in cls.__INSTANCES:
+			Instance = super().__new__(cls, *args)
 			Instance._IS_INITIALIZED = False
-			ConfigPath = Path(args[0])
-			cls.__INSTANCES[ConfigPath.as_posix()] = Instance
+			cls.__INSTANCES[PosixConfigPath] = Instance
 
 		return cls.__INSTANCES[args[0]]
 	

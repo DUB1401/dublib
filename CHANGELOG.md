@@ -46,6 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Управление всеми заголовками вынесено в свойство `headers`.
 - Оптимизированы попытки парсинга JSON внутри `WebResponse` через библиотеку [orjson](https://github.com/ijl/orjson).
 - По умолчанию убран интервал между запросами.
+#### validators
+- Базовый валидатор вынесен в подмодуль `base`, а сами валидаторы – в `types`.
+- Изменены рекомендации по именованию валидаторов.
 
 ### 🗑️ Removed
 #### engine.bus

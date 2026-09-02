@@ -41,7 +41,7 @@ class ProgressIndicator:
 	# >>>>> СПЕЦИАЛЬНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __new__(cls: "type[Self]", *args, **kwargs) -> "ProgressIndicator":
+	def __new__(cls: "type[Self]") -> "ProgressIndicator":
 		"""
 		Инициализирует новый объект или возвращает уже существующий.
 

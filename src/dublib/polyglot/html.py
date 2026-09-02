@@ -1,7 +1,7 @@
 import html
 import re
 from html.parser import HTMLParser
-from typing import Sequence
+from typing import Sequence, override
 
 #==========================================================================================#
 # >>>>> ВАЛИДАТОРЫ HTML <<<<< #
@@ -18,6 +18,7 @@ class _Validator(HTMLParser):
 		self.stack = []
 		self.errors = []
 
+	@override
 	def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]):
 		self.stack.append(tag)
 

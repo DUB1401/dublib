@@ -1,74 +1,16 @@
-from abc import ABC, abstractmethod
 from datetime import datetime
-from enum import Enum
-from pathlib import Path
-from typing import Generic, TypeVar, cast
+from pathlib import Path as PathlibPath
+from typing import cast, override
 
 import dateparser
 import validators
 from pathvalidate import is_valid_filepath
 
-from .exceptions.validators import ValidationError
+from .base import BaseValidator
 
-#==========================================================================================#
-# >>>>> БАЗОВЫЙ КЛАСС <<<<< #
-#==========================================================================================#
+class All(BaseValidator[str]):
 
-_PARSED_VALUE = TypeVar("_PARSED_VALUE")
-
-class BaseValidator(ABC, Generic[_PARSED_VALUE]):
-	"""Базовый валидатор строки."""
-
-	@staticmethod
-	@abstractmethod
-	def convert(value: str) -> _PARSED_VALUE:
-		"""
-		Конвертирует строку в значение определённого типа без проведения валидации.
-
-		:param value: Конвертируемая строка.
-		:type value: str
-		:return: Конвертированное значение.
-		:rtype: Any
-		"""
-
-		pass
-
-	@classmethod
-	def parse(cls, value: str) -> _PARSED_VALUE:
-		"""
-		Проводит валидацию строки и преобразует её в целевой тип.
-
-		:param value: Обрабатываемая строка.
-		:type value: str
-		:return: Результат преобразования.
-		:rtype: Any
-		:raises ValidationError: Ошибка валидации.
-		"""
-
-		if not cls.validate(value): raise ValidationError(value, cls)
-
-		return cls.convert(value)
-
-	@staticmethod
-	@abstractmethod
-	def validate(value: str) -> bool:
-		"""
-		Проверяет, соответствует ли строка критериям валидируемого типа.
-
-		:param value: Проверяемая строка.
-		:type value: str
-		:return: Возвращает `True`, если строка является валидным значением типа.
-		:rtype: bool
-		"""
-
-		pass
-
-#==========================================================================================#
-# >>>>> ВАЛИДАТОРЫ <<<<< #
-#==========================================================================================#
-
-class Validator_All(BaseValidator[str]):
-
+	@override
 	@staticmethod
 	def convert(value: str) -> str:
 		"""
@@ -82,6 +24,7 @@ class Validator_All(BaseValidator[str]):
 
 		return value
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -92,11 +35,14 @@ class Validator_All(BaseValidator[str]):
 		:return: Возвращает `True`, если строка является валидным значением типа.
 		:rtype: bool
 		"""
+
+		value # type: ignore
 
 		return True
 	
-class Validator_Alpha(BaseValidator[str]):
+class Alpha(BaseValidator[str]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> str:
 		"""
@@ -110,6 +56,7 @@ class Validator_Alpha(BaseValidator[str]):
 
 		return value
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -123,8 +70,9 @@ class Validator_Alpha(BaseValidator[str]):
 
 		return value.isalpha()
 	
-class Validator_Base64(BaseValidator[str]):
+class Base64(BaseValidator[str]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> str:
 		"""
@@ -138,6 +86,7 @@ class Validator_Base64(BaseValidator[str]):
 
 		return value
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -156,8 +105,9 @@ class Validator_Base64(BaseValidator[str]):
 
 		return False
 
-class Validator_Bool(BaseValidator[bool]):
+class Bool(BaseValidator[bool]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> bool:
 		"""
@@ -174,6 +124,7 @@ class Validator_Bool(BaseValidator[bool]):
 
 		return False
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -189,8 +140,9 @@ class Validator_Bool(BaseValidator[bool]):
 
 		return Buffer in ("true", "false")
 
-class Validator_Datetime(BaseValidator[datetime]):
+class Datetime(BaseValidator[datetime]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> datetime:
 		"""
@@ -204,6 +156,7 @@ class Validator_Datetime(BaseValidator[datetime]):
 
 		return cast(datetime, dateparser.parse(value))
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -222,8 +175,9 @@ class Validator_Datetime(BaseValidator[datetime]):
 
 		return False
 
-class Validator_Domain(BaseValidator[str]):
+class Domain(BaseValidator[str]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> str:
 		"""
@@ -237,6 +191,7 @@ class Validator_Domain(BaseValidator[str]):
 
 		return value
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -255,8 +210,9 @@ class Validator_Domain(BaseValidator[str]):
 
 		return False
 
-class Validator_Email(BaseValidator[str]):
+class Email(BaseValidator[str]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> str:
 		"""
@@ -270,6 +226,7 @@ class Validator_Email(BaseValidator[str]):
 
 		return value
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -288,8 +245,9 @@ class Validator_Email(BaseValidator[str]):
 
 		return False
 
-class Validator_Float(BaseValidator[float]):
+class Float(BaseValidator[float]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> float:
 		"""
@@ -303,6 +261,7 @@ class Validator_Float(BaseValidator[float]):
 
 		return float(value)
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -316,8 +275,9 @@ class Validator_Float(BaseValidator[float]):
 
 		return value.count("-") <= 1 and value.count(".") == 1 and value.replace(".", "").lstrip("-").isdigit()
 
-class Validator_Integer(BaseValidator[int]):
+class Integer(BaseValidator[int]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> int:
 		"""
@@ -331,6 +291,7 @@ class Validator_Integer(BaseValidator[int]):
 
 		return int(value)
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -344,8 +305,9 @@ class Validator_Integer(BaseValidator[int]):
 
 		return value.count("-") <= 1 and value.lstrip("-").isdigit()
 
-class Validator_IPv4(BaseValidator[str]):
+class IPv4(BaseValidator[str]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> str:
 		"""
@@ -359,6 +321,7 @@ class Validator_IPv4(BaseValidator[str]):
 
 		return value
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -377,8 +340,9 @@ class Validator_IPv4(BaseValidator[str]):
 
 		return False
 
-class Validator_IPv6(BaseValidator[str]):
+class IPv6(BaseValidator[str]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> str:
 		"""
@@ -392,6 +356,7 @@ class Validator_IPv6(BaseValidator[str]):
 
 		return value
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -410,8 +375,9 @@ class Validator_IPv6(BaseValidator[str]):
 
 		return False
 
-class Validator_Number(BaseValidator[float | int]):
+class Number(BaseValidator[float | int]):
 
+	@override
 	@staticmethod
 	def convert(value: str) -> float | int:
 		"""
@@ -425,6 +391,7 @@ class Validator_Number(BaseValidator[float | int]):
 
 		return float(value) if "." in value else int(value)
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -448,21 +415,23 @@ class Validator_Number(BaseValidator[float | int]):
 				return True
 			except ValueError: return False
 
-class Validator_Path(BaseValidator[Path]):
+class Path(BaseValidator[PathlibPath]):
 
+	@override
 	@staticmethod
-	def convert(value: str) ->  Path:
+	def convert(value: str) ->  PathlibPath:
 		"""
 		Конвертирует строку в значение определённого типа.
 
 		:param value: Конвертируемая строка.
 		:type value: str
 		:return: Конвертированное значение.
-		:rtype: Path
+		:rtype: pathlib.Path
 		"""
 
-		return Path(value)
+		return PathlibPath(value)
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -476,8 +445,9 @@ class Validator_Path(BaseValidator[Path]):
 
 		return is_valid_filepath(value)
 
-class Validator_UnsignedInteger(BaseValidator[int]):
+class UnsignedInteger(BaseValidator[int]):
 
+	@override
 	@staticmethod
 	def convert(value: str) ->  int:
 		"""
@@ -491,6 +461,7 @@ class Validator_UnsignedInteger(BaseValidator[int]):
 
 		return int(value)
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -504,8 +475,9 @@ class Validator_UnsignedInteger(BaseValidator[int]):
 
 		return value.isdigit()
 	
-class Validator_URL(BaseValidator[str]):
+class URL(BaseValidator[str]):
 
+	@override
 	@staticmethod
 	def convert(value: str) ->  str:
 		"""
@@ -519,6 +491,7 @@ class Validator_URL(BaseValidator[str]):
 
 		return value
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -537,21 +510,23 @@ class Validator_URL(BaseValidator[str]):
 
 		return False
 
-class Validator_ValidPath(BaseValidator[Path]):
+class ValidPath(BaseValidator[PathlibPath]):
 
+	@override
 	@staticmethod
-	def convert(value: str) ->  Path:
+	def convert(value: str) ->  PathlibPath:
 		"""
 		Конвертирует строку в значение определённого типа.
 
 		:param value: Конвертируемая строка.
 		:type value: str
 		:return: Конвертированное значение.
-		:rtype: Path
+		:rtype: pathlib.Path
 		"""
 
-		return Path(value)
+		return PathlibPath(value)
 	
+	@override
 	@staticmethod
 	def validate(value: str) -> bool:
 		"""
@@ -563,28 +538,4 @@ class Validator_ValidPath(BaseValidator[Path]):
 		:rtype: bool
 		"""
 
-		return Path(value).exists()
-
-#==========================================================================================#
-# >>>>> ПЕРЕЧИСЛЕНИЕ ВАЛИДАТОРОВ <<<<< #
-#==========================================================================================#
-
-class ValidableTypes(Enum):
-	"""Перечисление типов валидаторов."""
-
-	All = Validator_All
-	Alpha = Validator_Alpha
-	Base64 = Validator_Base64
-	Bool = Validator_Bool
-	Datetime = Validator_Datetime
-	Domain = Validator_Domain
-	Email = Validator_Email
-	Float = Validator_Float
-	Integer = Validator_Integer
-	IPv4 = Validator_IPv4
-	IPv6 = Validator_IPv6
-	Number = Validator_Number
-	Path = Validator_Path
-	UnsignedInteger = Validator_UnsignedInteger
-	URL = Validator_URL
-	ValidPath = Validator_ValidPath
+		return PathlibPath(value).exists()
