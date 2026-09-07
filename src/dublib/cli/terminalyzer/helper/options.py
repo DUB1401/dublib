@@ -6,6 +6,7 @@ class HelperOptions:
 
 	sort: bool = True
 	stylize: bool = True
+	parse_html: bool = True
 	typing: bool = True
 
 	indent: str = "\u0020" * 2

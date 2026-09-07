@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from prettytable import PLAIN_COLUMNS, PrettyTable
 
-from ...text_styler import FastStyler
+from ...text_styler import FastStyler, get_styled_text_from_html
 from ..commands.parameters import Argument, Flag, Key
 from .options import HelperOptions
 
@@ -153,7 +153,8 @@ class Helper:
 
 		else:
 			if position.description:
-				title += f": {position.description}"
+				description = get_styled_text_from_html(position.description) if self.options.parse_html else position.description
+				title += f": {description}"
 
 			info.append(title)
 
@@ -162,6 +163,7 @@ class Helper:
 				parameter_info += self.__build_parameter_label(parameter)
 
 				if parameter.description:
+					description = get_styled_text_from_html(parameter.description) if self.options.parse_html else position.description
 					parameter_info += f": {parameter.description}"
 
 				info.append(parameter_info)

@@ -1,6 +1,6 @@
 import logging
 
-from .cli.text_styler import FastStyler, GetStyledTextFromHTML
+from .cli.text_styler import FastStyler, get_styled_text_from_html
 
 class ColorFormatter(logging.Formatter):
 	"""Форматировщик вывода в консоль с поддержкой цветов."""
@@ -24,4 +24,4 @@ class ColorFormatter(logging.Formatter):
 		return Message
 
 LOGS_HANDLER = logging.StreamHandler()
-LOGS_HANDLER.setFormatter(ColorFormatter(GetStyledTextFromHTML("<b>[%(name)s]</b> %(levelname)s: %(message)s")))
+LOGS_HANDLER.setFormatter(ColorFormatter(get_styled_text_from_html("<b>[%(name)s]</b> %(levelname)s: %(message)s")))

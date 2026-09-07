@@ -16,7 +16,7 @@ _SupportedTags = MappingProxyType({
 	"s": (escapes.Decorations.Throughline, escapes.Drops.DISABLE_THROUGHLINED)
 })
 
-def GetStyledTextFromHTML(text: str) -> str:
+def get_styled_text_from_html(text: str) -> str:
 		"""
 		Преобразовывает теги HTML в управляющие последовательности ANSI.
 
