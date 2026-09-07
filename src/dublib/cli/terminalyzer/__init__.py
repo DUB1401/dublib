@@ -1,29 +1,19 @@
-import logging
 import sys
-from collections.abc import Sequence
-from typing import cast
+from typing import TYPE_CHECKING, Sequence
 
-from ... import exceptions
-from ...core import LOGS_HANDLER
-from ...validators import ValidableTypes as ValidableTypes
-from .command.definition import Command
-from .command.parser import CommandParser, ParsedCommandData
+from ...functions.data import to_sequence
+from .commands.group import ModelsGroup
+from .commands.model import CommandModel
 from .helper import Helper
+from .parser import CommandParser
 
-#==========================================================================================#
-# >>>>> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ЛОГГИРОВАНИЯ <<<<< #
-#==========================================================================================#
+if TYPE_CHECKING:
+	from .parser.entitites import CommandEntity
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.addHandler(LOGS_HANDLER)
-LOGGER.setLevel(logging.INFO)
-
-#==========================================================================================#
-# >>>>> ОСНОВНОЙ КЛАСС <<<<< #
-#==========================================================================================#
+__all__ = ["ModelsGroup", "Terminalyzer", "CommandModel"]
 
 class Terminalyzer:
-	"""Обработчик консольных параметров."""
+	"""Обработчик команд."""
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА <<<<< #
@@ -31,133 +21,74 @@ class Terminalyzer:
 
 	@property
 	def helper(self) -> Helper:
-		"""Настройки модуля помощи."""
+		"""Моудль помощи."""
 
-		return self.__Helper
+		return self.__helper
 
 	#==========================================================================================#
-	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ВАЛИДАЦИИ ОПИСАНИЙ КОМАНД <<<<< #
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __CheckSinglePositionalParametersDescriptionMissing(self, command: Command):
+	def __find_model(self, parameters: tuple[str, ...]) -> CommandModel | None:
 		"""
-		Проверяет параметры позиций команд на предмет дублирования описаний в случае установки лишь одного параметра для позиции. Результат выводит в формате предупреждений.
+		Производит поиск соответствующей параметрам модели команды.
 
-		:param command: Определение команды.
-		:type command: Command
-		"""
-
-		for CurrentPosition in command.positions:
-			if CurrentPosition.description and len(CurrentPosition.parameters) == 1 and CurrentPosition.parameters[0].description:
-				LOGGER.warning(f"Command: \"{command.name}\". Parameter description suppressed by position description on \"{CurrentPosition.name}\".")
-
-	def __CheckCommandForEmptyPositions(self, command: Command):
-		"""
-		Проверяет команду на наличие пустых позиций.
-
-		:param command: Определение команды.
-		:type command: Command
-		:raises Exceptions.CLI.Terminalyzer.EmptyPosition: Для позиции не описан ни один параметр.
+		:param parameters: Последовательность строк, представляющих команду.
+		:type parameters: tuple[str, ...]
+		:return: Модель команды.
+		:rtype: CommandModel | None
 		"""
 
-		for CurrentPosition in command.positions:
-			if not CurrentPosition.parameters:
-				raise exceptions.cli.terminalyzer.EmptyPosition(command.name, CurrentPosition.name)
+		for group in self.__groups:
+			for model in group.models:
+				if model.indentificator.match(parameters):
+					return model
 
-		return command
-
-	def __CheckCommandsUniqueness(self, commands: list[Command]):
-		"""
-		Проверяет уникальность переданных для проверки команд.
-
-		:param commands: Список команд.
-		:type commands: list[Command]
-		:raises Exceptions.CLI.Terminalyzer.MultipleCommandDefinition: Множественное определение команды.
-		"""
-
-		CommandsNames = tuple(CurrentCommand.name for CurrentCommand in commands)
-		for Name in CommandsNames:
-			if CommandsNames.count(Name) > 1:
-				raise exceptions.cli.terminalyzer.MultipleCommandDefinition(Name)
-
-	def __ValidateCommandsDefinitions(self, commands: list[Command]):
-		"""
-		Проводит валидацию определений команд.
-
-		:param command: Список определений команд.
-		:type command: list[Command]
-		:raises Exceptions.CLI.Terminalyzer.EmptyPosition: Для позиции не описан ни один параметр.
-		:raises Exceptions.CLI.Terminalyzer.MultipleCommandDefinition: Множественное определение команды.
-		"""
-
-		self.__CheckCommandsUniqueness(commands)
-
-		for CurrentCommand in commands:
-			self.__CheckSinglePositionalParametersDescriptionMissing(CurrentCommand)
-			self.__CheckCommandForEmptyPositions(CurrentCommand)
+		return None
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, input_parameters: Sequence[str] | None = None):
+	def __init__(self):
+		"""Обработчик команд."""
+
+		self.__helper = Helper()
+		self.__groups: tuple["ModelsGroup", ...] = ()
+
+	def set_commands_groups(self, groups: ModelsGroup | Sequence[ModelsGroup]):
 		"""
-		Обработчик консольных параметров.
+		Задаёт последовательность групп команд. Последовательность будет преобразована в кортеж для защиты от внешнего изменения.
 
-		:param input_parameters: Последовательность параметров команды, первым из которых является названия. По умолчанию берётся из *sys.argv* скрипта.
-		:type input_parameters: Sequence[str] | None
+		:param groups: Последовательность групп команд.
+		:type groups: ModelsGroup | Sequence[ModelsGroup]
 		"""
 
-		self.set_input(input_parameters)
-		
-		self.__Helper = Helper()
+		self.__groups = to_sequence(groups)
 
-	def check_commands(self, commands: list[Command]) -> ParsedCommandData | None:
+	def parse_parameters(self, parameters: Sequence[str] | None = None) -> "CommandEntity | None":
 		"""
-		Проверяет текущую команду на соответствие одному из переданных описаний.
+		Парсит параметры команды, представленные последовательностью строк. Если команда не передана, будут обработаны аргументы точки запуска скрипта Python.
 
-		:param commands: Список описаний команд.
-		:type commands: list[Command]
-		:return: При успешной проверке парсит данные команды и возвращает их.
-		:rtype: ParsedCommandData | None
-		:raises Exceptions.CLI.Terminalyzer.EmptyPosition: Для позиции не описан ни один параметр.
-		:raises Exceptions.CLI.Terminalyzer.MultipleCommandDefinition: Множественное определение команды.
-		"""
-		
-		commands = commands.copy()
-		if not self.__CommandName: return None
+		Для получения последовательности из строки рекомендуется использовать `shlex.split()`.
 
-		self.__ValidateCommandsDefinitions(commands)
-		if self.__Helper.is_enabled: commands.append(self.__Helper.command)
-		CommandData: ParsedCommandData | None = None
- 
-		self.__CheckCommandsUniqueness(commands)
-
-		for CurrentCommand in commands:
-			if CurrentCommand.name == self.__CommandName:
-				CommandData = CommandParser(CurrentCommand, self.__Parameters).parse()
-				break
-
-		if self.__Helper.is_enabled and CommandData and CommandData.name == "help":
-			if CommandData.arguments:
-				CommandName = cast(str, CommandData.arguments[0])
-				self.__Helper.generate_help_command(commands, CommandName, CommandData.check_flag("-t"))
-			else: self.__Helper.generate_help_list(commands)
-		
-		return CommandData
-
-	def set_input(self, input_parameters: Sequence[str] | None):
-		"""
-		Задаёт последовательность параметров, из которых будут парситься данные команды.
-
-		:param parameters: Последовательность параметров команды, первым из которых является названия. По умолчанию берётся из *sys.argv* скрипта.
+		:param parameters: Последовательность строк, представляющих команду.
 		:type parameters: Sequence[str] | None
+		:return: Сущность команды или `None`, если не удалось сопаставить параметры ни с одной моделью.
+		:rtype: CommandEntity | None
 		"""
 
-		self.__Input = list(input_parameters) if input_parameters else sys.argv[1:]
+		if parameters is None:
+			parameters = tuple(sys.argv[1:])
+		else:
+			parameters = tuple(parameters)
 
-		self.__CommandName = None
-		self.__Parameters: tuple = ()
+		if not parameters:
+			return None
 
-		if self.__Input: self.__CommandName = self.__Input[0]
-		if len(self.__Input) > 1: self.__Parameters = tuple(self.__Input[1:])
+		model: "CommandModel | None" = self.__find_model(parameters)
+
+		if not model:
+			return None
+
+		return CommandParser(model, parameters).parse()

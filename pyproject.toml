@@ -72,12 +72,11 @@ files = ["src"]
 include = ["src/*", "tests/*"]
 
 [tool.ruff.lint]
-select = ["A", "ARG", "C", "E", "F", "I"]
-extend-select = ["N"] 
+select = ["A", "ARG", "C", "E", "F", "I", "N818"]
 ignore = ["E701", "E501"]
 
 [tool.ruff.lint.per-file-ignores]
-"!dublib/functions/**.py" = ["N"]
+"dublib/functions/**.py" = ["N"]
 "tests/*" = ["S101"]
 
 [tool.ruff.lint.isort]
