@@ -337,7 +337,7 @@ class CommandEntity:
 
 		:param position_name: Имя позиции.
 		:type position_name: str
-		:param not_found_error: Указывает, выбрасывать ли исключение, если ключ не активирован.
+		:param not_found_error: Указывает, выбрасывать ли исключение, если позиция не найдена.
 		:type not_found_error: bool
 		:return: Сущность параметра позиции или `None` при пустой позиции.
 		:rtype: ArgumentEntity | FlagEntity | KeyEntity | None
@@ -352,6 +352,32 @@ class CommandEntity:
 			return None
 
 		return self.__positions[position_name].content
+
+	@overload
+	def get_position_named_parameter(self, position_name: str, not_found_error: Literal[True] = True) -> FlagEntity | KeyEntity: ...
+	@overload
+	def get_position_named_parameter(self, position_name: str, not_found_error: Literal[False] = False) -> FlagEntity | KeyEntity | None: ...
+
+	def get_position_named_parameter(self, position_name: str, not_found_error: bool = False) -> FlagEntity | KeyEntity | None:
+		"""
+		Возвращает сущность именованного параметра позиции.
+
+		:param position_name: Имя позиции.
+		:type position_name: str
+		:param not_found_error: Указывает, выбрасывать ли исключение, если позиция не найдена.
+		:type not_found_error: bool
+		:return: Сущность именованного параметра позиции или `None` при пустой позиции.
+		:rtype: FlagEntity | KeyEntity | None
+		:raises PositionNotFoundError: Позиция не найдена.
+		:raises TypeError: На позиции находится сущность аргумента.
+		"""
+
+		parameter_entity = self.get_position_parameter(position_name, not_found_error)
+
+		if isinstance(parameter_entity, ArgumentEntity):
+			raise TypeError("Unnamed parameter on position.")
+
+		return parameter_entity
 
 	@overload
 	def get_position_value[T: SUPPORTED_TYPES](self, position_name: str, expected_type: type[T], important: Literal[True]) -> T: ...

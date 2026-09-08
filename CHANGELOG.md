@@ -1,19 +1,24 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+Все значимые изменения проекта будут задокументированы в этом файле.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), данный проект соответствует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+Для визуальной категоризации изменений в данном файле используются эмодзи согласно [gitmoji](https://gitmoji.dev).
 
 ## [Unreleased]
 
-### ✏️ Changed
+### ✨ Добавлено
+#### cli.terminalyzer
+- Метод `get_position_named_parameter()` для получения сущностей гарантированно именованных параметров позиции.
+
+### ⚡️ Изменено
 #### cli.terminalyzer
 - Для сущностей флагов снова возвращается основное имя флага вместо `True`.
 
 ## [0.30.0] - 2026-09-08
 
-### 🚀 Added
+### ✨ Добавлено
 - Поддержка документации в формате **Markdown**.
 #### cli
 - Модуль `progress_indicator` для индикации прогресса в терминале на основе протокола **OSC 9;4**.
@@ -37,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Добавлена поддержка запросов `DELETE`.
 - Заданный интервал между запросами теперь выдерживается автоматически.
 
-### ✏️ Changed
+### ⚡️ Изменено
 - Минимальная поддерживаемая версия **Python** теперь 3.12.
 - Модули переименованы в соответствии с [PEP 8](https://peps.python.org/pep-0008).
 - Исправлено множество затенений встроенных ключевых компонентов Python, в связи с чем переименованы некоторые аргументы.
@@ -61,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Базовый валидатор вынесен в подмодуль `base`, а сами валидаторы – в `types`.
 - Изменены рекомендации по именованию валидаторов.
 
-### 🗑️ Removed
+### 🔥 Удалено
 #### engine.bus
 - Методы генерации текстовых представлений и вывода в консоль.
 #### functions.data.dictionary
@@ -69,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### functions.filesystem
 - Функция `ListDir()`.
 
-### 🛠️ Fixed
+### 🐛 Исправлено
 #### cli.terminalyzer
 - При ожидании пути возникала ошибка сравнения типа `Path` и его производных.
 #### web_requestor
@@ -78,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.29.0] - 2026-08-05
 
-### 🚀 Added
+### ✨ Добавлено
 #### Functions.Data
 - Добавлена функция `InsertDictionaryAfterKey()` для вставки одного словаря внутрь другого после определённого ключа.
 #### Functions.System
@@ -88,7 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - В `WebResponse` реализовано хранилище заголовков ответа.
 - Добавлен метод для разрешения запросов **Client Hints**, а также режим их автоматическоро разрешения при выполнении запросов.
 
-### ✏️ Changed
+### ⚡️ Изменено
 - Модуль `Methods` переименован в `Functions`.
 #### Functions.System
 - Функция `Clear()` теперь использует ANSI-коды вместо вызова системных утилит.
@@ -98,19 +103,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Для генерации заголовка _User-Agent_ и **Client Hints** применена библиотека [ua-generator](https://github.com/iamdual/ua-generator).
 - Код 404 удалён из считаемых результатом успешного выполнения запроса.
 
-### 🛠️ Fixed
+### 🐛 Исправлено
 #### Validators
 - Невозможно импортировать исключения модуля `Validators`.
 #### WebRequestor
 - Установка целочисленных значений в заголовок запроса приводила к сбою.
 
-### 🔒 Security
+### 🔒️ Безопасность
 - Заменены устаревшие вызовы `os.system()` на `subprocess.run()`.
 
 ## [0.28.5] - 2026-07-22
 
-### 🚀 Added
+### ✨ Добавлено
 - Для `Methods.System` и `Methods.Decorators` теперь поставляется документация.
 
-### ✏️ Changed
+### ⚡️ Изменено
 - Модуль `Validators` вынесен в корень и более не привязан к `CLI`.
