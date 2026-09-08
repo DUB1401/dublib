@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "dublib"
-version = "0.30.0"
+version = "0.30.1"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}

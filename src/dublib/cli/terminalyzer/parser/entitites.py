@@ -48,23 +48,20 @@ class FlagEntity:
 		return self.__parameter
 
 	@property
-	def value(self) -> bool:
-		"""Состояние активации флага."""
+	def value(self) -> str:
+		"""Основное имя флага."""
 
-		return self.__value
+		return self.__parameter.name
 
-	def __init__(self, parameter: "Flag", value: bool):
+	def __init__(self, parameter: "Flag"):
 		"""
 		Сущность аргумента.
 
 		:param parameter: Параметр.
 		:type parameter: Flag
-		:param value: Значение ключа.
-		:type value: bool
 		"""
 
 		self.__parameter = parameter
-		self.__value = value
 
 class KeyEntity:
 	"""Сущность ключа."""
@@ -375,7 +372,7 @@ class CommandEntity:
 		:type expected_type: type[SUPPORTED_TYPES] | None
 		:param important: Указывает, должна ли позиция обязательно иметь значение.
 		:type important: bool
-		:return: Параметр позиции или `None` при пустой позиции. Для флага возвращает статус активации.
+		:return: Параметр позиции или `None` при пустой позиции. Для флага возвращает основное имя.
 		:rtype: SUPPORTED_TYPES | None
 		:raises ImportantPositionEmptyError: Для обязательной позиции не задан параметр.
 		:raises PositionNotFoundError: Позиция не найдена.

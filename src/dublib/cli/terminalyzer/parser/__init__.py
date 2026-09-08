@@ -113,7 +113,7 @@ class CommandParser:
 
 		for flag in base.flags:
 			if parameter == flag.name or parameter in flag.aliases:
-				self.__add_base_position_parameter(index, FlagEntity(flag, True))
+				self.__add_base_position_parameter(index, FlagEntity(flag))
 				return
 		
 		for key in base.keys:
@@ -142,7 +142,7 @@ class CommandParser:
 			
 			for flag in position.flags:
 				if parameter == flag.name or parameter in flag.aliases:
-					self.__lock_position(position.name, index, FlagEntity(flag, True))
+					self.__lock_position(position.name, index, FlagEntity(flag))
 					return
 			
 			for key in position.keys:
