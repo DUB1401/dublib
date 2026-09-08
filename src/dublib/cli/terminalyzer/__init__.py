@@ -4,37 +4,33 @@ from typing import TYPE_CHECKING, Sequence
 from ...functions.data import to_sequence
 from .commands.group import ModelsGroup
 from .commands.model import CommandModel
-from .helper import Helper
 from .parser import CommandParser
 
 if TYPE_CHECKING:
 	from .parser.entitites import CommandEntity
 
-__all__ = ["ModelsGroup", "Terminalyzer", "CommandModel"]
+__all__ = ["ModelsGroup", "Terminalyzer"]
 
 class Terminalyzer:
 	"""Обработчик команд."""
 
-	#==========================================================================================#
-	# >>>>> СВОЙСТВА <<<<< #
-	#==========================================================================================#
-
 	@property
-	def helper(self) -> Helper:
-		"""Моудль помощи."""
+	def groups(self) -> tuple[ModelsGroup, ...]:
+		"""Последовательность групп моделей команд."""
 
-		return self.__helper
+		return self.__groups
 
-	#==========================================================================================#
-	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
-	#==========================================================================================#
+	def __init__(self):
+		"""Обработчик команд."""
 
-	def __find_model(self, parameters: tuple[str, ...]) -> CommandModel | None:
+		self.__groups: tuple["ModelsGroup", ...] = ()
+
+	def find_model(self, parameters: Sequence[str]) -> CommandModel | None:
 		"""
 		Производит поиск соответствующей параметрам модели команды.
 
 		:param parameters: Последовательность строк, представляющих команду.
-		:type parameters: tuple[str, ...]
+		:type parameters: Sequence[str]
 		:return: Модель команды.
 		:rtype: CommandModel | None
 		"""
@@ -45,16 +41,6 @@ class Terminalyzer:
 					return model
 
 		return None
-
-	#==========================================================================================#
-	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
-	#==========================================================================================#
-
-	def __init__(self):
-		"""Обработчик команд."""
-
-		self.__helper = Helper()
-		self.__groups: tuple["ModelsGroup", ...] = ()
 
 	def set_commands_groups(self, groups: ModelsGroup | Sequence[ModelsGroup]):
 		"""
@@ -86,7 +72,7 @@ class Terminalyzer:
 		if not parameters:
 			return None
 
-		model: "CommandModel | None" = self.__find_model(parameters)
+		model: "CommandModel | None" = self.find_model(parameters)
 
 		if not model:
 			return None

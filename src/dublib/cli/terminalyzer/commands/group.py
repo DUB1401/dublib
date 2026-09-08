@@ -1,4 +1,4 @@
-from typing import Literal, Sequence, overload
+from typing import Sequence
 
 from .... import exceptions
 from ....functions.data import to_sequence
@@ -14,10 +14,10 @@ class ModelsGroup:
 	#==========================================================================================#
 
 	@property
-	def is_supergroup(self) -> bool:
-		"""Соятояние: является ли контейнер супергруппой."""
+	def supergroup(self) -> str | None:
+		"""Имя супергруппы."""
 
-		return self.__is_supergroup
+		return self.__supergroup
 
 	@property
 	def models(self) -> tuple["CommandModel", ...]:
@@ -86,19 +86,14 @@ class ModelsGroup:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	@overload
-	def __init__(self, name: str, supergroup: Literal[True] = True): ...
-	@overload
-	def __init__(self, name: str | None = None, supergroup: Literal[False] = False): ...
-
-	def __init__(self, name: str | None = None, supergroup: bool = False):
+	def __init__(self, name: str | None = None, supergroup: str | None = None):
 		"""
 		Группа комманд.
 
 		:param name: Имя группы.
 		:type name: str | None
-		:param supergroup: Указывает, считать ли группу супергруппой, в которой имя группы требуется для обращения команд по примеру: `{group} {command} {parameters}`.
-		:type supergroup: bool
+		:param supergroup: Указывает идентификатор супергруппы, используемый для обращения к командам группы по шаблону: `{supergroup} {command} {parameters}`.
+		:type supergroup: str
 		:raises ValueError: Супергруппа должна иметь имя.
 		"""
 
@@ -106,7 +101,7 @@ class ModelsGroup:
 			raise ValueError("Supergroup must have name.")
 
 		self.__name: str | None = name
-		self.__is_supergroup: bool = supergroup
+		self.__supergroup: str | None = supergroup
 
 		self.__commands: dict[str, "CommandModel"] = {}
 

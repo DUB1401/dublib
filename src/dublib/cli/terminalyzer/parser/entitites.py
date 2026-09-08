@@ -134,6 +134,16 @@ class CommandEntity:
 	#==========================================================================================#
 
 	@property
+	def arguments(self) -> tuple[SUPPORTED_TYPES, ...]:
+		"""
+		Последовательность значений всех аргументов команды.
+
+		Сначала идут аргументы позиций в порядке их объявления, затем базовые аргументы.
+		"""
+
+		return self.__arguments_values
+
+	@property
 	def model(self) -> "CommandModel":
 		"""Модель команды."""
 
@@ -184,6 +194,28 @@ class CommandEntity:
 
 		return names
 
+	def __get_arguments(self) -> tuple[SUPPORTED_TYPES, ...]:
+		"""
+		Строит последовательность значений всех аргументов команды.
+
+		Сначала идут аргументы позиций в порядке их объявления, затем базовые аргументы.
+
+		:return: Последовательность значений всех аргументов команды.
+		:rtype: tuple[SUPPORTED_TYPES, ...]
+		"""
+
+		arguments: list[ArgumentEntity] = []
+		
+		for position in self.__positions.values():
+			parameter = position.content
+
+			if isinstance(parameter, ArgumentEntity):
+				arguments.append(parameter)
+
+		arguments.extend(parameter for parameter in self.__base if isinstance(parameter, ArgumentEntity))
+
+		return tuple(argument.value for argument in arguments)
+
 	def __get_parameters_entities_type[T: ArgumentEntity | FlagEntity | KeyEntity](self, entity_type: type[T]) -> list[T]:
 		"""
 		Возвращает последовательность сущностей параметров определённого типа.
@@ -212,7 +244,7 @@ class CommandEntity:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, model: "CommandModel", base: Sequence["ArgumentEntity | FlagEntity | KeyEntity"], positions: Sequence["PositionEntity"]):
+	def __init__(self, model: "CommandModel", base: Sequence[ArgumentEntity | FlagEntity | KeyEntity], positions: Sequence[PositionEntity]):
 		"""
 		Сущность команды.
 
@@ -227,8 +259,10 @@ class CommandEntity:
 		"""
 
 		self.__model: "CommandModel" = model
-		self.__base: Sequence["ArgumentEntity | FlagEntity | KeyEntity"] = base
+		self.__base: tuple["ArgumentEntity | FlagEntity | KeyEntity", ...] = tuple(base)
 		self.__positions: dict[str, "PositionEntity"] = {position.position.name: position for position in positions}
+
+		self.__arguments_values: tuple[SUPPORTED_TYPES, ...] = self.__get_arguments()
 
 	def check_flag(self, flag: str) -> bool:
 		"""

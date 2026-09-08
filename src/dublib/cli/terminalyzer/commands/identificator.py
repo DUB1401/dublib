@@ -12,8 +12,8 @@ class CommandIdentificator:
 	def values(self) -> tuple[str] | tuple[str, str]:
 		"""Кортеж из имени супергруппы (если включена) и команды."""
 
-		if self.__model.group.is_supergroup and self.__model.group.name:
-			return (self.__model.group.name, self.__model.name)
+		if self.__model.group.supergroup:
+			return (self.__model.group.supergroup, self.__model.name)
 
 		return (self.__model.name,)
 

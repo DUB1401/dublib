@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 
 from prettytable import PLAIN_COLUMNS, PrettyTable
 
@@ -238,7 +238,7 @@ class Helper:
 		"""
 		Генерирует список команд группы.
 
-		:param group: Группа команд.
+		:param group: Группа моделей команд.
 		:type group: ModelsGroup
 		:return: Строка, представляющая таблицу со списком команд и описанием.
 		:rtype: str
@@ -249,8 +249,10 @@ class Helper:
 		if self.options.sort:
 			models = tuple(sorted(models, key = lambda model: model.name))
 			
-		super_command = f"{group.name} " if group.is_supergroup else ""
-		table_data: dict[str, str] = {super_command + model.name: model.description or "" for model in models}
+		table_data: dict[str, str] = {
+			model.indentificator.as_str(): model.description or ""
+			for model in models
+		}
 
 		table_generator = PrettyTable()
 		table_generator.set_style(PLAIN_COLUMNS)
@@ -261,3 +263,25 @@ class Helper:
 			table_generator.add_row(list(command_data))
 
 		return table_generator.get_string()
+
+	def generate_groups_list(self, groups: Sequence["ModelsGroup"]) -> str:
+		"""
+		Генерирует список команд групп моделей команд, объединяя группы с одинаковыми именами и выводя заголовки.
+
+		:param groups: Последовательность групп моделей команд.
+		:type groups: Sequence[ModelsGroup]
+		:return: Строка, представляющая таблицы групп
+		:rtype: str
+		"""
+
+		show_headers: bool = len(groups) > 1
+		groups_lists: list[str] = []
+
+		for group in groups:
+			if show_headers and group.name:
+				name = FastStyler(group.name).decorate.bold if self.options.stylize else group.name
+				groups_lists.append(self.options.indent * 4 + name)
+
+			groups_lists.append(self.generate_group_list(group))
+
+		return "\n".join(groups_lists)
