@@ -31,7 +31,7 @@ def test_merge():
 	try: 
 		ResultOne.value
 		IsExceptionRaised = False
-	except BusExceptions.ValueNotInintialized: IsExceptionRaised = True
+	except BusExceptions.ValueNotInintializedError: IsExceptionRaised = True
 	assert IsExceptionRaised is True
 
 	IsExceptionRaised = None
@@ -39,7 +39,7 @@ def test_merge():
 	try: 
 		ResultOne.value
 		IsExceptionRaised = False
-	except BusExceptions.ValueNotInintialized: IsExceptionRaised = True
+	except BusExceptions.ValueNotInintializedError: IsExceptionRaised = True
 	assert IsExceptionRaised is False
 
 	# Слияние значений.

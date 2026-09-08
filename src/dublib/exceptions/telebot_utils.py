@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 # >>>>> КЭШ <<<<< #
 #==========================================================================================#
 
-class ChatNotSpecified(Exception):
+class ChatNotSpecifiedError(Exception):
 	"""Исключение: не указан чат для выгрузки."""
 
 	def __init__(self):
@@ -15,7 +15,7 @@ class ChatNotSpecified(Exception):
 
 		super().__init__() 
 
-class UnableCacheFile(Exception):
+class UnableCacheFileError(Exception):
 	"""Исключение: не удалось кэшировать файл."""
 
 	def __init__(self, path: "Path"):
@@ -32,7 +32,7 @@ class UnableCacheFile(Exception):
 # >>>>> ПОЛЬЗОВАТЕЛИ <<<<< #
 #==========================================================================================#
 
-class IncorrectUserToUpdate(Exception):
+class IncorrectUserToUpdateError(Exception):
 	"""Исключение: использование данных другого пользователя для обновления."""
 
 	def __init__(self, current_id: int, given_id: int):
@@ -40,7 +40,7 @@ class IncorrectUserToUpdate(Exception):
 
 		super().__init__(f"Current user is {current_id}, but given {given_id}.")
 
-class RefreshingBlocked(Exception):
+class RefreshingBlockedError(Exception):
 	"""Исключение: считывание данных из локального файла заблокировано."""
 
 	def __init__(self):
@@ -48,7 +48,7 @@ class RefreshingBlocked(Exception):
 
 		super().__init__("While saving suppressed refreshing is blocked.") 
 
-class SavingQueueBlocked(Exception):
+class SavingQueueBlockedError(Exception):
 	"""Исключение: очередь сохранения заблокирована."""
 
 	def __init__(self):

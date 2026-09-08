@@ -75,7 +75,7 @@ class ModelsGroup:
 
 		:param model: Модель команды.
 		:type model: CommandModel
-		:raises EmptyPosition: Для позиции не описан ни один параметр.
+		:raises EmptyPositionError: Для позиции не описан ни один параметр.
 		"""
 
 		for position in model.positions:

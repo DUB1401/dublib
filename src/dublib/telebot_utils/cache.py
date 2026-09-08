@@ -8,7 +8,7 @@ from typing import Any, cast
 
 from telebot import TeleBot, types
 
-from ..exceptions.telebot_utils import ChatNotSpecified, UnableCacheFile
+from ..exceptions.telebot_utils import ChatNotSpecifiedError, UnableCacheFileError
 from ..functions.filesystem import json
 
 #==========================================================================================#
@@ -186,13 +186,13 @@ class TeleCache:
 		Декоратор. Проверяет, инициализирован ли менеджер кэша.
 
 		:param function: Метод объекта.
-		:raises ChatNotSpecified: Не указан чат для выгрузки.
-		:raises UnableCacheFile: Не удалось кэшировать файл.
+		:raises ChatNotSpecifiedError: Не указан чат для выгрузки.
+		:raises UnableCacheFileError: Не удалось кэшировать файл.
 		"""
 
 		@functools.wraps(function)
 		def Wrapper(self: "TeleCache", *args, **kwargs):
-			if not self.__ChatID: raise ChatNotSpecified()
+			if not self.__ChatID: raise ChatNotSpecifiedError()
 			if not self.__Bot: raise RuntimeError("TeleBot not initialized.")
 			return function(self, *args, **kwargs)
 		
@@ -372,7 +372,7 @@ class TeleCache:
 			case types.InputMediaVideo: FileID = self.__Upload_Video(FilePath)
 
 		if not FileID or not Message:
-			raise UnableCacheFile(FilePath)
+			raise UnableCacheFileError(FilePath)
 
 		return Cache(FileID, Message.id, attachment_type)
 

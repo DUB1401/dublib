@@ -163,7 +163,7 @@ class Bearer(_BaseAuthorizationMethod):
 		:return: Возвращает `True`, если токен устарел.
 		:rtype: bool
 		:raises jwt.exceptions.DecodeError: Неверный формат токена.
-		:raises TokenExpired: Токен устарел.
+		:raises TokenExpiredError: Токен устарел.
 		"""
 
 		token = self._ClearScheme(token)
@@ -172,7 +172,7 @@ class Bearer(_BaseAuthorizationMethod):
 		IsExpired: bool = ExpiratonTimestamp < time()
 
 		if exception and IsExpired:
-			raise Exceptions.TokenExpired(datetime.fromtimestamp(ExpiratonTimestamp))
+			raise Exceptions.TokenExpiredError(datetime.fromtimestamp(ExpiratonTimestamp))
 
 		return IsExpired
 
@@ -184,7 +184,7 @@ class Bearer(_BaseAuthorizationMethod):
 		:type token: str
 		:param validate: Переключает проверку срока действия токена.
 		:type validate: bool
-		:raises TokenExpired: Токен устарел.
+		:raises TokenExpiredError: Токен устарел.
 		"""
 
 		if validate: self.is_jwt_expired(token, exception = True)

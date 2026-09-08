@@ -1,4 +1,4 @@
-class KeyNotAllowed(Exception):
+class KeyNotAllowedError(Exception):
 	"""Исключение: ключ не может быть использован."""
 
 	def __init__(self):
@@ -6,7 +6,7 @@ class KeyNotAllowed(Exception):
 
 		super().__init__("Key isn't allowed by rule.")
 
-class ValueNotInintialized(Exception):
+class ValueNotInintializedError(Exception):
 	"""Исключение: значение не инициализировано."""
 
 	def __init__(self):

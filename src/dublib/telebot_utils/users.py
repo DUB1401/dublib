@@ -404,10 +404,10 @@ class UserData:
 		"""
 		Считывает данные из файла пользователя и дополняет отсутствующие поля.
 
-		:raise RefreshingBlocked: Выбрасывается при попытке чтения файла пользователя во время подавления сохранений.
+		:raise RefreshingBlockedError: Выбрасывается при попытке чтения файла пользователя во время подавления сохранений.
 		"""
 
-		if self.__SuppressSaving: raise Exceptions.RefreshingBlocked()
+		if self.__SuppressSaving: raise Exceptions.RefreshingBlockedError()
 		Data = json.read(self.__Path)
 
 		for Key in self.__Data.keys():
@@ -575,10 +575,10 @@ class UserData:
 		:type user: telebot.types.User
 		:param is_chat_forbidden: Указывает, заблокировал ли пользователь бота.
 		:type is_chat_forbidden: bool | None
-		:raises IncorrectUserToUpdate: Выбрасывается при передаче несоответствующей по ID структуры пользователя.
+		:raises IncorrectUserToUpdateError: Выбрасывается при передаче несоответствующей по ID структуры пользователя.
 		"""
 
-		if user.id != self.__ID: raise Exceptions.IncorrectUserToUpdate(self.__ID, user.id)
+		if user.id != self.__ID: raise Exceptions.IncorrectUserToUpdateError(self.__ID, user.id)
 
 		if is_chat_forbidden is not None: self.__Data["is_chat_forbidden"] = is_chat_forbidden
 		self.__Data["is_premium"] = bool(user.is_premium)
@@ -817,10 +817,10 @@ class UsersManager:
 
 		:param user: Данные пользователя.
 		:type user: UserData
-		:raise SavingQueueBlocked: Выбрасывается при отключённой очереди сохранений.
+		:raise SavingQueueBlockedError: Выбрасывается при отключённой очереди сохранений.
 		"""
 
-		if not self.__IsSavingQueue: raise Exceptions.SavingQueueBlocked()
+		if not self.__IsSavingQueue: raise Exceptions.SavingQueueBlockedError()
 
 		if user.id not in self.__SavingQueue:
 			self.__SavingQueue.append(user.id)

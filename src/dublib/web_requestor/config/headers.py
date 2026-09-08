@@ -77,14 +77,14 @@ class ImportantHeaders:
 		:type name: str
 		:param value: Значение заголовка.
 		:type value: str | int
-		:raises UserAgentRedefining: Переопределение заголовка *User-Agent*. Используйте `generate_user_agent()` вместо этого метода.
-		:raises HeaderRedefining: Переопределение заголовка.
+		:raises UserAgentRedefiningError: Переопределение заголовка *User-Agent*. Используйте `generate_user_agent()` вместо этого метода.
+		:raises HeaderRedefiningError: Переопределение заголовка.
 		"""
 
 		name = name.lower()
 
 		if name in self.__Headers:
-			raise Exceptions.HeaderRedefining(name)
+			raise Exceptions.HeaderRedefiningError(name)
 		
 		self.set(name, value)
 
@@ -96,17 +96,17 @@ class ImportantHeaders:
 		:type name: str
 		:param value: Значение заголовка.
 		:type value: str | int
-		:raises AuthorizationRedefining: Переопределение заголовка _Authorization_.
-		:raises UserAgentRedefining: Gереопределение заголовков User-Agent или Sec-CH-*.
+		:raises AuthorizationRedefiningError: Переопределение заголовка _Authorization_.
+		:raises UserAgentRedefiningError: Gереопределение заголовков User-Agent или Sec-CH-*.
 		"""
 
 		name = name.lower()
 
 		if name == constants.USER_AGENT_HEADER or name.startswith("sec-ch"):
-			raise Exceptions.UserAgentRedefining()
+			raise Exceptions.UserAgentRedefiningError()
 
 		if name == constants.AUTHORIZATION_HEADER:
-			raise Exceptions.AuthorizationRedefining()
+			raise Exceptions.AuthorizationRedefiningError()
 		
 		self.__Headers[name] = value if type(value) is str else str(value)
 
@@ -138,14 +138,14 @@ class ImportantHeaders:
 		:type name: str
 		:param exception: Указывает, нужно ли выбрасывать исключение при попытке удаления несуществующего заголовка.
 		:type exception: bool
-		:raises UserAgentRedefining: Выбрасывается при попытке удаления заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
+		:raises UserAgentRedefiningError: Выбрасывается при попытке удаления заголовка *User-Agent*. Используйте `set_user_agent()` вместо этого метода.
 		:raises KeyError: Заголовк не существует.
 		"""
 
 		name = name.lower()
 
 		if name == "user-agent":
-			raise Exceptions.UserAgentRedefining()
+			raise Exceptions.UserAgentRedefiningError()
 
 		if name in self.__Headers:
 			del self.__Headers[name]

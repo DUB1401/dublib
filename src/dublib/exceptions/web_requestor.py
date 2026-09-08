@@ -1,6 +1,6 @@
 from datetime import datetime
 
-class AuthorizationRedefining(Exception):
+class AuthorizationRedefiningError(Exception):
 	"""Исключение: переопределение заголовка _Authorization_."""
 
 	def __init__(self):
@@ -8,7 +8,7 @@ class AuthorizationRedefining(Exception):
 
 		super().__init__("Generate \"Authorization\" by headers subsystem.")
 
-class HeaderRedefining(Exception):
+class HeaderRedefiningError(Exception):
 	"""Исключение: переопределение заголовка."""
 
 	def __init__(self, header: str):
@@ -21,7 +21,7 @@ class HeaderRedefining(Exception):
 
 		super().__init__(header)
 
-class TokenExpired(Exception):
+class TokenExpiredError(Exception):
 	"""Исключение: токен устарел."""
 
 	def __init__(self, expiration_date: datetime):
@@ -34,7 +34,7 @@ class TokenExpired(Exception):
 
 		super().__init__(expiration_date.strftime("%Y-%m-%d %H:%M:%S"))
 
-class UserAgentRedefining(Exception):
+class UserAgentRedefiningError(Exception):
 	"""Исключение: переопределение заголовков _User-Agent_ или _Sec-CH-*_."""
 
 	def __init__(self):

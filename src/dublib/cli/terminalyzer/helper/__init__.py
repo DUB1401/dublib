@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Sequence, cast
 
 from prettytable import PLAIN_COLUMNS, PrettyTable
 
@@ -91,16 +91,16 @@ class Helper:
 		"""
 
 		if isinstance(parameter, Argument):
-			typer: str = f"<{parameter.type.value.__name__}>" if self.options.typing else ""
+			typer = f"<{parameter.type.value.__name__}>" if self.options.typing else ""
 			return f"[argument{typer}]"
 
 		if isinstance(parameter, Flag):
-			naming: str = self.__build_parameter_naming(parameter.name, parameter.aliases)
+			naming = self.__build_parameter_naming(parameter.name, parameter.aliases)
 			return f"[flag {naming}]"
 
 		if isinstance(parameter, Key):
-			typer: str = f"<{parameter.type.value.__name__}>" if self.options.typing else ""
-			naming: str = self.__build_parameter_naming(parameter.name, parameter.aliases)
+			typer = f"<{parameter.type.value.__name__}>" if self.options.typing else ""
+			naming = self.__build_parameter_naming(parameter.name, parameter.aliases)
 			return f"[key{typer} {naming}]"
 
 		raise TypeError(f"Unsupported parameter object: {type(parameter)}.")
@@ -163,7 +163,7 @@ class Helper:
 				parameter_info += self.__build_parameter_label(parameter)
 
 				if parameter.description:
-					description = get_styled_text_from_html(parameter.description) if self.options.parse_html else position.description
+					description = get_styled_text_from_html(parameter.description) if self.options.parse_html else cast(str, position.description)
 					parameter_info += f": {parameter.description}"
 
 				info.append(parameter_info)

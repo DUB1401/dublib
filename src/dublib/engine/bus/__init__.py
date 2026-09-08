@@ -139,10 +139,10 @@ class ExecutionResult:
 		"""
 		Вложенное возвращаемое значение.
 
-		:raises ValueNotInintialized: Включено правило проверки инициализации значения.
+		:raises ValueNotInintializedError: Включено правило проверки инициализации значения.
 		"""
 
-		if self._Rules.require_value_initialization and not self._IsValueSetted: raise BusExceptions.ValueNotInintialized()
+		if self._Rules.require_value_initialization and not self._IsValueSetted: raise BusExceptions.ValueNotInintializedError()
 
 		return self._Value
 
@@ -224,10 +224,10 @@ class ExecutionResult:
 		:type key: Any
 		:param value: Значение.
 		:type value: Any
-		:raises KeyNotAllowed: Ключ не может быть использован из-за правила взаимодействия.
+		:raises KeyNotAllowedError: Ключ не может быть использован из-за правила взаимодействия.
 		"""
 
-		if self._Rules.allowed_data_keys and key not in self._Rules.allowed_data_keys: raise BusExceptions.KeyNotAllowed()
+		if self._Rules.allowed_data_keys and key not in self._Rules.allowed_data_keys: raise BusExceptions.KeyNotAllowedError()
 		self._Data[key] = value
 
 	def __str__(self) -> str:
