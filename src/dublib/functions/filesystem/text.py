@@ -23,22 +23,23 @@ def read(path: PathLike[str] | str, split: bool = False, strip_level: Literal[0,
 	:raises FileNotFoundError: Выбрасывается при отсутствии файла.
 	"""
 
-	Text: str | None = None
+	text: str | None = None
 
-	with open(path, encoding = "utf-8") as FileReader:
-		Text = FileReader.read()
+	with open(path, encoding = "utf-8") as reader:
+		text = reader.read()
 
-	TextLines: list[str] = Text.split("\n")
+	if not split:
+		return text.strip() if strip_level else text
+
+	text_lines: list[str] = text.split("\n")
+	result: list[str] = []
 
 	if strip_level:
-		for Index in range(len(TextLines)):
-			Buffer: str = TextLines[Index].strip()
+		for line in text_lines:
+			line = line.strip()
+			if line or strip_level == 1: result.append(line)
 
-			if strip_level == 1: TextLines[Index] = Buffer
-			elif Buffer: TextLines[Index] = Buffer
-			
-
-	return TextLines if split else "\n".join(TextLines)
+	return result
 
 def write(path: PathLike[str] | str , text: str | Sequence[str], atomic: bool = False):
 	"""
