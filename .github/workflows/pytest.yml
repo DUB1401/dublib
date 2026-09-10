@@ -1,4 +1,4 @@
-name: Tests
+name: pytest
 
 on:
   workflow_dispatch:
@@ -21,18 +21,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.14"
-
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
 
+      - name: Set up Python
+        run: uv python install 3.14
+
       - name: Install dependencies
-        run: uv pip install --system .[dev]
+        run: uv sync --all-extras
 
       - name: Run tests
-        run: pytest -v
+        run: uv run pytest -v
