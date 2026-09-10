@@ -11,6 +11,7 @@ from .entitites import (
 
 if TYPE_CHECKING:
 	from ..commands.model import CommandModel
+	from ..commands.positions import Position
 
 __all__ = ["CommandParser"]
 
@@ -99,9 +100,45 @@ class CommandParser:
 
 		self.__base_parameters.append(entity)
 
-	def __catch_parameters_for_base_position(self, parameter: str, index: int):
+	def __catch_argument_for_positions(self, parameter: str, index: int):
 		"""
-		Пытается интерпретировать каждый параметр для базовой позиции.
+		Пытается назначить аргумент на разблокированные позиции.
+
+		:param parameter: Значение параметра.
+		:type parameter: str
+		:param index: Индекс параметра.
+		:type index: int
+		"""
+
+		for position in self.__model.positions:
+
+			if self.__is_position_locked(position): continue
+				
+			if position.argument and self.__positions_parameters[position.name] is None:
+				value = position.argument.type.value.parse(parameter)
+				self.__lock_position(position.name, index, ArgumentEntity(position.argument, value))
+				return
+
+	def __catch_argument_for_base_position(self, parameter: str, index: int):
+		"""
+		Пытается назначить аргумент на базовую позицию.
+
+		:param parameter: Значение параметра.
+		:type parameter: str
+		:param index: Индекс параметра.
+		:type index: int
+		"""
+
+		base = self.__model.base
+			
+		for argument in base.arguments:
+			value = argument.type.value.parse(parameter)
+			self.__add_base_position_parameter(index, ArgumentEntity(argument, value))
+			return
+
+	def __catch_named_parameters_for_base_position(self, parameter: str, index: int):
+		"""
+		Пытается назначить именованные параметры на базовую позицию.
 
 		:param parameter: Значение параметра.
 		:type parameter: str
@@ -122,15 +159,10 @@ class CommandParser:
 				value = key.type.value.parse(self.__parameters[index + 1])
 				self.__add_base_position_parameter(index, KeyEntity(key, value))
 				return
-			
-		for argument in base.arguments:
-			value = argument.type.value.parse(self.__parameters[index])
-			self.__add_base_position_parameter(index, ArgumentEntity(argument, value))
-			return
 
-	def __catch_parameters_for_positions(self, parameter: str, index: int):
+	def __catch_named_parameters_for_positions(self, parameter: str, index: int):
 		"""
-		Пытается интерпретировать каждый параметр для позиции.
+		Пытается назначить именованные параметры на разблокированные позиции.
 
 		:param parameter: Значение параметра.
 		:type parameter: str
@@ -139,6 +171,8 @@ class CommandParser:
 		"""
 
 		for position in self.__model.positions:
+
+			if self.__is_position_locked(position): continue
 			
 			for flag in position.flags:
 				if parameter == flag.name or parameter in flag.aliases:
@@ -151,11 +185,28 @@ class CommandParser:
 					value = key.type.value.parse(self.__parameters[index + 1])
 					self.__lock_position(position.name, index, KeyEntity(key, value))
 					return
-				
-			if position.argument and self.__positions_parameters[position.name] is None:
-				value = position.argument.type.value.parse(self.__parameters[index])
-				self.__lock_position(position.name, index, ArgumentEntity(position.argument, value))
-				return
+
+	def __get_unlocked_parameters_range(self) -> list[int]:
+		"""
+		Возвращает список индексов незаблокированных параметров.
+
+		:return: Список индексов незаблокированных параметров.
+		:rtype: list[int]
+		"""
+
+		return [index for index in range(len(self.__parameters_locks)) if not self.__parameters_locks[index]]
+
+	def __is_position_locked(self, position: "Position") -> bool:
+		"""
+		Проверяет, заблокирована ли позиция.
+
+		:param position: Позиция.
+		:type position: Position
+		:return: Возвращает `True`, если позиция заблокирована.
+		:rtype: bool
+		"""
+
+		return bool(self.__positions_parameters[position.name])
 
 	def __lock_position(self, position_name: str, index: int, entity: ArgumentEntity | FlagEntity | KeyEntity):
 		"""
@@ -217,15 +268,17 @@ class CommandParser:
 		:rtype: CommandEntity
 		"""
 
-		parameters_range = range(self.__parameters_count)
+		for index in self.__get_unlocked_parameters_range():
+			self.__catch_named_parameters_for_positions(self.__parameters[index], index)
 
-		for index in parameters_range:
-			if self.__parameters_locks[index]: continue
-			self.__catch_parameters_for_positions(self.__parameters[index], index)
+		for index in self.__get_unlocked_parameters_range():
+			self.__catch_named_parameters_for_base_position(self.__parameters[index], index)
 
-		for index in parameters_range:
-			if self.__parameters_locks[index]: continue
-			self.__catch_parameters_for_base_position(self.__parameters[index], index)
+		for index in self.__get_unlocked_parameters_range():
+			self.__catch_argument_for_positions(self.__parameters[index], index)
+
+		for index in self.__get_unlocked_parameters_range():
+			self.__catch_argument_for_base_position(self.__parameters[index], index)
 
 		self.__check_important_positions_parameters()
 		self.__check_prarameters_bounds()
