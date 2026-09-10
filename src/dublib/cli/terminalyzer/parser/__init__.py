@@ -220,6 +220,7 @@ class CommandParser:
 		parameters_range = range(self.__parameters_count)
 
 		for index in parameters_range:
+			if self.__parameters_locks[index]: continue
 			self.__catch_parameters_for_positions(self.__parameters[index], index)
 
 		for index in parameters_range:
