@@ -36,8 +36,6 @@ class All(BaseValidator[str]):
 		:rtype: bool
 		"""
 
-		value # type: ignore
-
 		return True
 	
 class Alpha(BaseValidator[str]):

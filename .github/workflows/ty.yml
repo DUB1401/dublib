@@ -1,4 +1,4 @@
-name: Mypy
+name: ty
 
 on: [push, pull_request]
 
@@ -19,8 +19,8 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv pip install --system .[dev]
+        run: uv pip install .[dev]
 
-      - name: Run Mypy
-        run: mypy --install-types --non-interactive
+      - name: Run ty
+        run: uv run ty check .
         

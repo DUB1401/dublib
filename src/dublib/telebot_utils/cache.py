@@ -202,105 +202,100 @@ class TeleCache:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ВЫГРУЗКИ ФАЙЛОВ <<<<< #
 	#==========================================================================================#
 
-	def __Upload_Animation(self, file_path: Path) -> str | None:
+	def __Upload_Animation(self, file_path: Path) -> tuple[types.Message, str | None]:
 		"""
 		Выгружает анимацию.
 
 		:param file_path: Путь к файлу.
 		:type file_path: Path
 		:return: ID файла или `None` в случае неудачи.
-		:rtype: str | None
+		:rtype: tuple[types.Message, str | None]
 		:raises TypeError: Неверный тип файла для данного типа вложений.
 		"""
 
 		ChatID = cast(int, self.__ChatID)
-		Bot = cast(TeleBot, self.__Bot)
 		FileID: str | None = None
 
-		Message = Bot.send_animation(chat_id = ChatID, animation = types.InputFile(file_path))
+		Message = self.__Bot.send_animation(chat_id = ChatID, animation = types.InputFile(file_path))
 		if Message.animation: FileID = Message.animation.file_id
 		# Некоторые анимации отображаются верно, но распознаются как документы.
 		elif Message.document: FileID = Message.document.file_id
 		# Выброс исключения при попытке использования полноценного видео в качестве анимации.
 		elif Message.video: raise TypeError("Use InputMediaVideo for this file.")
 
-		return FileID
+		return Message, FileID
 
-	def __Upload_Audio(self, file_path: Path) -> str | None:
+	def __Upload_Audio(self, file_path: Path) -> tuple[types.Message, str | None]:
 		"""
 		Выгружает аудио.
 
 		:param file_path: Путь к файлу.
 		:type file_path: Path
 		:return: ID файла или `None` в случае неудачи.
-		:rtype: str | None
+		:rtype: tuple[types.Message, str | None]
 		"""
 
 		ChatID = cast(int, self.__ChatID)
-		Bot = cast(TeleBot, self.__Bot)
 		FileID: str | None = None
 
-		Message = Bot.send_audio(chat_id = ChatID, audio = types.InputFile(file_path))
+		Message = self.__Bot.send_audio(chat_id = ChatID, audio = types.InputFile(file_path))
 		if Message.audio: FileID = Message.audio.file_id
 
-		return FileID
+		return Message, FileID
 
-	def __Upload_Document(self, file_path: Path) -> str | None:
+	def __Upload_Document(self, file_path: Path) -> tuple[types.Message, str | None]:
 		"""
 		Выгружает документ.
 
 		:param file_path: Путь к файлу.
 		:type file_path: Path
 		:return: ID файла или `None` в случае неудачи.
-		:rtype: str | None
+		:rtype: tuple[types.Message, str | None]
 		"""
 
 		ChatID = cast(int, self.__ChatID)
-		Bot = cast(TeleBot, self.__Bot)
 		FileID: str | None = None
 
-		Message = Bot.send_document(chat_id = ChatID, document = types.InputFile(file_path))
+		Message = self.__Bot.send_document(chat_id = ChatID, document = types.InputFile(file_path))
 		if Message.document: FileID = Message.document.file_id
 
-		return FileID
+		return Message, FileID
 
-	def __Upload_Photo(self, file_path: Path) -> str | None:
+	def __Upload_Photo(self, file_path: Path) -> tuple[types.Message, str | None]:
 		"""
 		Выгружает изображение.
 
 		:param file_path: Путь к файлу.
 		:type file_path: Path
 		:return: ID файла или `None` в случае неудачи.
-		:rtype: str | None
+		:rtype: tuple[types.Message, str | None]
 		"""
 
 		ChatID = cast(int, self.__ChatID)
-		Bot = cast(TeleBot, self.__Bot)
 		FileID: str | None = None
 
-		Message = Bot.send_photo(chat_id = ChatID, photo = types.InputFile(file_path))
+		Message = self.__Bot.send_photo(chat_id = ChatID, photo = types.InputFile(file_path))
 		if Message.photo: FileID = Message.photo[-1].file_id
 
-		return FileID
+		return Message, FileID
 
-	def __Upload_Video(self, file_path: Path) -> str | None:
+	def __Upload_Video(self, file_path: Path) -> tuple[types.Message, str | None]:
 		"""
 		Выгружает видео.
 
 		:param file_path: Путь к файлу.
 		:type file_path: Path
 		:return: ID файла или `None` в случае неудачи.
-		:rtype: str | None
+		:rtype: tuple[types.Message, str | None]
 		"""
 
 		ChatID = cast(int, self.__ChatID)
-		Bot = cast(TeleBot, self.__Bot)
 		FileID: str | None = None
 
-		Message = Bot.send_video(chat_id = ChatID, video = types.InputFile(file_path))
+		Message = self.__Bot.send_video(chat_id = ChatID, video = types.InputFile(file_path))
 		if Message.video: FileID = Message.video.file_id
 
-		return FileID
+		return Message, FileID
 
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
@@ -365,11 +360,11 @@ class TeleCache:
 		FileID: str | None = None
 		
 		match attachment_type:
-			case types.InputMediaAnimation: FileID = self.__Upload_Animation(FilePath)
-			case types.InputMediaAudio: FileID = self.__Upload_Audio(FilePath)
-			case types.InputMediaDocument: FileID = self.__Upload_Document(FilePath)
-			case types.InputMediaPhoto: FileID = self.__Upload_Photo(FilePath)
-			case types.InputMediaVideo: FileID = self.__Upload_Video(FilePath)
+			case types.InputMediaAnimation: Message, FileID = self.__Upload_Animation(FilePath)
+			case types.InputMediaAudio: Message, FileID = self.__Upload_Audio(FilePath)
+			case types.InputMediaDocument: Message, FileID = self.__Upload_Document(FilePath)
+			case types.InputMediaPhoto: Message, FileID = self.__Upload_Photo(FilePath)
+			case types.InputMediaVideo: Message, FileID = self.__Upload_Video(FilePath)
 
 		if not FileID or not Message:
 			raise UnableCacheFileError(FilePath)
@@ -577,7 +572,6 @@ class TeleCache:
 		:rtype: VirtualCachedFile
 		"""
 
-		self.__Bot = cast(TeleBot, self.__Bot)
 		self.__ChatID = cast(int, self.__ChatID)
 
 		if not attachment_type: attachment_type = types.InputMediaDocument

@@ -92,18 +92,14 @@ class WebRequestor:
 				
 				#---> Переключение HTTP/HTTPS протоколов прокси при неудачном запросе.
 				#==========================================================================================#
-				if Response.status_code not in self.__Config.good_codes and CurrentProxy and self.__Config.switch_proxy_protocol and CurrentProxy.protocol:
+				if not Response.ok and CurrentProxy and self.__Config.switch_proxy_protocol and CurrentProxy.protocol in (Protocols.HTTP, Protocols.HTTPS):
+					match CurrentProxy.protocol:
+						case Protocols.HTTP: CurrentProxy.set_protocol(Protocols.HTTPS)
+						case Protocols.HTTPS: CurrentProxy.set_protocol(Protocols.HTTP)
 
-					if CurrentProxy.protocol in (Protocols.HTTP, Protocols.HTTPS):
-						sleep(self.__Config.delay)
-
-						match CurrentProxy.protocol:
-							case Protocols.HTTP: CurrentProxy.set_protocol(Protocols.HTTPS)
-							case Protocols.HTTPS: CurrentProxy.set_protocol(Protocols.HTTP)
-
-						NewResponse = WebResponse(self.__Config)
-						self.__RequestsMethods[request_type][self.__Config.lib](NewResponse, url, CurrentProxy, **kwargs)
-						if NewResponse.status_code in self.__Config.good_codes: Response = NewResponse
+					NewResponse = WebResponse(self.__Config)
+					self.__RequestsMethods[request_type][self.__Config.lib](NewResponse, url, CurrentProxy, **kwargs)
+					if NewResponse.status_code in self.__Config.good_codes: Response = NewResponse
 
 			except Exception as ExceptionData:
 				Response.push_exception(ExceptionData)

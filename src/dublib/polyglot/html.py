@@ -38,14 +38,14 @@ class _Validator(HTMLParser):
 	def error(self, message):
 		self.errors.append(f"Parsing error: {message}.")
 
-def _ValidateHTML(text: str) -> tuple[str]:
+def _ValidateHTML(text: str) -> tuple[str, ...]:
 	"""
 	Проводит валидацию структуры HTML.
 
 	:param text: Обрабатываемый текст с тегами HTML.
 	:type text: str
 	:return: Набор ошибок валидации. Пустая последовательность при отсутствии ошибок.
-	:rtype: tuple[str]
+	:rtype: tuple[str, ...]
 	"""
 
 	Parser = _Validator()
@@ -171,7 +171,7 @@ class HTML:
 
 		return self.__Text
 	
-	def validate(self, raise_exception: bool = False) -> tuple[str]:
+	def validate(self, raise_exception: bool = False) -> tuple[str, ...]:
 		"""
 		Проверяет валидность структуры HTML.
 
