@@ -22,5 +22,5 @@ jobs:
         run: uv pip install --system .[dev]
 
       - name: Run ty
-        run: uv run ty check .
+        run: ty check .
         
