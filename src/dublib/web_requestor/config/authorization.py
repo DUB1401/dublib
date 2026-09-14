@@ -37,39 +37,38 @@ class _BaseAuthorizationMethod(ABC):
 		return self._Value
 
 	@property
-	def scheme(self) -> str:
+	def scheme(self) -> AuthorizationSchemes:
 		"""Схема авторизации."""
 
-		return self._Scheme.value
+		return self._Scheme
 
 	#==========================================================================================#
 	# >>>>> НАСЛЕДУЕМЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def _ClearScheme(self, token: str) -> str:
+	def _remove_scheme(self, data: str) -> str:
 		"""
-		Удаляет из токена схему.
+		Удаляет из данных авторизации схему.
 
-		:param token: Токен.
-		:type token: str
-		:return: Обработанный токен.
+		:param data: Данные авторизации.
+		:type data: str
+		:return: Очищенные данные.
 		:rtype: str
 		"""
 
-		for Schema in AuthorizationSchemes:
-			SchemaLength: int = len(Schema.value)
+		scheme_length: int = len(self._Scheme.value)
 
-			if token.lower().startswith(Schema.value.lower()):
-				return token[:SchemaLength * -1].strip()
+		if data.lower().startswith(self._Scheme.value.lower()):
+			return data[:scheme_length * -1].strip()
 
-		return token
+		return data
 
 	#==========================================================================================#
 	# >>>>> ПЕРЕОПРЕДЕЛЯЕМЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
 	@abstractmethod
-	def _ReturnScheme(self) -> AuthorizationSchemes:
+	def _export_scheme(self) -> AuthorizationSchemes:
 		"""
 		Возвращает тип схемы авторизации.
 
@@ -86,7 +85,7 @@ class _BaseAuthorizationMethod(ABC):
 	def __init__(self):
 		"""Базовый метод авторизации."""
 
-		self._Scheme: AuthorizationSchemes = self._ReturnScheme()
+		self._Scheme: AuthorizationSchemes = self._export_scheme()
 		self._Value: str | None = None
 
 	def clear(self):
@@ -101,7 +100,7 @@ class Basic(_BaseAuthorizationMethod):
 	# >>>>> ПЕРЕОПРЕДЕЛЯЕМЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def _ReturnScheme(self) -> AuthorizationSchemes:
+	def _export_scheme(self) -> AuthorizationSchemes:
 		"""
 		Возвращает тип схемы авторизации.
 
@@ -138,7 +137,7 @@ class Bearer(_BaseAuthorizationMethod):
 	# >>>>> ПЕРЕОПРЕДЕЛЯЕМЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def _ReturnScheme(self) -> AuthorizationSchemes:
+	def _export_scheme(self) -> AuthorizationSchemes:
 		"""
 		Возвращает тип схемы авторизации.
 
@@ -151,6 +150,22 @@ class Bearer(_BaseAuthorizationMethod):
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
+
+	def get_jwt_expiration_date(self, token: str) -> datetime:
+		"""
+		Определяет дату и время истечения токена.
+
+		:param token: **JSON Web Token** со схемой или без.
+		:type token: str
+		:return: Дата и время истечения токена.
+		:rtype: datetime
+		"""
+
+		token = self._remove_scheme(token)
+		token_data: dict = jwt.decode(token, options = {"verify_signature": False})
+		expiration_timestamp: int = token_data["exp"]
+
+		return datetime.fromtimestamp(expiration_timestamp)
 
 	def is_jwt_expired(self, token: str, exception: bool = False) -> bool:
 		"""
@@ -166,15 +181,13 @@ class Bearer(_BaseAuthorizationMethod):
 		:raises TokenExpiredError: Токен устарел.
 		"""
 
-		token = self._ClearScheme(token)
-		TokenData = jwt.decode(token, options = {"verify_signature": False})
-		ExpiratonTimestamp: int = TokenData["exp"]
-		IsExpired: bool = ExpiratonTimestamp < time()
+		expiration_date = self.get_jwt_expiration_date(token)
+		is_expired: bool = expiration_date.timestamp() < time()
 
-		if exception and IsExpired:
-			raise Exceptions.TokenExpiredError(datetime.fromtimestamp(ExpiratonTimestamp))
+		if exception and is_expired:
+			raise Exceptions.TokenExpiredError(expiration_date)
 
-		return IsExpired
+		return is_expired
 
 	def set_jwt(self, token: str, validate: bool = True):
 		"""
@@ -188,7 +201,7 @@ class Bearer(_BaseAuthorizationMethod):
 		"""
 
 		if validate: self.is_jwt_expired(token, exception = True)
-		self._Value = self._ClearScheme(token)
+		self._Value = self._remove_scheme(token)
 
 	def set_token(self, token: str):
 		"""
@@ -198,7 +211,7 @@ class Bearer(_BaseAuthorizationMethod):
 		:type token: str
 		"""
 
-		self._Value = self._ClearScheme(token)
+		self._Value = self._remove_scheme(token)
 
 #==========================================================================================#
 # >>>>> ОСНОВНОЙ КЛАСС <<<<< #
@@ -218,7 +231,13 @@ class Authorizator:
 		if not self.__IsEnabled or not self.__AuthorizationMethod:
 			return {}
 
-		return {constants.AUTHORIZATION_HEADER: f"{self.__AuthorizationMethod.scheme} {self.__AuthorizationMethod.value}"}
+		return {constants.AUTHORIZATION_HEADER: f"{self.__AuthorizationMethod.scheme.value} {self.__AuthorizationMethod.value}"}
+
+	@property
+	def method(self) -> _BaseAuthorizationMethod | None:
+		"""Используемый метод авторизации."""
+
+		return self.__AuthorizationMethod
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
