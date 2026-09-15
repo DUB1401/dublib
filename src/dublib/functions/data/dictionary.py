@@ -1,6 +1,71 @@
+from collections.abc import Sequence
 from typing import Any
 
 import more_itertools
+
+from .sequences import to_sequence
+
+def deep_merge(
+	base: dict,
+	content: dict,
+	sequences_type: type[list | tuple | set] = list,
+	uniqueness: bool = False
+	) -> dict:
+	"""
+	Выполняет глубокое слияние двух словарей и вложенных последовательностей `list`, `tuple` и `set`.
+
+	:param base: Базовый словарь. Изменяется во время выполнения функции.
+	:type base: dict
+	:param content: Словарь, содержимое которого вливается в базовый.
+	:type content: dict
+	:param sequences_type: Тип, к которому будут приводиться последовательности при их слиянии.
+	:type sequences_type: type[list | tuple | set]
+	:param uniqueness: Указывает, нужно ли исключать в последовательностях повторяемые элементы.
+	:type uniqueness: bool
+	:return: Базовый словарь.
+	:rtype: dict
+	"""
+
+	for key, content_value in content.items():
+
+		#---> Простое добавление.
+		#==========================================================================================#
+		if key not in base:
+			base[key] = content_value
+			continue
+
+		base_value = base[key]
+
+		#---> Слияние словарей.
+		#==========================================================================================#
+		if isinstance(base_value, dict) and isinstance(content_value, dict):
+			base_value = deep_merge(base_value, content_value, sequences_type, uniqueness) 
+			continue
+
+		#---> Слияние последовательностей.
+		#==========================================================================================#
+		if all(isinstance(value, Sequence) and not isinstance(value, (str, bytes)) for value in (base_value, content_value)):
+			base_list: list = to_sequence(base_value, target_type = list)
+			content_list: list = to_sequence(content_value, target_type = list)
+			result_list: list = []
+
+			if uniqueness:
+				for item in content_list:
+					if item not in base_list:
+						base_list.append(item)
+				result_list = base_list
+
+			else:
+				result_list = base_list + content_list
+
+			base[key] = to_sequence(result_list, target_type = sequences_type)
+			continue
+
+		#---> Перезапись.
+		#==========================================================================================#
+		base[key] = content_value
+
+	return base
 
 def insert_item(base_dictionary: dict, target_key: Any, item: tuple[Any, Any]) -> dict:
 	"""

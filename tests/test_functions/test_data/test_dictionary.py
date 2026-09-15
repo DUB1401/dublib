@@ -1,5 +1,49 @@
 from dublib.functions.data import dictionary
 
+def test_deep_merge():
+	base = {"v": 1, "list": (1, 2, 3)}
+	content = {"v": 2, "list": [3, 4, 5]}
+	result = {"v": 2, "list": [1, 2, 3, 3, 4, 5]}
+	assert dictionary.deep_merge(base, content) == result
+
+	base = {"v": 1, "list": (1, 2, 3)}
+	content = {"v": 2, "list": [3, 4, 5]}
+	result = {"v": 2, "list": [1, 2, 3, 4, 5]}
+	assert dictionary.deep_merge(base, content, uniqueness = True) == result
+
+	base = {"v": 1, "list": (1, 2, 3)}
+	content = {"v": 2, "list": [3, 4, 5]}
+	result = {"v": 2, "list": (1, 2, 3, 4, 5)}
+	assert dictionary.deep_merge(base, content, sequences_type = tuple, uniqueness = True) == result
+
+	base = {"v": 1, "list": (1, 2, 3)}
+	content = {"v": 2, "list": "345"}
+	result = {"v": 2, "list": "345"}
+	assert dictionary.deep_merge(base, content, sequences_type = tuple, uniqueness = True) == result
+
+	base = {
+		"v": 1,
+		"dict": {
+			"vd": 1,
+			"list": [1, 2, 3]
+		}
+	}
+	content = {
+		"v": 2,
+		"dict": {
+			"vd": 2,
+			"list": (3, 4, 5)
+		}
+	}
+	result = {
+		"v": 2,
+		"dict": {
+			"vd": 2,
+			"list": {1, 2, 3, 4, 5}
+		}
+	}
+	assert dictionary.deep_merge(base, content, sequences_type = set) == result
+
 def test_insert_item():
 	base_dict = {"1": 1, "2": 2, "3": 3}
 	result = dictionary.insert_item(base_dict, "2", ("4", 4))

@@ -1,10 +1,19 @@
 import copy
-from typing import Any, Sequence, overload
+from typing import Any, Sequence
 
 import orjson
 
 from . import dictionary as dictionary
 from . import string as string
+from .sequences import to_sequence
+
+__all__ = [
+	"deep_copy",
+	"stringify_float",
+	"string_to_bool",
+	"to_sequence",
+	"zerotify"
+]
 
 def deep_copy(data: Any) -> Any:
 	"""
@@ -55,30 +64,6 @@ def string_to_bool(value: str, literals: Sequence[str] = ("false", "0")) -> bool
 	if value.lower() in literals: return False
 
 	return bool(value)
-
-@overload
-def to_sequence(value: Any, target_type: type[list]) -> list: ...
-@overload
-def to_sequence(value: Any, target_type: type[set]) -> set: ...
-@overload
-def to_sequence(value: Any, target_type: type[tuple] = ...) -> tuple: ...
-
-def to_sequence(value: Any, target_type: type[list | set | tuple] = tuple) -> list | set | tuple:
-	"""
-	Преобразует значение в итерируемый контейнерн целевого типа.
-
-	:param value: Обрабатываемое значение или итерируемый контейнер значений.
-	:type value: Any
-	:param target_type: Целевой тип итерируемого контейнера.
-	:type target_type: type[list | set | tuple]
-	:return: Приведённое к итерируемому контейнеру значение (единичные элементы упаковываются в контейнер, контейнеры преобразуются в целевой тип).
-	:rtype: list | set | tuple
-	"""
-
-	if type(value) is target_type: return value
-	if type(value) in (list, set, tuple): return target_type(value)
-	
-	return target_type((value,))
 
 def zerotify(value: Any) -> Any:
 	"""

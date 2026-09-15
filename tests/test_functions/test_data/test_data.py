@@ -18,7 +18,6 @@ def test_string_to_bool():
 	assert data.string_to_bool("1") is True
 	assert data.string_to_bool("") is False
 
-
 def test_to_sequence():
 	assert data.to_sequence("test") == ("test",)
 	assert data.to_sequence(["test"]) == ("test",)

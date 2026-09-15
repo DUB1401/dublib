@@ -1,10 +1,10 @@
 [build-system]
-requires = ["uv-build>=0.12.10,<0.13.0"]
+requires = ["uv-build>=0.12.14,<0.13.0"]
 build-backend = "uv_build"
 
 [project]
 name = "dublib"
-version = "0.30.3"
+version = "0.30.4"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}
