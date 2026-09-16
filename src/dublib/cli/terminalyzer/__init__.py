@@ -42,11 +42,11 @@ class Terminalyzer:
 
 		return None
 
-	def set_commands_groups(self, groups: ModelsGroup | Sequence[ModelsGroup]):
+	def set_models_groups(self, groups: ModelsGroup | Sequence[ModelsGroup]):
 		"""
-		Задаёт последовательность групп команд. Последовательность будет преобразована в кортеж для защиты от внешнего изменения.
+		Set commands models group sequence. Sequence will be transformated into a tuple to protect it from external modification. 
 
-		:param groups: Последовательность групп команд.
+		:param groups: Group of commands models or it sequence.
 		:type groups: ModelsGroup | Sequence[ModelsGroup]
 		"""
 

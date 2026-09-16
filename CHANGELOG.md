@@ -1,27 +1,37 @@
 # Changelog
 
-Все значимые изменения проекта будут задокументированы в этом файле.
+All notable changes to this project will be documented in this file.
 
-Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), данный проект соответствует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Для визуальной категоризации изменений в данном файле используются эмодзи согласно [gitmoji](https://gitmoji.dev).
+For visual categorization of changes emojis are used in accordance with [gitmoji](https://gitmoji.dev).
+
+## [Unreleased]
+
+### 🎨 Changed
+#### cli.terminalyzer
+- Method `set_commands_groups()` renamed to `set_models_groups()`.
+
+### 🗑️ Deprecated
+- Module `telebot_utils` planned to remove in future versions.
 
 ## [0.30.4] - 2026-09-15
 
-### ✨ Добавлено
+### ✨ Added
 #### functions.data.dictionary
 - Функция `deep_merge()` для глубокого слияния многоуровневых словарей.
 
 ## [0.30.3] - 2026-09-14
 
-### ✨ Добавлено
+### ✨ Added
 #### web_requestor
 - Оператор авторизации `Bearer` получил метод `get_jwt_expiration_date()`.
 - Оператору авторизации добавлено свойство, представляющее сам метод авторизации.
 
 ## [0.30.2] - 2026-09-10
 
-### 🐛 Исправлено
+### 🐛 Fixed
 #### cli.terminalyzer
 - Аргументы позиций обрабатывались перед именованными параметрами базовой позиции.
 - Не осуществлялась проверка блокировки параметра позиции.
@@ -34,17 +44,17 @@
 
 ## [0.30.1] - 2026-09-08
 
-### ✨ Добавлено
+### ✨ Added
 #### cli.terminalyzer
 - Метод `get_position_named_parameter()` для получения сущностей гарантированно именованных параметров позиции.
 
-### ⚡️ Изменено
+### 🎨 Changed
 #### cli.terminalyzer
 - Для сущностей флагов снова возвращается основное имя флага вместо `True`.
 
 ## [0.30.0] - 2026-09-08
 
-### ✨ Добавлено
+### ✨ Added
 #### cli
 - Модуль `progress_indicator` для индикации прогресса в терминале на основе протокола **OSC 9;4**.
 #### cli.templates
@@ -67,7 +77,7 @@
 - Добавлена поддержка запросов `DELETE`.
 - Заданный интервал между запросами теперь выдерживается автоматически.
 
-### ⚡️ Изменено
+### 🎨 Changed
 - Минимальная поддерживаемая версия **Python** теперь 3.12.
 - Модули переименованы в соответствии с [PEP 8](https://peps.python.org/pep-0008).
 - Исправлено множество затенений встроенных ключевых компонентов Python, в связи с чем переименованы некоторые аргументы.
@@ -99,7 +109,7 @@
 #### functions.filesystem
 - Функция `ListDir()`.
 
-### 🐛 Исправлено
+### 🐛 Fixed
 #### cli.terminalyzer
 - При ожидании пути возникала ошибка сравнения типа `Path` и его производных.
 #### web_requestor
@@ -108,7 +118,7 @@
 
 ## [0.29.0] - 2026-08-05
 
-### ✨ Добавлено
+### ✨ Added
 #### Functions.Data
 - Добавлена функция `InsertDictionaryAfterKey()` для вставки одного словаря внутрь другого после определённого ключа.
 #### Functions.System
@@ -118,7 +128,7 @@
 - В `WebResponse` реализовано хранилище заголовков ответа.
 - Добавлен метод для разрешения запросов **Client Hints**, а также режим их автоматическоро разрешения при выполнении запросов.
 
-### ⚡️ Изменено
+### 🎨 Changed
 - Модуль `Methods` переименован в `Functions`.
 #### Functions.System
 - Функция `Clear()` теперь использует ANSI-коды вместо вызова системных утилит.
@@ -128,19 +138,19 @@
 - Для генерации заголовка _User-Agent_ и **Client Hints** применена библиотека [ua-generator](https://github.com/iamdual/ua-generator).
 - Код 404 удалён из считаемых результатом успешного выполнения запроса.
 
-### 🐛 Исправлено
+### 🐛 Fixed
 #### Validators
 - Невозможно импортировать исключения модуля `Validators`.
 #### WebRequestor
 - Установка целочисленных значений в заголовок запроса приводила к сбою.
 
-### 🔒️ Безопасность
+### 🔒️ Security
 - Заменены устаревшие вызовы `os.system()` на `subprocess.run()`.
 
 ## [0.28.5] - 2026-07-22
 
-### ✨ Добавлено
+### ✨ Added
 - Для `Methods.System` и `Methods.Decorators` теперь поставляется документация.
 
-### ⚡️ Изменено
+### 🎨 Changed
 - Модуль `Validators` вынесен в корень и более не привязан к `CLI`.
