@@ -207,7 +207,7 @@ class Helper:
 
 		self.__options: HelperOptions = options or HelperOptions()
 
-	def generate_command_info(self, model: "CommandModel") -> str:
+	def generate_model_info(self, model: "CommandModel") -> str:
 		"""
 		Генерирует справку по команде.
 

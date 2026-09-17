@@ -1,3 +1,4 @@
+import shlex
 import sys
 from typing import TYPE_CHECKING, Sequence
 
@@ -52,20 +53,22 @@ class Terminalyzer:
 
 		self.__groups = to_sequence(groups)
 
-	def parse_parameters(self, parameters: Sequence[str] | None = None) -> "CommandEntity | None":
+	def parse_parameters(self, parameters: str | Sequence[str] | None = None, call_handler: bool = True) -> "CommandEntity | None":
 		"""
-		Парсит параметры команды, представленные последовательностью строк. Если команда не передана, будут обработаны аргументы точки запуска скрипта Python.
+		Parse command parameters. 
 
-		Для получения последовательности из строки рекомендуется использовать `shlex.split()`.
-
-		:param parameters: Последовательность строк, представляющих команду.
-		:type parameters: Sequence[str] | None
-		:return: Сущность команды или `None`, если не удалось сопаставить параметры ни с одной моделью.
+		:param parameters: Input parameters. If no parameters, it will be received from Python script arguments. If parameters given as string, it will be splitted by `shlex.split()`.
+		:type parameters: str | Sequence[str] | None
+		:param call_handler: Automatically call provided by command model hadnler if available.
+		:type call_handler: bool
+		:return: Command parsed data as entity or `None` if model not found for processed parameters.
 		:rtype: CommandEntity | None
 		"""
 
 		if parameters is None:
 			parameters = tuple(sys.argv[1:])
+		elif isinstance(parameters, str):
+			parameters = shlex.split(parameters)
 		else:
 			parameters = tuple(parameters)
 
@@ -77,4 +80,9 @@ class Terminalyzer:
 		if not model:
 			return None
 
-		return CommandParser(model, parameters).parse()
+		entity = CommandParser(model, parameters).parse()
+
+		if call_handler and model.handler:
+			model.handler(entity)
+
+		return entity

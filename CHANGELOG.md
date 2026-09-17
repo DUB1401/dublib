@@ -9,9 +9,16 @@ For visual categorization of changes emojis are used in accordance with [gitmoji
 
 ## [Unreleased]
 
+### ✨ Added
+#### cli.terminalyzer
+- Method `parse_parameters()` now may automatically split input parameters from string by `shlex.split()`.
+- Now handlers available in commands modules.
+- Raising exception `NamedParameterMissingInModelError` while named parameter required from entity.
+
 ### 🎨 Changed
 #### cli.terminalyzer
 - Method `set_commands_groups()` renamed to `set_models_groups()`.
+- Helper method `generate_command_info()` renamed to `generate_model_info()`.
 
 ### 🗑️ Deprecated
 - Module `telebot_utils` planned to remove in future versions.

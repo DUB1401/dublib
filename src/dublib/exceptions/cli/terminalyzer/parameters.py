@@ -19,17 +19,15 @@ class KeyMissingError(Exception):
 class NamedParameterMissingInModelError(Exception):
 	"""Исключение: именованный параметр отсутствует в модели команды."""
 
-	def __init__(self, command_name: str, parameter_name: str):
+	def __init__(self, parameter_name: str):
 		"""
 		Исключение: именованный параметр отсутствует в модели команды.
 
-		:param command_name: Имя команды.
-		:type command_name: str
 		:param parameter_name: Имя параметра.
 		:type parameter_name: str
 		"""
 
-		super().__init__(f"Named parameter \"{parameter_name}\" missing in model \"{command_name}\".") 
+		super().__init__(parameter_name) 
 
 class NotEnoughParametersError(Exception):
 	"""Исключение: недостаточно параметров."""

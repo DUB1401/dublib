@@ -1,9 +1,10 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from .identificator import CommandIdentificator
 from .positions import BasePosition, Position
 
 if TYPE_CHECKING:
+	from ..parser.entitites import CommandEntity
 	from .group import ModelsGroup
 
 __all__ = ["CommandModel"]
@@ -32,6 +33,12 @@ class CommandModel:
 		"""Группа, к которой отностися модель."""
 
 		return self.__group
+
+	@property
+	def handler(self) -> Callable[["CommandEntity"], None] | None:
+		"""Automatically called command entity handler."""
+
+		return self.__handler
 
 	@property
 	def indentificator(self) -> CommandIdentificator:
@@ -84,6 +91,7 @@ class CommandModel:
 		self.__description: str | None = description
 
 		self.__identificator: "CommandIdentificator" = CommandIdentificator(self)
+		self.__handler: Callable[["CommandEntity"], None] | None = None
 
 		self.__base_position = BasePosition()
 		self.__positions: dict[str, Position] = {}
@@ -119,3 +127,13 @@ class CommandModel:
 		"""
 
 		return self.__positions[name]
+
+	def register_handler(self, handler: Callable[["CommandEntity"], None]):
+		"""
+		Register automatically called by `Terminalyzer` command entity handler.
+
+		:param handler: Command entity handler.
+		:type handler: Callable[[CommandEntity], None]
+		"""
+
+		self.__handler = handler

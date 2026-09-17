@@ -213,6 +213,48 @@ class CommandEntity:
 
 		return tuple(argument.value for argument in arguments)
 
+	def __get_flags_names(self) -> tuple[str, ...]:
+		"""
+		Collect all flags names and aliases.
+
+		:return: All flags names and aliases.
+		:rtype: tuple[str, ...]
+		"""
+
+		result: list[str] = []
+
+		for position in self.__model.positions:
+			for flag in position.flags:
+				result.append(flag.name)
+				if flag.aliases: result.extend(flag.aliases)
+
+		for flag in self.__model.base.flags:
+			result.append(flag.name)
+			if flag.aliases: result.extend(flag.aliases)
+
+		return tuple(result)
+
+	def __get_keys_names(self) -> tuple[str, ...]:
+		"""
+		Collect all keys names and aliases.
+
+		:return: All keys names and aliases.
+		:rtype: tuple[str, ...]
+		"""
+
+		result: list[str] = []
+
+		for position in self.__model.positions:
+			for key in position.keys:
+				result.append(key.name)
+				if key.aliases: result.extend(key.aliases)
+
+		for key in self.__model.base.keys:
+			result.append(key.name)
+			if key.aliases: result.extend(key.aliases)
+
+		return tuple(result)
+
 	def __get_parameters_entities_type[T: ArgumentEntity | FlagEntity | KeyEntity](self, entity_type: type[T]) -> list[T]:
 		"""
 		Возвращает последовательность сущностей параметров определённого типа.
@@ -261,27 +303,42 @@ class CommandEntity:
 
 		self.__arguments_values: tuple[SUPPORTED_TYPES, ...] = self.__get_arguments()
 
-	def check_flag(self, flag: str) -> bool:
+		self.__flags_names: tuple[str, ...] = self.__get_flags_names()
+		self.__keys_names: tuple[str, ...] = self.__get_keys_names()
+
+	def check_flag(self, flag: str, missing_error: bool = True) -> bool:
 		"""
 		Проверяет, активирован ли флаг.
 		
 		:param flag: Имя флага.
 		:type flag: str
+		:param missing_error: Enable raising `NamedParameterMissingInModelError` exception.
+		:type missing_error: bool
 		:return: Результат проверки.
 		:rtype: bool
+		:raises NamedParameterMissingInModelError: Именованный параметр отсутствует в модели команды.
 		"""
+
+		if missing_error and flag not in self.__flags_names:
+			raise exceptions.cli.terminalyzer.parameters.NamedParameterMissingInModelError(flag)
 
 		return flag in self.__get_activated_named_parameters_names(FlagEntity)
 
-	def check_key(self, key: str) -> bool:
+	def check_key(self, key: str, missing_error: bool = True) -> bool:
 		"""
 		Проверяет, активирован ли ключ.
 		
 		:param key: Имя ключа.
 		:type key: str
+		:param missing_error: Enable raising `NamedParameterMissingInModelError` exception.
+		:type missing_error: bool
 		:return: Результат проверки.
 		:rtype: bool
+		:raises NamedParameterMissingInModelError: Именованный параметр отсутствует в модели команды.
 		"""
+
+		if missing_error and key not in self.__keys_names:
+			raise exceptions.cli.terminalyzer.parameters.NamedParameterMissingInModelError(key)
 
 		return key in self.__get_activated_named_parameters_names(KeyEntity)
 
@@ -302,13 +359,17 @@ class CommandEntity:
 		:type key: str
 		:param expected_type: Ожидаемый тип значения. Если тип не соответствует, будет выброшено исключение `TypeError`. Проверяются только значения, отличные от `None`.
 		:type expected_type: type[SUPPORTED_TYPES] | None
-		:param not_found_error: Указывает, выбрасывать ли исключение, если ключ не активирован.
+		:param not_found_error: Указывает, выбрасывать ли исключение, если ключ не активирован или не найден в модели.
 		:type not_found_error: bool
 		:return: Значение ключа или `None` при отсутствующем ключе.
 		:rtype: SUPPORTED_TYPES | None
 		:raises KeyMissingError: Ключ не активирован. Выбрасывается только при активации параметра `not_found_error`.
+		:raises NamedParameterMissingInModelError: Именованный параметр отсутствует в модели команды.
 		:raises TypeError: Ожидается другой тип данных.
 		"""
+
+		if not_found_error and key not in self.__keys_names:
+			raise exceptions.cli.terminalyzer.parameters.NamedParameterMissingInModelError(key)
 
 		value: SUPPORTED_TYPES | None = None
 		is_key_found: bool = False
