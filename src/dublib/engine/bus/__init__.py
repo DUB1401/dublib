@@ -117,10 +117,10 @@ class ExecutionResult:
 		return self._Data.copy()
 
 	@property
-	def is_value_setted(self) -> bool:
+	def is_value_set(self) -> bool:
 		"""Состояние: вызывался ли метод установки значения у данного контейнера."""
 
-		return self._IsValueSetted
+		return self._IsValueSet
 
 	@property
 	def messages(self) -> MessagesContainer:
@@ -139,10 +139,10 @@ class ExecutionResult:
 		"""
 		Вложенное возвращаемое значение.
 
-		:raises ValueNotInintializedError: Включено правило проверки инициализации значения.
+		:raises ValueNotInitializedError: Включено правило проверки инициализации значения.
 		"""
 
-		if self._Rules.require_value_initialization and not self._IsValueSetted: raise BusExceptions.ValueNotInintializedError()
+		if self._Rules.require_value_initialization and not self._IsValueSet: raise BusExceptions.ValueNotInitializedError()
 
 		return self._Value
 
@@ -174,7 +174,7 @@ class ExecutionResult:
 		self._Value = None
 		self._Data = {}
 
-		self._IsValueSetted = False
+		self._IsValueSet = False
 
 		self._PostInitMethod()
 
@@ -269,7 +269,7 @@ class ExecutionResult:
 
 		if overwrite:
 			if result.code: self._Code = result.code
-			if result.is_value_setted: self._Value = result.value
+			if result.is_value_set: self._Value = result.value
 
 		for Key in result.data.keys():
 			if Key in self._Data and overwrite or Key not in self._Data: self._Data[Key] = result.data[Key]
@@ -279,7 +279,7 @@ class ExecutionResult:
 	def delete_value(self):
 		"""Удаляет значение."""
 
-		self._IsValueSetted = False
+		self._IsValueSet = False
 		self._Value = None
 
 	def set_code(self, code: int | None):
@@ -300,5 +300,5 @@ class ExecutionResult:
 		:type value: Any
 		"""
 
-		self._IsValueSetted = True
+		self._IsValueSet = True
 		self._Value = value

@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING, Callable
 
-from .identificator import CommandIdentificator
+from .identifier import CommandIdentifier
 from .positions import BasePosition, Position
 
 if TYPE_CHECKING:
-	from ..parser.entitites import CommandEntity
+	from ..parser.entities import CommandEntity
 	from .group import ModelsGroup
 
 __all__ = ["CommandModel"]
@@ -41,10 +41,10 @@ class CommandModel:
 		return self.__handler
 
 	@property
-	def indentificator(self) -> CommandIdentificator:
+	def indentificator(self) -> CommandIdentifier:
 		"""Идентификатор команды."""
 
-		return self.__identificator
+		return self.__identifier
 
 	@property
 	def max_parameters_count(self) -> int:
@@ -90,7 +90,7 @@ class CommandModel:
 		self.__name: str = name
 		self.__description: str | None = description
 
-		self.__identificator: "CommandIdentificator" = CommandIdentificator(self)
+		self.__identifier: "CommandIdentifier" = CommandIdentifier(self)
 		self.__handler: Callable[["CommandEntity"], None] | None = None
 
 		self.__base_position = BasePosition()

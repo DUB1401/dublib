@@ -9,6 +9,15 @@ For visual categorization of changes emojis are used in accordance with [gitmoji
 
 ## [Unreleased]
 
+### 🎨 Changed
+#### cli.templates.bus
+- Messages types now printed in lower case.
+
+### 🐛 Fixed
+- Many spelling issues with [typos](https://github.com/crate-ci/typos).
+
+## [0.31.0] - 2026-09-17
+
 ### ✨ Added
 #### cli.terminalyzer
 - Method `parse_parameters()` now may automatically split input parameters from string by `shlex.split()`.

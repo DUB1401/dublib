@@ -25,7 +25,7 @@ def GenerateMessage(text: str, message_type: MessagesTypes | None = None, origin
 	if origin:
 		OriginPart = f"{origin}:"
 	if message_type:
-		TypePart = f"[{OriginPart}{message_type.name.upper()}] "
+		TypePart = f"[{OriginPart}{message_type.name.lower()}] "
 
 	Message = f"{TypePart}{text}"
 

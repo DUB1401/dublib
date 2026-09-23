@@ -119,9 +119,9 @@ class WebRequestor:
 
 		if ResponseHeaders:
 			AcceptCH: str | None = ResponseHeaders.get("accept-ch")
-			CriricalCH: str | None = ResponseHeaders.get("critical-ch")
+			CriticalCH: str | None = ResponseHeaders.get("critical-ch")
 			if AcceptCH: self.__Config.headers.accept_client_hints(AcceptCH)
-			if CriricalCH: self.__Config.headers.accept_client_hints(CriricalCH)
+			if CriticalCH: self.__Config.headers.accept_client_hints(CriticalCH)
 
 	def __Initialize(self):
 		"""Инициализирует сессию."""

@@ -34,7 +34,7 @@ def run_before_method(method_name: str):
 	"""
 
 	if method_name.startswith("__"):
-		raise ValueError("Only public and protected methods supported in @run_befor_method decorator.")
+		raise ValueError("Only public and protected methods supported in @run_before_method decorator.")
 	
 	def decorator(function):
 

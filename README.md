@@ -8,7 +8,7 @@
 ![PyPI](https://img.shields.io/pypi/v/dublib)
 [![KeepChangelog](https://img.shields.io/badge/changelog-Keep%20a%20Changelog%20v1.1.0-%23E05735)](/CHANGELOG.md)
 
-This is a collection of usefull Python modules written by [@DUB1401](https://github.com/DUB1401). It provides common development instruments and [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI) abstraction systems.
+This is a collection of useful Python modules written by [@DUB1401](https://github.com/DUB1401). It provides common development instruments and [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI) abstraction systems.
 
 Development now in beta stage, releases dropped by Rolling-model. That's mean if for improvements, fixes, optimization or stardatization backward compatibility may be disrupted it will be disrupted. Always lock lib version!
 

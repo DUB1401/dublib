@@ -8,7 +8,7 @@ from .commands.model import CommandModel
 from .parser import CommandParser
 
 if TYPE_CHECKING:
-	from .parser.entitites import CommandEntity
+	from .parser.entities import CommandEntity
 
 __all__ = ["ModelsGroup", "Terminalyzer"]
 
@@ -45,7 +45,7 @@ class Terminalyzer:
 
 	def set_models_groups(self, groups: ModelsGroup | Sequence[ModelsGroup]):
 		"""
-		Set commands models group sequence. Sequence will be transformated into a tuple to protect it from external modification. 
+		Set commands models group sequence. Sequence will be transformed into a tuple to protect it from external modification. 
 
 		:param groups: Group of commands models or it sequence.
 		:type groups: ModelsGroup | Sequence[ModelsGroup]
@@ -57,9 +57,9 @@ class Terminalyzer:
 		"""
 		Parse command parameters. 
 
-		:param parameters: Input parameters. If no parameters, it will be received from Python script arguments. If parameters given as string, it will be splitted by `shlex.split()`.
+		:param parameters: Input parameters. If no parameters, it will be received from Python script arguments. If parameters given as string, it will be split by `shlex.split()`.
 		:type parameters: str | Sequence[str] | None
-		:param call_handler: Automatically call provided by command model hadnler if available.
+		:param call_handler: Automatically call provided by command model handler if available.
 		:type call_handler: bool
 		:return: Command parsed data as entity or `None` if model not found for processed parameters.
 		:rtype: CommandEntity | None

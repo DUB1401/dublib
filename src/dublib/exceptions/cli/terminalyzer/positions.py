@@ -37,7 +37,7 @@ class MultipleParametersOnPositionError(Exception):
 		:type position_name: str
 		"""
 
-		super().__init__(f"On positioin \"{position_name}\" setted more than 1 parameter.") 
+		super().__init__(f"On position \"{position_name}\" set more than 1 parameter.") 
 
 class PositionAlreadyExistsError(Exception):
 	"""Исключение: позиция уже существует."""

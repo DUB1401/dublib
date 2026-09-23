@@ -44,4 +44,4 @@ def shutdown():
 		case "win32":
 			subprocess.run(("shutdown", "/s", "/t", "0"))
 		case _:
-			raise RuntimeError("Unsuported platform to shutdown.")
+			raise RuntimeError("Unsupported platform to shutdown.")

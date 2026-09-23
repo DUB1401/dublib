@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Sequence
 
 from .... import exceptions
-from .entitites import (
+from .entities import (
 	ArgumentEntity,
 	CommandEntity,
 	FlagEntity,
@@ -33,7 +33,7 @@ class CommandParser:
 			if position.is_important and self.__positions_parameters[position.name] is None:
 				raise exceptions.cli.terminalyzer.positions.ImportantPositionEmptyError(position.name)
 
-	def __check_prarameters_bounds(self):
+	def __check_parameters_bounds(self):
 		"""
 		Проверяет, все ли параметры в команде использованы.
 
@@ -281,7 +281,7 @@ class CommandParser:
 			self.__catch_argument_for_base_position(self.__parameters[index], index)
 
 		self.__check_important_positions_parameters()
-		self.__check_prarameters_bounds()
+		self.__check_parameters_bounds()
 		self.__chack_parameters_count()
 
 		return CommandEntity(

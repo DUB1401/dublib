@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from ....cli.terminalyzer.commands.identificator import CommandIdentificator
+	from ....cli.terminalyzer.commands.identifier import CommandIdentifier
 
 class KeyMissingError(Exception):
 	"""Исключение: ключ не активирован."""
@@ -88,12 +88,12 @@ class UnboundParameterError(Exception):
 class UnfamiliarParametersError(Exception):
 	"""Исключение: обрабатываемые параметры не соответствуют идентификатору модели."""
 
-	def __init__(self, identificator: "CommandIdentificator"):
+	def __init__(self, identifier: "CommandIdentifier"):
 		"""
 		Исключение: обрабатываемые параметры не соответствуют идентификатору модели.
 
-		:param identificator: Идентификатор команды.
-		:type identificator: CommandIdentificator
+		:param identifier: Идентификатор команды.
+		:type identifier: CommandIdentifier
 		"""
 
-		super().__init__(identificator.as_str()) 
+		super().__init__(identifier.as_str()) 

@@ -5,7 +5,7 @@ from .... import exceptions
 if TYPE_CHECKING:
 	from .model import CommandModel
 
-class CommandIdentificator:
+class CommandIdentifier:
 	"""Идентификатор команды."""
 
 	@property
@@ -48,9 +48,9 @@ class CommandIdentificator:
 		"""
 
 		self.match(parameters, exception = True)
-		identificators_count: int = len(self.values)
+		identifiers_count: int = len(self.values)
 
-		return tuple(parameters[identificators_count:])
+		return tuple(parameters[identifiers_count:])
 
 	def match(self, parameters: Sequence[str], exception: bool = False) -> bool:
 		"""
@@ -65,16 +65,16 @@ class CommandIdentificator:
 		:raises UnfamiliarParametersError: Обрабатываемые параметры не соответствуют идентификатору модели.
 		"""
 
-		identificators = self.values
-		identificators_count: int = len(identificators)
+		identifiers = self.values
+		identifiers_count: int = len(identifiers)
 		parameters_tuple: tuple[str, ...] = tuple(parameters)
 
 		is_match: bool = False
 
-		if identificators_count > len(parameters_tuple):
+		if identifiers_count > len(parameters_tuple):
 			is_match = False
 		else:
-			is_match = parameters_tuple[: identificators_count] == identificators
+			is_match = parameters_tuple[: identifiers_count] == identifiers
 
 		if not is_match and exception:
 			raise exceptions.cli.terminalyzer.parameters.UnfamiliarParametersError(self)

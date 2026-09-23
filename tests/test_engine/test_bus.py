@@ -31,7 +31,7 @@ def test_merge():
 	try: 
 		ResultOne.value
 		IsExceptionRaised = False
-	except BusExceptions.ValueNotInintializedError: IsExceptionRaised = True
+	except BusExceptions.ValueNotInitializedError: IsExceptionRaised = True
 	assert IsExceptionRaised is True
 
 	IsExceptionRaised = None
@@ -39,13 +39,13 @@ def test_merge():
 	try: 
 		ResultOne.value
 		IsExceptionRaised = False
-	except BusExceptions.ValueNotInintializedError: IsExceptionRaised = True
+	except BusExceptions.ValueNotInitializedError: IsExceptionRaised = True
 	assert IsExceptionRaised is False
 
 	# Слияние значений.
-	assert ResultOne.is_value_setted is False
+	assert ResultOne.is_value_set is False
 	ResultOne.value = 123
-	assert ResultOne.is_value_setted is True
+	assert ResultOne.is_value_set is True
 	assert ResultOne.value == 123
 
 	# Слияние дополнительных данных.
@@ -75,13 +75,13 @@ def test_merge():
 
 def test_delete_value():
 	Result = ExecutionResult()
-	assert Result.is_value_setted is False
+	assert Result.is_value_set is False
 	Result.value = 123
-	assert Result.is_value_setted is True
+	assert Result.is_value_set is True
 	Result.value = None
-	assert Result.is_value_setted is True
+	assert Result.is_value_set is True
 	Result.delete_value()
-	assert Result.is_value_setted is False
+	assert Result.is_value_set is False
 	assert bool(Result) is False
 
 def test_set_code():
@@ -95,4 +95,4 @@ def test_set_value():
 	Result.value = 123
 	assert Result.value == 123
 	Result.value = None
-	assert Result.is_value_setted is True
+	assert Result.is_value_set is True

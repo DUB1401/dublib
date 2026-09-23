@@ -74,12 +74,12 @@ class CachedFile:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, identificator: PathLike[str] | str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, file_type: type[types.InputMedia] | None = None):
+	def __init__(self, identifier: PathLike[str] | str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, file_type: type[types.InputMedia] | None = None):
 		"""
 		Данные кэшированного файла.
 
-		:param identificator: Путь к файлу или его вирутальный идентификатор.
-		:type identificator: PathLike[str] | str 
+		:param identifier: Путь к файлу или его вирутальный идентификатор.
+		:type identifier: PathLike[str] | str 
 		:param chat_id: ID чата с файлом.
 		:type chat_id: int
 		:param file_id: ID файла 
@@ -92,7 +92,7 @@ class CachedFile:
 		:type file_type: type[types.InputMedia] | None
 		"""
 
-		self._Identificator = identificator
+		self._Identifier = identifier
 		self._ChatID = chat_id
 		self._FileID = file_id
 		self._MessageID = message_id
@@ -106,10 +106,10 @@ class VirtualCachedFile(CachedFile):
 	#==========================================================================================#
 
 	@property
-	def identificator(self) -> str:
+	def identifier(self) -> str:
 		"""Идентификатор файла."""
 
-		return cast(str, self._Identificator)
+		return cast(str, self._Identifier)
 	
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -124,7 +124,7 @@ class VirtualCachedFile(CachedFile):
 		"""
 
 		Data: dict = {
-			"identificator": self._Identificator,
+			"identifier": self._Identifier,
 			"chat_id": self._ChatID,
 			"file_id": self._FileID,
 			"message_id": self._MessageID
@@ -144,7 +144,7 @@ class RealCachedFile(CachedFile):
 	def path(self) -> Path:
 		"""Путь к файлу или его виртуальный идентификатор."""
 
-		return Path(self._Identificator)
+		return Path(self._Identifier)
 	
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -159,7 +159,7 @@ class RealCachedFile(CachedFile):
 		"""
 
 		Data: dict = {
-			"path": self._Identificator,
+			"path": self._Identifier,
 			"chat_id": self._ChatID,
 			"file_id": self._FileID,
 			"message_id": self._MessageID
@@ -314,7 +314,7 @@ class TeleCache:
 				"storage": self.__RealData
 			},
 			"virtual": {
-				"key": "identificator",
+				"key": "identifier",
 				"object": VirtualCachedFile,
 				"storage": self.__VirtualData
 			}
@@ -327,7 +327,7 @@ class TeleCache:
 				Object: type[RealCachedFile | VirtualCachedFile] = Determinations[CacheType]["object"]
 				Storage: dict = Determinations[CacheType]["storage"]
 
-				Identificator = Cache[MainKey]
+				Identifier = Cache[MainKey]
 
 				for Key in ("data", "type"):
 					if Key not in Cache.keys(): Cache[Key] = None
@@ -336,7 +336,7 @@ class TeleCache:
 					CachedFileType: str = Cache["type"]
 					Cache["type"] = FileTypes[CachedFileType.title()].value
 
-				Storage[Identificator] = Object(Identificator, Cache["chat_id"], Cache["file_id"], Cache["message_id"], Cache["data"], Cache["type"])
+				Storage[Identifier] = Object(Identifier, Cache["chat_id"], Cache["file_id"], Cache["message_id"], Cache["data"], Cache["type"])
 
 	@require_initialization
 	def __UploadFile(self, path: PathLike[str] | str, attachment_type: type[types.InputMedia] | None = None) -> Cache:
@@ -556,14 +556,14 @@ class TeleCache:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ РАБОТЫ С ВИРТУАЛЬНЫМИ ФАЙЛАМИ <<<<< #
 	#==========================================================================================#
 
-	def cache_virtual_file(self, path: PathLike[str] | str, identificator: str, attachment_type: type[types.InputMedia] | None = None, data: dict | None = None) -> VirtualCachedFile:
+	def cache_virtual_file(self, path: PathLike[str] | str, identifier: str, attachment_type: type[types.InputMedia] | None = None, data: dict | None = None) -> VirtualCachedFile:
 		"""
 		Кэширует виртуальный файл.
 
 		:param path: Путь к файлу.
 		:type path: PathLike[str] | str
-		:param identificator: Идентификатор файла.
-		:type identificator: str
+		:param identifier: Идентификатор файла.
+		:type identifier: str
 		:param attachment_type: Тип вложения (по умолчанию `types.InputMediaDocument`).
 		:type attachment_type: type[types.InputMedia] | None
 		:param data: Словарь дополнительных данных.
@@ -578,9 +578,9 @@ class TeleCache:
 
 		if path not in self.__VirtualData.keys():
 			Cache = self.__UploadFile(path, attachment_type)
-			self.register_virtual_file(identificator, self.__ChatID, Cache.file_id, Cache.message_id, data, Cache.file_type)
+			self.register_virtual_file(identifier, self.__ChatID, Cache.file_id, Cache.message_id, data, Cache.file_type)
 
-		return self.__VirtualData[identificator]
+		return self.__VirtualData[identifier]
 
 	def drop_virtual_cache(self):
 		"""Удаляет данные всех виртуальных кэшированных файлов."""
@@ -588,37 +588,37 @@ class TeleCache:
 		self.__VirtualData = {}
 		self.save()
 
-	def get_virtual_cached_file(self, identificator: str) -> VirtualCachedFile:
+	def get_virtual_cached_file(self, identifier: str) -> VirtualCachedFile:
 		"""
 		Возвращает данные кэша виртуального файла.
 
-		:param identificator: Идентификатор файла.
-		:type identificator: str
+		:param identifier: Идентификатор файла.
+		:type identifier: str
 		:raise KeyError: Выбрасывается при отсутствии кэша файла с указанным идентификатором.
 		:return: Данные кэша виртуального файла.
 		:rtype: VirtualCachedFile
 		"""
 
-		return self.__VirtualData[identificator]
+		return self.__VirtualData[identifier]
 	
-	def has_virtual_cache(self, identificator: str) -> bool:
+	def has_virtual_cache(self, identifier: str) -> bool:
 		"""
 		Проверяет наличие виртуального файла в кэше.
 
-		:param identificator: Идентификатор файла.
-		:type identificator: str
+		:param identifier: Идентификатор файла.
+		:type identifier: str
 		:return: Возвращает `True`, если указанный файл найден в кэше.
 		:rtype: bool
 		"""
 
-		return identificator in self.__VirtualData.keys()
+		return identifier in self.__VirtualData.keys()
 	
-	def register_virtual_file(self, identificator: str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, attachment_type: type[types.InputMedia] | None = None) -> VirtualCachedFile:
+	def register_virtual_file(self, identifier: str, chat_id: int, file_id: str, message_id: int | None = None, data: dict | None = None, attachment_type: type[types.InputMedia] | None = None) -> VirtualCachedFile:
 		"""
 		Регистрирует в хранилище данные кэша виртуального файла.
 
-		:param identificator: Идентификатор файла.
-		:type identificator: str
+		:param identifier: Идентификатор файла.
+		:type identifier: str
 		:param chat_id: ID чата.
 		:type chat_id: int
 		:param file_id: ID файла.
@@ -633,20 +633,20 @@ class TeleCache:
 		:rtype: VirtualCachedFile
 		"""
 		
-		File = VirtualCachedFile(identificator, chat_id, file_id, message_id, data, attachment_type)	
-		self.__VirtualData[identificator] = File
+		File = VirtualCachedFile(identifier, chat_id, file_id, message_id, data, attachment_type)	
+		self.__VirtualData[identifier] = File
 		self.save()
 		
 		return File
 
-	def remove_virtual_cache(self, identificator: str):
+	def remove_virtual_cache(self, identifier: str):
 		"""
 		Удаляет из хранилища данные кэша виртуального файла.
 
-		:param identificator: Идентификатор файла.
-		:type identificator: str
+		:param identifier: Идентификатор файла.
+		:type identifier: str
 		:raise KeyError: Выбрасывается при отсутствии кэша файла с указанным идентификатором.
 		"""
 
-		del self.__VirtualData[identificator]
+		del self.__VirtualData[identifier]
 		self.save()

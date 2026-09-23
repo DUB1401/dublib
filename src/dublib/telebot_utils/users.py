@@ -586,7 +586,7 @@ class UserData:
 		self.__Data["username"] = user.username
 		self.save()
 
-	def update_acitivity(self) -> datetime:
+	def update_activity(self) -> datetime:
 		"""
 		Обновляет дату и время последней активности пользователя.
 
@@ -749,7 +749,7 @@ class UsersManager:
 		CurrentUser = self.__Users[user.id]
 		CurrentUser.update(user)
 		if CurrentUser.is_chat_forbidden: CurrentUser.set_chat_forbidden(False)
-		if update_activity: CurrentUser.update_acitivity()
+		if update_activity: CurrentUser.update_activity()
 
 		return CurrentUser
 

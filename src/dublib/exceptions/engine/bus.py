@@ -6,7 +6,7 @@ class KeyNotAllowedError(Exception):
 
 		super().__init__("Key isn't allowed by rule.")
 
-class ValueNotInintializedError(Exception):
+class ValueNotInitializedError(Exception):
 	"""Исключение: значение не инициализировано."""
 
 	def __init__(self):

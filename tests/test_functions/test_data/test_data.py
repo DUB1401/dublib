@@ -14,7 +14,7 @@ def test_stringify_float():
 
 def test_string_to_bool():
 	assert data.string_to_bool("0") is False
-	assert data.string_to_bool("fAlsE") is False
+	assert data.string_to_bool("FALSE") is False
 	assert data.string_to_bool("1") is True
 	assert data.string_to_bool("") is False
 
