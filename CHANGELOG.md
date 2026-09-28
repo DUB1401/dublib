@@ -9,9 +9,17 @@ For visual categorization of changes emojis are used in accordance with [gitmoji
 
 ## [Unreleased]
 
+### ✨ Added
+#### cli.terminalyzer
+- Method `run_handler()` in command entity.
+- Property `is_handled` to command entity.
+
 ### 🎨 Changed
+#### cli.terminalyzer
+- Rename `parse_parameters()` to `parse_command()`.
+
 #### engine.patcher
-- Rework module with new methods.
+- Module fully rewrited.
 
 ## [0.31.1] - 2026-09-23
 

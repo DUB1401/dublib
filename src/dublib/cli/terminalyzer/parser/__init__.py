@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 __all__ = ["CommandParser"]
 
 class CommandParser:
-	"""Парсер команды."""
+	"""Command parser."""
 
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ ВАЛИДАЦИИ <<<<< #
@@ -243,18 +243,18 @@ class CommandParser:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, model: "CommandModel", parameters: Sequence[str]):
+	def __init__(self, model: "CommandModel", data: Sequence[str]):
 		"""
-		Парсер команды.
+		Command parser.
 
-		:param model: Модель команды.
+		:param model: Command model.
 		:type model: CommandModel
-		:param parameters: Последовательность строковых параметров команды без имени.
-		:type parameters: Sequence[str]
+		:param data: Command data.
+		:type data: Sequence[str]
 		"""
 
 		self.__model: CommandModel = model
-		self.__parameters: tuple[str, ...] = tuple(self.__model.indentificator.clear_parameters(parameters))
+		self.__parameters: tuple[str, ...] = tuple(self.__model.indentificator.clear_parameters(data))
 
 		self.__parameters_count: int = len(self.__parameters)
 		self.__parameters_locks: list[bool] = [False] * self.__parameters_count

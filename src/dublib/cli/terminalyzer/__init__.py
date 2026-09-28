@@ -14,32 +14,32 @@ if TYPE_CHECKING:
 __all__ = ["ModelsGroup", "Terminalyzer"]
 
 class Terminalyzer:
-	"""Обработчик команд."""
+	"""Commands processor."""
 
 	@property
 	def groups(self) -> tuple[ModelsGroup, ...]:
-		"""Последовательность групп моделей команд."""
+		"""Models groups."""
 
 		return self.__groups
 
 	def __init__(self):
-		"""Обработчик команд."""
+		"""Commands processor."""
 
 		self.__groups: tuple[ModelsGroup, ...] = ()
 
-	def find_model(self, parameters: Sequence[str]) -> CommandModel | None:
+	def find_model(self, data: Sequence[str]) -> CommandModel | None:
 		"""
-		Производит поиск соответствующей параметрам модели команды.
+		Search model by command data.
 
-		:param parameters: Последовательность строк, представляющих команду.
-		:type parameters: Sequence[str]
-		:return: Модель команды.
+		:param data: Command data.
+		:type data: Sequence[str]
+		:return: Command model.
 		:rtype: CommandModel | None
 		"""
 
 		for group in self.__groups:
 			for model in group.models:
-				if model.indentificator.match(parameters):
+				if model.indentificator.match(data):
 					return model
 
 		return None
@@ -54,36 +54,36 @@ class Terminalyzer:
 
 		self.__groups = to_sequence(groups)
 
-	def parse_parameters(self, parameters: str | Sequence[str] | None = None, call_handler: bool = True) -> "CommandEntity | None":
+	def parse_command(self, data: str | Sequence[str] | None = None, call_handler: bool = True) -> "CommandEntity | None":
 		"""
-		Parse command parameters. 
+		Parse command data. 
 
-		:param parameters: Input parameters. If no parameters, it will be received from Python script arguments. If parameters given as string, it will be split by `shlex.split()`.
-		:type parameters: str | Sequence[str] | None
+		:param data: Input data. If no data, it will be received from Python script arguments. If data given as string, it will be split by `shlex.split()`.
+		:type data: str | Sequence[str] | None
 		:param call_handler: Automatically call provided by command model handler if available.
 		:type call_handler: bool
 		:return: Command parsed data as entity or `None` if model not found for processed parameters.
 		:rtype: CommandEntity | None
 		"""
 
-		if parameters is None:
-			parameters = tuple(sys.argv[1:])
-		elif isinstance(parameters, str):
-			parameters = shlex.split(parameters)
+		if data is None:
+			data = tuple(sys.argv[1:])
+		elif isinstance(data, str):
+			data = shlex.split(data)
 		else:
-			parameters = tuple(parameters)
+			data = tuple(data)
 
-		if not parameters:
+		if not data:
 			return None
 
-		model: CommandModel | None = self.find_model(parameters)
+		model: CommandModel | None = self.find_model(data)
 
 		if not model:
 			return None
 
-		entity = CommandParser(model, parameters).parse()
+		entity = CommandParser(model, data).parse()
 
-		if call_handler and model.handler:
-			model.handler(entity)
+		if call_handler:
+			entity.run_handler()
 
 		return entity

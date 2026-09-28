@@ -125,7 +125,7 @@ class PositionEntity:
 			raise exceptions.cli.terminalyzer.positions.ImportantPositionEmptyError(self.__position.name)
 
 class CommandEntity:
-	"""Сущность команды."""
+	"""Command entity."""
 
 	#==========================================================================================#
 	# >>>>> СВОЙСТВА <<<<< #
@@ -140,6 +140,12 @@ class CommandEntity:
 		"""
 
 		return self.__arguments_values
+
+	@property
+	def is_handled(self) -> bool:
+		"""Is entity processed by handler."""
+
+		return self.__is_handled
 
 	@property
 	def model(self) -> "CommandModel":
@@ -306,6 +312,8 @@ class CommandEntity:
 
 		self.__flags_names: tuple[str, ...] = self.__get_flags_names()
 		self.__keys_names: tuple[str, ...] = self.__get_keys_names()
+
+		self.__is_handled: bool = False
 
 	def check_flag(self, flag: str, missing_error: bool = True) -> bool:
 		"""
@@ -477,3 +485,17 @@ class CommandEntity:
 			raise exceptions.cli.terminalyzer.positions.ImportantPositionEmptyError(position_name)
 
 		return self.__check_value_type(value, expected_type)
+
+	def run_handler(self) -> bool:
+		"""
+		Run command entity handler if provided.
+
+		:return: `True` if handler passed.
+		:rtype: bool
+		"""
+
+		if self.__model.handler:
+			self.__model.handler(self)
+			self.__is_handled = True
+
+		return self.__is_handled
