@@ -1,4 +1,4 @@
-from .enums import MessagesTypes
+from ...cli.messages.types import MessagesTypes
 
 class ExecutionMessage:
 	"""Сообщение процесса выполнения."""

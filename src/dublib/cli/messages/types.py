@@ -1,7 +1,7 @@
 from enum import Enum
 
 class MessagesTypes(Enum):
-	"""Перечисление типов сообщений."""
+	"""Messages types enumeration."""
 
 	Debug = "debug"
 	Info = "info"

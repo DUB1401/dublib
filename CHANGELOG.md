@@ -15,11 +15,14 @@ For visual categorization of changes emojis are used in accordance with [gitmoji
 - Property `is_handled` to command entity.
 
 ### 🎨 Changed
+- Module `cli.templates.bus` reworked as `cli.messages`.
 #### cli.terminalyzer
 - Rename `parse_parameters()` to `parse_command()`.
-
 #### engine.patcher
-- Module fully rewrited.
+- Module fully rewritten.
+
+### 🔥 Removed
+- Module `cli.templates`.
 
 ## [0.31.1] - 2026-09-23
 
@@ -131,7 +134,7 @@ For visual categorization of changes emojis are used in accordance with [gitmoji
 - Базовый валидатор вынесен в подмодуль `base`, а сами валидаторы – в `types`.
 - Изменены рекомендации по именованию валидаторов.
 
-### 🔥 Удалено
+### 🔥 Removed
 #### engine.bus
 - Методы генерации текстовых представлений и вывода в консоль.
 #### functions.data.dictionary
