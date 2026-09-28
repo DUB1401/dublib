@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Sequence
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 from .... import exceptions
 from .entities import (
@@ -252,7 +253,7 @@ class CommandParser:
 		:type parameters: Sequence[str]
 		"""
 
-		self.__model: "CommandModel" = model
+		self.__model: CommandModel = model
 		self.__parameters: tuple[str, ...] = tuple(self.__model.indentificator.clear_parameters(parameters))
 
 		self.__parameters_count: int = len(self.__parameters)
@@ -287,5 +288,5 @@ class CommandParser:
 		return CommandEntity(
 			model = self.__model,
 			base = self.__base_parameters,
-			positions = tuple(PositionEntity(position, self.__positions_parameters[position.name]) for position in self.__model.positions)
+			positions = tuple(PositionEntity(position, self.__positions_parameters[position.name]) for position in self.__model.positions),
 		)

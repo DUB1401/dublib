@@ -2,9 +2,9 @@ import os
 import random
 import shutil
 import tempfile
+from collections.abc import Sequence
 from os import PathLike
 from pathlib import Path
-from typing import Sequence
 
 from ..data import to_sequence
 

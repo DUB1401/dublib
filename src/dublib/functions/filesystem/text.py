@@ -1,5 +1,6 @@
+from collections.abc import Sequence
 from os import PathLike
-from typing import Literal, Sequence, overload
+from typing import Literal, overload
 
 from . import atomic_write
 
@@ -32,12 +33,15 @@ def read(path: PathLike[str] | str, split: bool = False, strip_level: Literal[0,
 		return text.strip() if strip_level else text
 
 	text_lines: list[str] = text.split("\n")
+
+	if not strip_level:
+		return text_lines
+
 	result: list[str] = []
 
-	if strip_level:
-		for line in text_lines:
-			line = line.strip()
-			if line or strip_level == 1: result.append(line)
+	for line in text_lines:
+		line = line.strip()
+		if line or strip_level == 1: result.append(line)
 
 	return result
 

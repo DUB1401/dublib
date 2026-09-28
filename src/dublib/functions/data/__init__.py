@@ -1,5 +1,6 @@
 import copy
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import orjson
 
@@ -12,7 +13,7 @@ __all__ = [
 	"stringify_float",
 	"string_to_bool",
 	"to_sequence",
-	"zerotify"
+	"zerotify",
 ]
 
 def deep_copy(data: Any) -> Any:

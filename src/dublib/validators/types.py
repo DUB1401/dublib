@@ -152,7 +152,7 @@ class Datetime(BaseValidator[datetime]):
 		:rtype: datetime
 		"""
 
-		return cast(datetime, dateparser.parse(value))
+		return cast("datetime", dateparser.parse(value))
 	
 	@override
 	@staticmethod

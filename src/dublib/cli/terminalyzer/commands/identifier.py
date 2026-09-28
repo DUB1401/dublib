@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Sequence
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 from .... import exceptions
 
@@ -25,7 +26,7 @@ class CommandIdentifier:
 		:type model: CommandModel
 		"""
 
-		self.__model: "CommandModel" = model
+		self.__model: CommandModel = model
 
 	def as_str(self) -> str:
 		"""

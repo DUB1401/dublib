@@ -36,7 +36,7 @@ def GenerateMessage(text: str, message_type: MessagesTypes | None = None, origin
 			MessagesTypes.Error: codes.Colors.Red,
 			MessagesTypes.Warning: codes.Colors.Yellow,
 			MessagesTypes.Critical: codes.Colors.Red,
-			None: None
+			None: None,
 		}
 		Message = TextStyler(text_color = ColorsDict[message_type]).get_styled_text(Message)
 

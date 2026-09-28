@@ -1,4 +1,5 @@
-from typing import Sequence, cast
+from collections.abc import Sequence
+from typing import cast
 
 import ua_generator
 from ua_generator.user_agent import UserAgent
@@ -65,7 +66,7 @@ class ImportantHeaders:
 
 		if not self.__UserAgent:
 			self.generate_user_agent()
-			self.__UserAgent = cast(UserAgent, self.__UserAgent)
+			self.__UserAgent = cast("UserAgent", self.__UserAgent)
 
 		self.__UserAgent.headers.accept_ch(hints)
 
@@ -127,7 +128,7 @@ class ImportantHeaders:
 		self.__UserAgent = ua_generator.generate(
 			to_sequence(device) if device else None,
 			to_sequence(platform) if platform else None,
-			to_sequence(browsers) if browsers else None
+			to_sequence(browsers) if browsers else None,
 		)
 
 	def remove(self, name: str, exception: bool = False):

@@ -1,6 +1,7 @@
 import shlex
 import sys
-from typing import TYPE_CHECKING, Sequence
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 from ...functions.data import to_sequence
 from .commands.group import ModelsGroup
@@ -24,7 +25,7 @@ class Terminalyzer:
 	def __init__(self):
 		"""Обработчик команд."""
 
-		self.__groups: tuple["ModelsGroup", ...] = ()
+		self.__groups: tuple[ModelsGroup, ...] = ()
 
 	def find_model(self, parameters: Sequence[str]) -> CommandModel | None:
 		"""
@@ -75,7 +76,7 @@ class Terminalyzer:
 		if not parameters:
 			return None
 
-		model: "CommandModel | None" = self.find_model(parameters)
+		model: CommandModel | None = self.find_model(parameters)
 
 		if not model:
 			return None

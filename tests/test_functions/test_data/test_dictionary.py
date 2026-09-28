@@ -25,22 +25,22 @@ def test_deep_merge():
 		"v": 1,
 		"dict": {
 			"vd": 1,
-			"list": [1, 2, 3]
-		}
+			"list": [1, 2, 3],
+		},
 	}
 	content = {
 		"v": 2,
 		"dict": {
 			"vd": 2,
-			"list": (3, 4, 5)
-		}
+			"list": (3, 4, 5),
+		},
 	}
 	result = {
 		"v": 2,
 		"dict": {
 			"vd": 2,
-			"list": {1, 2, 3, 4, 5}
-		}
+			"list": {1, 2, 3, 4, 5},
+		},
 	}
 	assert dictionary.deep_merge(base, content, sequences_type = set) == result
 
@@ -70,10 +70,10 @@ def test_replace_key():
 	assert dictionary.replace_key(
 		{"1": 1, "2": 2},
 		"2",
-		"3"
+		"3",
 	) == {"1": 1, "3": 2}
 	assert tuple(dictionary.replace_key(
 		{"1": 1, "2": 2, "3": 3},
 		"2",
-		"4"
+		"4",
 	).keys()) == ("1", "4", "3")

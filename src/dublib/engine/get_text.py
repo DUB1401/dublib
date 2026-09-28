@@ -1,6 +1,6 @@
 import gettext
 import os
-from typing import Callable, Sequence
+from collections.abc import Callable, Sequence
 
 from ..functions.data import to_sequence
 

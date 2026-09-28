@@ -109,7 +109,7 @@ class VirtualCachedFile(CachedFile):
 	def identifier(self) -> str:
 		"""Идентификатор файла."""
 
-		return cast(str, self._Identifier)
+		return cast("str", self._Identifier)
 	
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -127,7 +127,7 @@ class VirtualCachedFile(CachedFile):
 			"identifier": self._Identifier,
 			"chat_id": self._ChatID,
 			"file_id": self._FileID,
-			"message_id": self._MessageID
+			"message_id": self._MessageID,
 		}
 		if self._Data: Data["data"] = self._Data.copy()
 		if self._Type: Data["type"] = FileTypes(self._Type).name.lower()
@@ -162,7 +162,7 @@ class RealCachedFile(CachedFile):
 			"path": self._Identifier,
 			"chat_id": self._ChatID,
 			"file_id": self._FileID,
-			"message_id": self._MessageID
+			"message_id": self._MessageID,
 		}
 		Data["data"] = self._Data.copy()
 		if self._Type: Data["type"] = FileTypes(self._Type).name.lower()
@@ -213,7 +213,7 @@ class TeleCache:
 		:raises TypeError: Неверный тип файла для данного типа вложений.
 		"""
 
-		ChatID = cast(int, self.__ChatID)
+		ChatID = cast("int", self.__ChatID)
 		FileID: str | None = None
 
 		Message = self.__Bot.send_animation(chat_id = ChatID, animation = types.InputFile(file_path))
@@ -235,7 +235,7 @@ class TeleCache:
 		:rtype: tuple[types.Message, str | None]
 		"""
 
-		ChatID = cast(int, self.__ChatID)
+		ChatID = cast("int", self.__ChatID)
 		FileID: str | None = None
 
 		Message = self.__Bot.send_audio(chat_id = ChatID, audio = types.InputFile(file_path))
@@ -253,7 +253,7 @@ class TeleCache:
 		:rtype: tuple[types.Message, str | None]
 		"""
 
-		ChatID = cast(int, self.__ChatID)
+		ChatID = cast("int", self.__ChatID)
 		FileID: str | None = None
 
 		Message = self.__Bot.send_document(chat_id = ChatID, document = types.InputFile(file_path))
@@ -271,7 +271,7 @@ class TeleCache:
 		:rtype: tuple[types.Message, str | None]
 		"""
 
-		ChatID = cast(int, self.__ChatID)
+		ChatID = cast("int", self.__ChatID)
 		FileID: str | None = None
 
 		Message = self.__Bot.send_photo(chat_id = ChatID, photo = types.InputFile(file_path))
@@ -289,7 +289,7 @@ class TeleCache:
 		:rtype: tuple[types.Message, str | None]
 		"""
 
-		ChatID = cast(int, self.__ChatID)
+		ChatID = cast("int", self.__ChatID)
 		FileID: str | None = None
 
 		Message = self.__Bot.send_video(chat_id = ChatID, video = types.InputFile(file_path))
@@ -311,13 +311,13 @@ class TeleCache:
 			"real": {
 				"key": "path",
 				"object": RealCachedFile,
-				"storage": self.__RealData
+				"storage": self.__RealData,
 			},
 			"virtual": {
 				"key": "identifier",
 				"object": VirtualCachedFile,
-				"storage": self.__VirtualData
-			}
+				"storage": self.__VirtualData,
+			},
 		}
 
 		for CacheType in Determinations.keys():
@@ -375,7 +375,7 @@ class TeleCache:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, bot: TeleBot, cache_file_path: PathLike[str] | str | None = None,):
+	def __init__(self, bot: TeleBot, cache_file_path: PathLike[str] | str | None = None):
 		"""
 		Менеджер кэша загружаемых в Telegram файлов.
 
@@ -409,7 +409,7 @@ class TeleCache:
 
 		Buffer = {
 			"real": [Cache.to_dict() for Cache in self.__RealData.values()],
-			"virtual": [Cache.to_dict() for Cache in self.__VirtualData.values()]
+			"virtual": [Cache.to_dict() for Cache in self.__VirtualData.values()],
 		}
 
 		json.write(self.__StoragePath, Buffer)
@@ -424,7 +424,7 @@ class TeleCache:
 
 		if type(bot) is TeleBot: self.__Bot = bot 
 		else: 
-			bot = cast(str, bot)
+			bot = cast("str", bot)
 			self.__Bot = TeleBot(bot)
 
 	def set_chat_id(self, chat_id: int, check_chat_access: bool = True):
@@ -466,7 +466,7 @@ class TeleCache:
 
 		if path not in self.__RealData.keys():
 			Cache = self.__UploadFile(path, attachment_type)
-			self.register_real_file(path, cast(int, self.__ChatID), Cache.file_id, Cache.message_id, data, Cache.file_type)
+			self.register_real_file(path, cast("int", self.__ChatID), Cache.file_id, Cache.message_id, data, Cache.file_type)
 
 		return self.__RealData[str(path)]
 
@@ -572,7 +572,7 @@ class TeleCache:
 		:rtype: VirtualCachedFile
 		"""
 
-		self.__ChatID = cast(int, self.__ChatID)
+		self.__ChatID = cast("int", self.__ChatID)
 
 		if not attachment_type: attachment_type = types.InputMediaDocument
 

@@ -1,4 +1,4 @@
-from typing import Sequence
+from collections.abc import Sequence
 
 from .... import exceptions
 from ....functions.data import to_sequence
@@ -103,7 +103,7 @@ class ModelsGroup:
 		self.__name: str | None = name
 		self.__supergroup: str | None = supergroup
 
-		self.__commands: dict[str, "CommandModel"] = {}
+		self.__commands: dict[str, CommandModel] = {}
 
 	def clear(self):
 		"""Удаляет хранимые модели команд."""

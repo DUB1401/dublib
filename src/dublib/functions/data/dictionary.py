@@ -9,7 +9,7 @@ def deep_merge(
 	base: dict,
 	content: dict,
 	sequences_type: type[list | tuple | set] = list,
-	uniqueness: bool = False
+	uniqueness: bool = False,
 	) -> dict:
 	"""
 	Выполняет глубокое слияние двух словарей и вложенных последовательностей `list`, `tuple` и `set`.

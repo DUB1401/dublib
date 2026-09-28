@@ -1,5 +1,6 @@
 import logging
-from typing import Sequence, cast
+from collections.abc import Sequence
+from typing import cast
 
 from requests.exceptions import ReadTimeout
 from telebot import TeleBot
@@ -46,7 +47,7 @@ class TeleMaster:
 		:type bot: str | TeleBot
 		"""
 
-		self.__Bot: TeleBot = TeleBot(bot) if type(bot) is str else cast(TeleBot, bot)
+		self.__Bot: TeleBot = TeleBot(bot) if type(bot) is str else cast("TeleBot", bot)
 
 	def check_user_subscription(self, user: UserData, chat_id: int, max_tries: int = 3) -> bool | None:
 		"""

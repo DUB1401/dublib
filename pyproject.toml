@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "dublib"
-version = "0.31.1"
+version = "0.31.2"
 description = "Коллекция полезных модулей от DUB1401."
 authors = [
 	{name = "DUB1401", email = "vlad.milosta@outlook.com"}
@@ -66,7 +66,7 @@ Changelog = "https://github.com/DUB1401/dublib/releases"
 include = ["src/*", "tests/*"]
 
 [tool.ruff.lint]
-select = ["A", "ARG", "C", "E", "F", "I", "N818"]
+select = ["A", "ARG", "C", "COM", "E", "F", "I", "N818", "TC", "UP"]
 ignore = ["E701", "E501"]
 
 [tool.ruff.lint.per-file-ignores]

@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Literal, Sequence, overload
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Literal, overload
 
 from .... import exceptions
 from .typing import SUPPORTED_TYPES
@@ -117,7 +118,7 @@ class PositionEntity:
 		:raises ImportantPositionEmptyError: Для обязательной позиции не задан параметр.
 		"""
 
-		self.__position: "Position" = position
+		self.__position: Position = position
 		self.__content: ArgumentEntity | FlagEntity | KeyEntity | None = content
 
 		if self.__position.is_important and self.__content is None:
@@ -297,9 +298,9 @@ class CommandEntity:
 		:type positions: Sequence["PositionEntity"]
 		"""
 
-		self.__model: "CommandModel" = model
-		self.__base: tuple["ArgumentEntity | FlagEntity | KeyEntity", ...] = tuple(base)
-		self.__positions: dict[str, "PositionEntity"] = {position.position.name: position for position in positions}
+		self.__model: CommandModel = model
+		self.__base: tuple[ArgumentEntity | FlagEntity | KeyEntity, ...] = tuple(base)
+		self.__positions: dict[str, PositionEntity] = {position.position.name: position for position in positions}
 
 		self.__arguments_values: tuple[SUPPORTED_TYPES, ...] = self.__get_arguments()
 

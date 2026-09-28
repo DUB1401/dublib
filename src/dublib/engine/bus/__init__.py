@@ -1,4 +1,5 @@
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from ...cli.text_styler import TextStyler, codes
 from ...exceptions.engine import bus as BusExceptions
@@ -233,7 +234,7 @@ class ExecutionResult:
 	def __str__(self) -> str:
 		"""Возвращает текстовое представление результата."""
 
-		Status = str()
+		Status = ""
 		Bolder = TextStyler(codes.Decorations.Bold)
 		Status += Bolder.get_styled_text("Code:") + f" {self._Code}\n"
 		Status += Bolder.get_styled_text("Value:") + f" {self._Value}\n"

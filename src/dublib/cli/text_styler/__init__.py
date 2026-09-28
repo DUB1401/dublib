@@ -1,5 +1,6 @@
+from collections.abc import Sequence
 from types import MappingProxyType
-from typing import Sequence, cast
+from typing import cast
 
 from ...functions.data import to_sequence
 from . import codes, escapes
@@ -13,7 +14,7 @@ _SupportedTags = MappingProxyType({
 	"b": (escapes.Decorations.Bold, escapes.Drops.DISABLE_BOLD),
 	"i": (escapes.Decorations.Italic, escapes.Drops.DISABLE_ITALIC),
 	"u": (escapes.Decorations.Underlined, escapes.Drops.DISABLE_UNDERLINED),
-	"s": (escapes.Decorations.Throughline, escapes.Drops.DISABLE_THROUGHLINED)
+	"s": (escapes.Decorations.Throughline, escapes.Drops.DISABLE_THROUGHLINED),
 })
 
 def get_styled_text_from_html(text: str) -> str:
@@ -78,7 +79,7 @@ class TextStyler:
 			decorations: codes.Decorations | Sequence[codes.Decorations] | None = None,
 			text_color: codes.Colors | None = None,
 			background_color: codes.BackgroundsColors | None = None,
-			autoreset: bool = True
+			autoreset: bool = True,
 		):
 		"""
 		Стилизатор текста.
@@ -93,7 +94,7 @@ class TextStyler:
 		:type autoreset: bool
 		"""
 
-		self.__Decorations: tuple[codes.Decorations, ...] | None = cast(tuple[codes.Decorations, ...], to_sequence(decorations)) if decorations else None
+		self.__Decorations: tuple[codes.Decorations, ...] | None = cast("tuple[codes.Decorations, ...]", to_sequence(decorations)) if decorations else None
 		self.__TextColor = text_color
 		self.__BackgroundColor = background_color
 		self.__Autoreset = autoreset
@@ -145,7 +146,7 @@ class TextStyler:
 		:type decorations: Codes.Decorations | Sequence[Codes.Decorations] | None
 		"""
 
-		self.__Decorations = cast(tuple[codes.Decorations, ...], to_sequence(decorations)) if decorations else None
+		self.__Decorations = cast("tuple[codes.Decorations, ...]", to_sequence(decorations)) if decorations else None
 
 	def set_text_color(self, text_color: codes.Colors | None):
 		"""

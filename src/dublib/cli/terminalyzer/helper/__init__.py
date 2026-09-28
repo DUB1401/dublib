@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Sequence, cast
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, cast
 
 from prettytable import PLAIN_COLUMNS, PrettyTable
 
@@ -163,7 +164,7 @@ class Helper:
 				parameter_info += self.__build_parameter_label(parameter)
 
 				if parameter.description:
-					description = get_styled_text_from_html(parameter.description) if self.options.parse_html else cast(str, position.description)
+					description = get_styled_text_from_html(parameter.description) if self.options.parse_html else cast("str", position.description)
 					parameter_info += f": {parameter.description}"
 
 				info.append(parameter_info)
@@ -244,7 +245,7 @@ class Helper:
 		:rtype: str
 		"""
 
-		models: tuple["CommandModel", ...] = group.models
+		models: tuple[CommandModel, ...] = group.models
 
 		if self.options.sort:
 			models = tuple(sorted(models, key = lambda model: model.name))

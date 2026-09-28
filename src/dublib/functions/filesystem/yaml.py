@@ -15,7 +15,7 @@ def read(path: PathLike[str] | str) -> dict:
 	:raises FileNotFoundError: Выбрасывается при отсутствии файла.
 	"""
 
-	with open(path, "r") as FileReader:
+	with open(path) as FileReader:
 		return yaml.safe_load(FileReader)
 
 def write(path: PathLike[str] | str, data: dict, atomic: bool = False):

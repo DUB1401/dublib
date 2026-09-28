@@ -1,7 +1,8 @@
 import html
 import re
+from collections.abc import Sequence
 from html.parser import HTMLParser
-from typing import Sequence, override
+from typing import override
 
 #==========================================================================================#
 # >>>>> ВАЛИДАТОРЫ HTML <<<<< #

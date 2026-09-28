@@ -1,4 +1,5 @@
-from typing import Sequence, cast, get_args
+from collections.abc import Sequence
+from typing import cast, get_args
 
 from curl_cffi import BrowserTypeLiteral, CurlHttpVersion
 
@@ -58,7 +59,7 @@ class _curl_cffi_config:
 		"""
 
 		if fingerprint not in get_args(BrowserTypeLiteral): raise ValueError(fingerprint)
-		self.__Fingerprint = cast(BrowserTypeLiteral | None, fingerprint)
+		self.__Fingerprint = cast("BrowserTypeLiteral | None", fingerprint)
 
 class _httpx_config:
 	"""Дополнительная конфигурация библиотеки httpx."""

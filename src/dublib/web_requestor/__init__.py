@@ -1,7 +1,8 @@
 import logging
 import random
+from collections.abc import Callable, Sequence
 from time import sleep, time
-from typing import TYPE_CHECKING, Any, Callable, Sequence, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import httpx
 import requests
@@ -132,7 +133,7 @@ class WebRequestor:
 				self.__Session = curl_cffi_requests.Session(
 					allow_redirects = self.__Config.redirecting,
 					impersonate = self.__Config.curl_cffi.fingerprint,
-					http_version = self.__Config.curl_cffi.http_version
+					http_version = self.__Config.curl_cffi.http_version,
 				)
 
 			case WebLibs.httpx: self.__Session = httpx.Client(http2 = self.__Config.httpx.http2)
@@ -190,7 +191,7 @@ class WebRequestor:
 		:rtype: WebResponse
 		"""
 
-		self.__Session = cast(curl_cffi_requests.Session, self.__Session)
+		self.__Session = cast("curl_cffi_requests.Session", self.__Session)
 		headers = self.__MergeHeaders(headers)
 
 		response.parse_response(self.__Session.delete(
@@ -200,8 +201,8 @@ class WebRequestor:
 			cookies = cookies,
 			data = data,
 			json = json,
-			proxies = cast(ProxySpec, proxy.to_dict()) if proxy else None,
-			verify = self.__Config.verify_ssl
+			proxies = cast("ProxySpec", proxy.to_dict()) if proxy else None,
+			verify = self.__Config.verify_ssl,
 		))
 
 		return response
@@ -226,7 +227,7 @@ class WebRequestor:
 		:rtype: WebResponse
 		"""
 
-		self.__Session = cast(curl_cffi_requests.Session, self.__Session)
+		self.__Session = cast("curl_cffi_requests.Session", self.__Session)
 		headers = self.__MergeHeaders(headers)
 
 		response.parse_response(self.__Session.get(
@@ -234,8 +235,8 @@ class WebRequestor:
 			params = params,
 			headers = headers,
 			cookies = cookies,
-			proxies = cast(ProxySpec, proxy.to_dict()) if proxy else None,
-			verify = self.__Config.verify_ssl
+			proxies = cast("ProxySpec", proxy.to_dict()) if proxy else None,
+			verify = self.__Config.verify_ssl,
 		))
 
 		return response
@@ -264,7 +265,7 @@ class WebRequestor:
 		:rtype: WebResponse
 		"""
 
-		self.__Session = cast(curl_cffi_requests.Session, self.__Session)
+		self.__Session = cast("curl_cffi_requests.Session", self.__Session)
 		headers = self.__MergeHeaders(headers)
 
 		response.parse_response(self.__Session.post(
@@ -274,8 +275,8 @@ class WebRequestor:
 			cookies = cookies,
 			data = data,
 			json = json,
-			proxies = cast(ProxySpec, proxy.to_dict()) if proxy else None,
-			verify = self.__Config.verify_ssl
+			proxies = cast("ProxySpec", proxy.to_dict()) if proxy else None,
+			verify = self.__Config.verify_ssl,
 		))
 
 		return response
@@ -319,7 +320,7 @@ class WebRequestor:
 			proxy = proxy.to_string() if proxy else None,
 			http2 = self.__Config.httpx.http2,
 			follow_redirects = self.__Config.redirecting,
-			verify = self.__Config.verify_ssl
+			verify = self.__Config.verify_ssl,
 		)
 
 		response.parse_response(self.__Session.request("DELETE", url, data = data, json = json))
@@ -357,7 +358,7 @@ class WebRequestor:
 			proxy = proxy.to_string() if proxy else None,
 			http2 = self.__Config.httpx.http2,
 			follow_redirects = self.__Config.redirecting,
-			verify = self.__Config.verify_ssl
+			verify = self.__Config.verify_ssl,
 		)
 
 		response.parse_response(self.__Session.get(url))
@@ -399,7 +400,7 @@ class WebRequestor:
 			proxy = proxy.to_string() if proxy else None,
 			http2 = self.__Config.httpx.http2,
 			follow_redirects = self.__Config.redirecting,
-			verify = self.__Config.verify_ssl
+			verify = self.__Config.verify_ssl,
 		)
 
 		response.parse_response(self.__Session.post(url, data = data, json = json))
@@ -434,7 +435,7 @@ class WebRequestor:
 		:rtype: WebResponse
 		"""
 		
-		self.__Session = cast(requests.Session, self.__Session)
+		self.__Session = cast("requests.Session", self.__Session)
 		headers = self.__MergeHeaders(headers)
 
 		response.parse_response(self.__Session.delete(
@@ -446,7 +447,7 @@ class WebRequestor:
 			proxies = proxy.to_dict() if proxy else None,
 			allow_redirects = self.__Config.redirecting,
 			verify = self.__Config.verify_ssl,
-			json = json
+			json = json,
 		))
 
 		return response
@@ -471,7 +472,7 @@ class WebRequestor:
 		:rtype: WebResponse
 		"""
 		
-		self.__Session = cast(requests.Session, self.__Session)
+		self.__Session = cast("requests.Session", self.__Session)
 		headers = self.__MergeHeaders(headers)
 
 		response.parse_response(self.__Session.get(
@@ -481,7 +482,7 @@ class WebRequestor:
 			cookies = cookies,
 			proxies = proxy.to_dict() if proxy else None,
 			allow_redirects = self.__Config.redirecting,
-			verify = self.__Config.verify_ssl
+			verify = self.__Config.verify_ssl,
 		))
 
 		return response
@@ -510,7 +511,7 @@ class WebRequestor:
 		:rtype: WebResponse
 		"""
 
-		self.__Session = cast(requests.Session, self.__Session)
+		self.__Session = cast("requests.Session", self.__Session)
 		headers = self.__MergeHeaders(headers)
 
 		response.parse_response(self.__Session.post(
@@ -522,7 +523,7 @@ class WebRequestor:
 			json = json,
 			proxies = proxy.to_dict() if proxy else None,
 			allow_redirects = self.__Config.redirecting,
-			verify = self.__Config.verify_ssl
+			verify = self.__Config.verify_ssl,
 		))
 
 		return response
@@ -548,18 +549,18 @@ class WebRequestor:
 			RequestsTypes.DELETE: {
 				WebLibs.curl_cffi: self.__curl_cffi_DELETE,
 				WebLibs.httpx: self.__httpx_DELETE,
-				WebLibs.requests: self.__requests_DELETE
+				WebLibs.requests: self.__requests_DELETE,
 			},
 			RequestsTypes.GET: {
 				WebLibs.curl_cffi: self.__curl_cffi_GET,
 				WebLibs.httpx: self.__httpx_GET,
-				WebLibs.requests: self.__requests_GET
+				WebLibs.requests: self.__requests_GET,
 			},
 			RequestsTypes.POST: {
 				WebLibs.curl_cffi: self.__curl_cffi_POST,
 				WebLibs.httpx: self.__httpx_POST,
-				WebLibs.requests: self.__requests_POST
-			}
+				WebLibs.requests: self.__requests_POST,
+			},
 		}
 
 		self.__Initialize()

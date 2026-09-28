@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from .identifier import CommandIdentifier
 from .positions import BasePosition, Position
@@ -86,12 +87,12 @@ class CommandModel:
 		:type description: str | None
 		"""
 
-		self.__group: "ModelsGroup" = group
+		self.__group: ModelsGroup = group
 		self.__name: str = name
 		self.__description: str | None = description
 
-		self.__identifier: "CommandIdentifier" = CommandIdentifier(self)
-		self.__handler: Callable[["CommandEntity"], None] | None = None
+		self.__identifier: CommandIdentifier = CommandIdentifier(self)
+		self.__handler: Callable[[CommandEntity], None] | None = None
 
 		self.__base_position = BasePosition()
 		self.__positions: dict[str, Position] = {}

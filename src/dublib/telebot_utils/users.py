@@ -2,12 +2,13 @@ import enum
 import hashlib
 import logging
 import os
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from os import PathLike
 from pathlib import Path
 from threading import Thread
-from typing import Any, Literal, Sequence
+from typing import Any, Literal
 
 import dateparser
 import orjson
@@ -233,7 +234,7 @@ class UserData:
 			"last_activity": None,
 			"flags": [],
 			"data": {},
-			"temp": {}
+			"temp": {},
 		}
 
 		self.__Objects: dict[str, Any] = {}
