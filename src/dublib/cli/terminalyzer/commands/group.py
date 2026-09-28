@@ -1,8 +1,12 @@
-from collections.abc import Sequence
+
+from typing import TYPE_CHECKING
 
 from .... import exceptions
 from ....functions.data import to_sequence
 from .model import CommandModel
+
+if TYPE_CHECKING:
+	from collections.abc import Sequence
 
 __all__ = ["ModelsGroup"]
 

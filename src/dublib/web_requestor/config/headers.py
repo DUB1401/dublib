@@ -1,13 +1,15 @@
 from collections.abc import Sequence
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import ua_generator
-from ua_generator.user_agent import UserAgent
 
 from ...exceptions import web_requestor as Exceptions
 from ...functions.data import to_sequence
 from . import constants
 from .authorization import Authorizator
+
+if TYPE_CHECKING:
+	from ua_generator.user_agent import UserAgent
 
 class ImportantHeaders:
 	"""Оператор приоритетных заголовков."""

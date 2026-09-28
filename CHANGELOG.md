@@ -7,12 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For visual categorization of changes emojis are used in accordance with [gitmoji](https://gitmoji.dev).
 
-## [Unreleased] - 2026-09-23
+## [Unreleased]
 
 ### 🎨 Changed
-#### cli.templates.bus
-- Messages types now printed in lower case.
-
+#### engine.patcher
+- Rework module with new methods.
 
 ## [0.31.1] - 2026-09-23
 
